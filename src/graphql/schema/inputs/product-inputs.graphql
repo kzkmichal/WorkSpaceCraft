@@ -1,0 +1,20 @@
+input CreateProductInput {
+	title: String!
+	description: String!
+	imageUrl: String!
+	originalStoreLink: String
+	price: Float!
+	category: String!
+	subcategory: String
+}
+
+input UpdateProductInput {
+	id: ID!
+	title: String
+	description: String
+	imageUrl: String
+	originalStoreLink: String
+	price: Float
+	category: String
+	subcategory: String
+}

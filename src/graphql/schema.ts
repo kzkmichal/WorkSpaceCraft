@@ -1,27 +1,19 @@
-import { gql } from "graphql-tag";
+import { join } from "path";
+import { loadSchemaSync } from "@graphql-tools/load";
+import { GraphQLFileLoader } from "@graphql-tools/graphql-file-loader";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { resolvers } from "./resolvers";
+import { resolvers } from "./resolvers/index";
 
-const typeDefs = gql`
-	type Query {
-		products(category: String, subcategory: String): [Product!]!
-		product(id: ID!): Product
-		setups: [Setup!]!
-		setup(id: ID!): Setup
-		articles: [Article!]!
-		article(id: ID!): Article
-	}
+const schemaPath = join(
+	process.cwd(),
+	"src/graphql/schema/**/*.graphql",
+);
 
-	type Mutation {
-		createProduct(input: ProductInput!): Product!
-		updateProduct(id: ID!, input: ProductInput!): Product!
-		deleteProduct(id: ID!): Boolean!
-		createReview(productId: ID!, input: ReviewInput!): Review!
-		createSetup(input: SetupInput!): Setup!
-		createArticle(input: ArticleInput!): Article!
-	}
-
-	# TODO: Define types for Product, Setup, Article, User, and Review
-`;
-
-export const schema = makeExecutableSchema({ typeDefs, resolvers });
+const typeDefs = loadSchemaSync(schemaPath, {
+	loaders: [new GraphQLFileLoader()],
+});
+// TODO: Define types for Product, Setup, Article, User, and Review
+export const schema = makeExecutableSchema({
+	typeDefs,
+	resolvers,
+});
