@@ -1,5 +1,7 @@
 schema:
   - src/graphql/schema/**/*.graphql
+documents:
+  - src/graphql/operations/**/*.graphql
 generates:
   src/graphql/generated/graphql.ts:
     plugins:
@@ -13,6 +15,9 @@ generates:
       enumsAsTypes: true
       skipTypename: true
       gqlImport: false
+      avoidOptionals: false
+      maybeValue: "T | undefined"
+      inputMaybeValue: "T | undefined"
       makeResolverTypeCallable: true
       useTypeImports: true
       scalars:

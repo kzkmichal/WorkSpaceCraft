@@ -14,6 +14,7 @@ export const resolvers: Resolvers = {
 				});
 				return products.map((product) => ({
 					...product,
+					subcategory: product.subcategory || undefined,
 					createdAt: product.createdAt.toISOString(),
 					updatedAt: product.updatedAt.toISOString(),
 					createdBy: {
@@ -49,6 +50,7 @@ export const resolvers: Resolvers = {
 
 				return {
 					...product,
+					subcategory: product.subcategory || undefined,
 					createdAt: product.createdAt.toISOString(),
 					updatedAt: product.updatedAt.toISOString(),
 					createdBy: {
@@ -90,6 +92,7 @@ export const resolvers: Resolvers = {
 
 				return {
 					...product,
+					subcategory: product.subcategory || undefined,
 					createdAt: product.createdAt.toISOString(),
 					updatedAt: product.updatedAt.toISOString(),
 					createdBy: {
@@ -136,12 +139,6 @@ export const resolvers: Resolvers = {
 					where: { id: input.id },
 					data: {
 						...input,
-						title: input.title ?? "",
-						description: input.description || "",
-						price: input.price ?? undefined,
-						imageUrl: input.imageUrl || "",
-						category: input.category ?? undefined,
-						subcategory: input.subcategory,
 					},
 					include: {
 						createdBy: true,
@@ -150,6 +147,7 @@ export const resolvers: Resolvers = {
 
 				return {
 					...updatedProduct,
+					subcategory: updatedProduct.subcategory || undefined,
 					createdAt: updatedProduct.createdAt.toISOString(),
 					updatedAt: updatedProduct.updatedAt.toISOString(),
 					createdBy: {

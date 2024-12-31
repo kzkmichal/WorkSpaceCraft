@@ -1,0 +1,11 @@
+query Products($limit: Int, $offset: Int) {
+	products(limit: $limit, offset: $offset) {
+		...ProductFields
+	}
+}
+
+query Product($id: ID!) {
+	product(id: $id) {
+		...ProductFields
+	}
+}

@@ -1,21 +1,17 @@
 import { notFound } from "next/navigation";
+import { getProduct } from "@/hooks/getProduct";
+import { ProductDetails } from "@/components/products/ProductDetails";
 
-export default function ProductPage({
+export default async function ProductPage({
 	params,
 }: {
 	params: { id: string };
 }) {
-	// TODO: Fetch product data based on params.id
-	const product = null; // Replace with actual data fetching
+	const product = await getProduct(params.id);
 
 	if (!product) {
 		notFound();
 	}
 
-	return (
-		<div>
-			<h1 className="mb-6 text-3xl font-bold">Product Details</h1>
-			{/* TODO: Add product details */}
-		</div>
-	);
+	return <ProductDetails {...product} />;
 }

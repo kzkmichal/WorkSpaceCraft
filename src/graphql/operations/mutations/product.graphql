@@ -1,0 +1,15 @@
+mutation CreateProduct($input: CreateProductInput!) {
+	createProduct(input: $input) {
+		...ProductFields
+	}
+}
+
+mutation UpdateProduct($input: UpdateProductInput!) {
+	updateProduct(input: $input) {
+		...ProductFields
+	}
+}
+
+mutation DeleteProduct($id: ID!) {
+	deleteProduct(id: $id)
+}
