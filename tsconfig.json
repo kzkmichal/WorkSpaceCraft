@@ -29,7 +29,8 @@
 		"**/*.ts",
 		"**/*.tsx",
 		".next/types/**/*.ts",
-		"src/components/setups/SetupCard"
+		"src/components/setups/SetupCard",
+		"src/types/next-auth.d.ts"
 	],
 	"exclude": ["node_modules"]
 }

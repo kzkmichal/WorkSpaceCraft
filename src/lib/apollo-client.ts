@@ -2,7 +2,9 @@ import {
 	ApolloClient,
 	InMemoryCache,
 	createHttpLink,
+	from,
 } from "@apollo/client";
+import { clientAuthLink } from "./apollo-auth-link";
 
 const httpLink = createHttpLink({
 	uri: "/api/graphql",
@@ -10,11 +12,19 @@ const httpLink = createHttpLink({
 });
 
 const cache = new InMemoryCache({
-	// Konfiguracja typePolicies zostanie dodana później
+	typePolicies: {
+		Query: {
+			fields: {
+				me: {
+					merge: true,
+				},
+			},
+		},
+	},
 });
 
 export const client = new ApolloClient({
-	link: httpLink,
+	link: from([clientAuthLink, httpLink]),
 	cache: cache,
 	defaultOptions: {
 		watchQuery: {

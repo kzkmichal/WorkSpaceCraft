@@ -1,0 +1,12 @@
+fragment UserFields on User {
+	id
+	email
+	name
+}
+
+fragment AuthPayloadFields on AuthPayload {
+	token
+	user {
+		...UserFields
+	}
+}
