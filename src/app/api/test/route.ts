@@ -1,10 +1,8 @@
-// src/app/api/test/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma/prisma";
 
 export async function GET() {
 	try {
-		// Sprawdź połączenie wykonując prostą operację
 		const count = await prisma.user.findMany({
 			include: {
 				products: true,
@@ -31,12 +29,11 @@ export async function GET() {
 
 export async function POST() {
 	try {
-		// Próba utworzenia testowego użytkownika
 		const user = await prisma.user.create({
 			data: {
 				name: "testuser" + Math.random(),
 				email: `test${Math.random()}@example.com`,
-				password: "test123", // W produkcji powinno być zahashowane
+				password: "test123",
 			},
 		});
 
