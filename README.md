@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# WorkSpaceCraft
+
+WorkSpaceCraft is a web application designed for remote and hybrid workers, providing a curated collection of products, tools, and furniture for home office setups.
+
+## Features
+
+- 🏠 Comprehensive database of work-from-home essentials
+- 👥 User-driven product recommendations and reviews
+- 🖼️ Workspace setup gallery
+- 📚 Educational content on ergonomics and productivity
+- 🔍 Advanced search and filtering options
+- ⭐ Personal favorites list
+
+## Tech Stack
+
+- **Frontend**: React.js, Next.js, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, GraphQL, Apollo Server
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js
+- **Testing**: Jest, React Testing Library
+- **Deployment**: Vercel, Docker
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/your-username/workspacecraft.git
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+3. Set up environment variables:
 
-## Learn More
+```bash
+cp .env.example .env.local
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Set up the database:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm prisma:generate
+pnpm prisma:migrate
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+5. Start the development server:
 
-## Deploy on Vercel
+```bash
+pnpm dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Documentation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Comprehensive documentation is available in the [docs](./docs) directory:
+
+- [Complete API Documentation](./docs/api.md) - Detailed guide for GraphQL API, authentication, and more
+- [Documentation Overview](./docs/README.md) - Guide to using the documentation
+
+## Scripts
+
+- `pnpm dev` - Start development server
+- `pnpm build` - Build for production
+- `pnpm start` - Start production server
+- `pnpm test` - Run tests
+- `pnpm lint` - Run linting
+- `pnpm codegen` - Generate GraphQL types
+- `pnpm prisma:generate` - Generate Prisma client
+- `pnpm prisma:migrate` - Run database migrations
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
