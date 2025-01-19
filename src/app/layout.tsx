@@ -1,9 +1,10 @@
 import React from "react";
 import { Inter } from "next/font/google";
+import Providers from "./providers";
 import { Footer } from "@/components/common/organisms/Footer";
 import { Header } from "@/components/common/organisms/Header";
-
 import "../styles/globals.css";
+import { Navigation } from "@/components/common/organisms/Navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,13 +22,16 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body className={inter.className}>
-				<div className="flex min-h-screen flex-col">
-					<Header />
-					<main className="container mx-auto flex-grow px-4 py-8">
-						{children}
-					</main>
-					<Footer />
-				</div>
+				<Providers>
+					<div className="flex min-h-screen flex-col">
+						<Navigation />
+						<Header />
+						<main className="container mx-auto h-full flex-grow px-4 py-8">
+							{children}
+						</main>
+						<Footer />
+					</div>
+				</Providers>
 			</body>
 		</html>
 	);

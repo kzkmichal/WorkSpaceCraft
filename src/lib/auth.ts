@@ -1,7 +1,11 @@
 import { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { compare } from "bcrypt";
-import prisma from "@/lib/prisma";
+import { createAuthClient } from "./auth-client";
+import {
+	SignInMutation,
+	SignInMutationVariables,
+	SignInDocument,
+} from "@/graphql/generated/graphql";
 
 export const authOptions: NextAuthOptions = {
 	providers: [
@@ -15,27 +19,62 @@ export const authOptions: NextAuthOptions = {
 				if (!credentials?.email || !credentials?.password) {
 					return null;
 				}
-				const user = await prisma.user.findUnique({
-					where: { email: credentials.email },
-				});
-				if (!user) {
+
+				try {
+					const client = createAuthClient();
+					const { data } = await client.mutate<
+						SignInMutation,
+						SignInMutationVariables
+					>({
+						mutation: SignInDocument,
+						variables: {
+							input: {
+								email: credentials.email,
+								password: credentials.password,
+							},
+						},
+					});
+
+					if (!data?.signIn) {
+						return null;
+					}
+
+					return {
+						id: data.signIn.user.id,
+						email: data.signIn.user.email,
+						name: data.signIn.user.name,
+						accessToken: data.signIn.token,
+					};
+				} catch (error) {
+					console.error("Authentication error:", error);
 					return null;
 				}
-				const isPasswordValid = await compare(
-					credentials.password,
-					user.password,
-				);
-				if (!isPasswordValid) {
-					return null;
-				}
-				return { id: user.id, email: user.email, name: user.name };
 			},
 		}),
 	],
+	callbacks: {
+		async jwt({ token, user }) {
+			if (user) {
+				token.accessToken = user.accessToken;
+				token.sub = user.id;
+			}
+			return token;
+		},
+		async session({ session, token }) {
+			if (token) {
+				session.user.id = token.sub as string;
+				session.accessToken = token.accessToken;
+			}
+			return session;
+		},
+	},
 	session: {
 		strategy: "jwt",
+		maxAge: 7 * 24 * 60 * 60, // 7 days
 	},
 	pages: {
 		signIn: "/auth/signin",
+		error: "/auth/error",
 	},
+	secret: process.env.NEXTAUTH_SECRET,
 };

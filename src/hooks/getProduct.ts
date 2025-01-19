@@ -10,7 +10,8 @@ export async function getProduct(
 	id: string,
 ): Promise<Product | null> {
 	try {
-		const { data } = await getClient().query<
+		const client = await getClient();
+		const { data } = await client.query<
 			ProductQuery,
 			ProductQueryVariables
 		>({

@@ -20,6 +20,11 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type AuthPayload = {
+  token: Scalars['String']['output'];
+  user: User;
+};
+
 export type CreateProductInput = {
   category: Scalars['String']['input'];
   description: Scalars['String']['input'];
@@ -33,6 +38,8 @@ export type CreateProductInput = {
 export type Mutation = {
   createProduct: Product;
   deleteProduct: Scalars['Boolean']['output'];
+  signIn: AuthPayload;
+  signUp: AuthPayload;
   updateProduct: Product;
 };
 
@@ -44,6 +51,16 @@ export type MutationCreateProductArgs = {
 
 export type MutationDeleteProductArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationSignInArgs = {
+  input: SignInInput;
+};
+
+
+export type MutationSignUpArgs = {
+  input: SignUpInput;
 };
 
 
@@ -66,6 +83,7 @@ export type Product = {
 };
 
 export type Query = {
+  me?: Maybe<User>;
   product?: Maybe<Product>;
   products: Array<Product>;
   user?: Maybe<User>;
@@ -86,6 +104,17 @@ export type QueryProductsArgs = {
 
 export type QueryUserArgs = {
   id: Scalars['ID']['input'];
+};
+
+export type SignInInput = {
+  email: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+};
+
+export type SignUpInput = {
+  email: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  password: Scalars['String']['input'];
 };
 
 export type UpdateProductInput = {
@@ -175,6 +204,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  AuthPayload: ResolverTypeWrapper<AuthPayload>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   CreateProductInput: CreateProductInput;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
@@ -183,6 +213,8 @@ export type ResolversTypes = {
   Mutation: ResolverTypeWrapper<{}>;
   Product: ResolverTypeWrapper<Product>;
   Query: ResolverTypeWrapper<{}>;
+  SignInInput: SignInInput;
+  SignUpInput: SignUpInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   UpdateProductInput: UpdateProductInput;
   User: ResolverTypeWrapper<User>;
@@ -190,6 +222,7 @@ export type ResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  AuthPayload: AuthPayload;
   Boolean: Scalars['Boolean']['output'];
   CreateProductInput: CreateProductInput;
   Float: Scalars['Float']['output'];
@@ -198,14 +231,24 @@ export type ResolversParentTypes = {
   Mutation: {};
   Product: Product;
   Query: {};
+  SignInInput: SignInInput;
+  SignUpInput: SignUpInput;
   String: Scalars['String']['output'];
   UpdateProductInput: UpdateProductInput;
   User: User;
 };
 
+export type AuthPayloadResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['AuthPayload'] = ResolversParentTypes['AuthPayload']> = {
+  token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type MutationResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createProduct?: Resolver<ResolversTypes['Product'], ParentType, ContextType, RequireFields<MutationCreateProductArgs, 'input'>>;
   deleteProduct?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteProductArgs, 'id'>>;
+  signIn?: Resolver<ResolversTypes['AuthPayload'], ParentType, ContextType, RequireFields<MutationSignInArgs, 'input'>>;
+  signUp?: Resolver<ResolversTypes['AuthPayload'], ParentType, ContextType, RequireFields<MutationSignUpArgs, 'input'>>;
   updateProduct?: Resolver<ResolversTypes['Product'], ParentType, ContextType, RequireFields<MutationUpdateProductArgs, 'input'>>;
 };
 
@@ -225,6 +268,7 @@ export type ProductResolvers<ContextType = ApolloContext, ParentType extends Res
 };
 
 export type QueryResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   product?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<QueryProductArgs, 'id'>>;
   products?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType, Partial<QueryProductsArgs>>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
@@ -242,6 +286,7 @@ export type UserResolvers<ContextType = ApolloContext, ParentType extends Resolv
 };
 
 export type Resolvers<ContextType = ApolloContext> = {
+  AuthPayload?: AuthPayloadResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Product?: ProductResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
@@ -249,9 +294,27 @@ export type Resolvers<ContextType = ApolloContext> = {
 };
 
 
+export type UserFieldsFragment = { id: string, email: string, name: string };
+
+export type AuthPayloadFieldsFragment = { token: string, user: { id: string, email: string, name: string } };
+
 export type UserFragment = { id: string, name: string, email: string, createdAt: string, updatedAt: string };
 
 export type ProductFieldsFragment = { id: string, title?: string | undefined, description?: string | undefined, imageUrl?: string | undefined, price?: number | undefined, category: string, subcategory?: string | undefined, createdAt: string, updatedAt: string, createdBy?: { id: string, name: string, email: string, createdAt: string, updatedAt: string } | undefined };
+
+export type SignInMutationVariables = Exact<{
+  input: SignInInput;
+}>;
+
+
+export type SignInMutation = { signIn: { token: string, user: { id: string, email: string, name: string } } };
+
+export type SignUpMutationVariables = Exact<{
+  input: SignUpInput;
+}>;
+
+
+export type SignUpMutation = { signUp: { token: string, user: { id: string, email: string, name: string } } };
 
 export type CreateProductMutationVariables = Exact<{
   input: CreateProductInput;
@@ -274,6 +337,11 @@ export type DeleteProductMutationVariables = Exact<{
 
 export type DeleteProductMutation = { deleteProduct: boolean };
 
+export type MeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeQuery = { me?: { id: string, email: string, name: string } | undefined };
+
 export type ProductsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
@@ -289,6 +357,21 @@ export type ProductQueryVariables = Exact<{
 
 export type ProductQuery = { product?: { id: string, title?: string | undefined, description?: string | undefined, imageUrl?: string | undefined, price?: number | undefined, category: string, subcategory?: string | undefined, createdAt: string, updatedAt: string, createdBy?: { id: string, name: string, email: string, createdAt: string, updatedAt: string } | undefined } | undefined };
 
+export const UserFieldsFragmentDoc = gql`
+    fragment UserFields on User {
+  id
+  email
+  name
+}
+    `;
+export const AuthPayloadFieldsFragmentDoc = gql`
+    fragment AuthPayloadFields on AuthPayload {
+  token
+  user {
+    ...UserFields
+  }
+}
+    ${UserFieldsFragmentDoc}`;
 export const UserFragmentDoc = gql`
     fragment User on User {
   id
@@ -314,6 +397,72 @@ export const ProductFieldsFragmentDoc = gql`
   }
 }
     ${UserFragmentDoc}`;
+export const SignInDocument = gql`
+    mutation SignIn($input: SignInInput!) {
+  signIn(input: $input) {
+    ...AuthPayloadFields
+  }
+}
+    ${AuthPayloadFieldsFragmentDoc}`;
+export type SignInMutationFn = Apollo.MutationFunction<SignInMutation, SignInMutationVariables>;
+
+/**
+ * __useSignInMutation__
+ *
+ * To run a mutation, you first call `useSignInMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignInMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signInMutation, { data, loading, error }] = useSignInMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSignInMutation(baseOptions?: Apollo.MutationHookOptions<SignInMutation, SignInMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SignInMutation, SignInMutationVariables>(SignInDocument, options);
+      }
+export type SignInMutationHookResult = ReturnType<typeof useSignInMutation>;
+export type SignInMutationResult = Apollo.MutationResult<SignInMutation>;
+export type SignInMutationOptions = Apollo.BaseMutationOptions<SignInMutation, SignInMutationVariables>;
+export const SignUpDocument = gql`
+    mutation SignUp($input: SignUpInput!) {
+  signUp(input: $input) {
+    ...AuthPayloadFields
+  }
+}
+    ${AuthPayloadFieldsFragmentDoc}`;
+export type SignUpMutationFn = Apollo.MutationFunction<SignUpMutation, SignUpMutationVariables>;
+
+/**
+ * __useSignUpMutation__
+ *
+ * To run a mutation, you first call `useSignUpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSignUpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [signUpMutation, { data, loading, error }] = useSignUpMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSignUpMutation(baseOptions?: Apollo.MutationHookOptions<SignUpMutation, SignUpMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SignUpMutation, SignUpMutationVariables>(SignUpDocument, options);
+      }
+export type SignUpMutationHookResult = ReturnType<typeof useSignUpMutation>;
+export type SignUpMutationResult = Apollo.MutationResult<SignUpMutation>;
+export type SignUpMutationOptions = Apollo.BaseMutationOptions<SignUpMutation, SignUpMutationVariables>;
 export const CreateProductDocument = gql`
     mutation CreateProduct($input: CreateProductInput!) {
   createProduct(input: $input) {
@@ -411,6 +560,45 @@ export function useDeleteProductMutation(baseOptions?: Apollo.MutationHookOption
 export type DeleteProductMutationHookResult = ReturnType<typeof useDeleteProductMutation>;
 export type DeleteProductMutationResult = Apollo.MutationResult<DeleteProductMutation>;
 export type DeleteProductMutationOptions = Apollo.BaseMutationOptions<DeleteProductMutation, DeleteProductMutationVariables>;
+export const MeDocument = gql`
+    query Me {
+  me {
+    ...UserFields
+  }
+}
+    ${UserFieldsFragmentDoc}`;
+
+/**
+ * __useMeQuery__
+ *
+ * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMeQuery(baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+      }
+export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+        }
+export function useMeSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MeQuery, MeQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+        }
+export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
+export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
+export type MeSuspenseQueryHookResult = ReturnType<typeof useMeSuspenseQuery>;
+export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const ProductsDocument = gql`
     query Products($limit: Int, $offset: Int) {
   products(limit: $limit, offset: $offset) {

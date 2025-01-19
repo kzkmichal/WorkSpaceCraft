@@ -11,7 +11,8 @@ export async function getProducts(
 	offset = 0,
 ): Promise<Product[]> {
 	try {
-		const { data } = await getClient().query<
+		const client = await getClient();
+		const { data } = await client.query<
 			ProductsQuery,
 			ProductsQueryVariables
 		>({
