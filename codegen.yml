@@ -1,0 +1,19 @@
+schema:
+  - src/graphql/schema/**/*.graphql
+generates:
+  src/graphql/generated/graphql.ts:
+    plugins:
+      - typescript
+      - typescript-resolvers
+      - typescript-operations
+      - typescript-react-apollo
+    config:
+      withHooks: true
+      contextType: ../context#ApolloContext
+      enumsAsTypes: true
+      skipTypename: true
+      gqlImport: false
+      makeResolverTypeCallable: true
+      useTypeImports: true
+      scalars:
+        DateTime: string

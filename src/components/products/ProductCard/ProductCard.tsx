@@ -12,7 +12,7 @@ export const ProductCard = ({
 	id,
 	title,
 	imageUrl,
-	price,
+	price = 2,
 }: ProductCardProps) => {
 	return (
 		<Link href={`/products/${id}`} className="block">

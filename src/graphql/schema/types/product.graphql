@@ -1,0 +1,13 @@
+type Product {
+	id: ID!
+	title: String
+	description: String
+	imageUrl: String
+	originalStoreLink: String
+	price: Float
+	category: String!
+	subcategory: String
+	createdAt: String!
+	updatedAt: String!
+	createdBy: User
+}

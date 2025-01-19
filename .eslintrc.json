@@ -32,14 +32,15 @@
 		// 	}
 		// ],
 
-		"@typescript-eslint/consistent-type-imports": [
-			"error",
-			{
-				"prefer": "type-imports",
-				"fixStyle": "inline-type-imports",
-				"disallowTypeAnnotations": false
-			}
-		],
+		// "@typescript-eslint/consistent-type-imports": [
+		// 	"error",
+		// 	{
+		// 		"prefer": "type-imports",
+		// 		"fixStyle": "inline-type-imports",
+		// 		"disallowTypeAnnotations": false
+		// 	}
+		// ],
+		"@typescript-eslint/consistent-type-imports": "off",
 
 		"import/no-duplicates": ["error", { "prefer-inline": true }],
 
@@ -89,6 +90,15 @@
 			"files": ["src/app/**/*.ts?(x)", "middleware.ts"],
 			"rules": {
 				"import/no-default-export": "off"
+			}
+		},
+		{
+			"files": ["**/generated/**/*.ts"],
+			"rules": {
+				"@typescript-eslint/no-explicit-any": "off",
+				"@typescript-eslint/no-empty-object-type": "off",
+				"@typescript-eslint/no-unused-vars": "off",
+				"import/order": "off"
 			}
 		}
 	],

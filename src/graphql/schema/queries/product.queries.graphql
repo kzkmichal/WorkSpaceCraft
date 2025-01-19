@@ -1,0 +1,4 @@
+type Query {
+	products(limit: Int, offset: Int): [Product!]!
+	product(id: ID!): Product
+}
