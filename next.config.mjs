@@ -8,6 +8,16 @@ const nextConfig = {
 		DB_PASSWORD: process.env.DB_PASSWORD,
 		DB_PORT: process.env.DB_PORT,
 	},
+	images: {
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "images.unsplash.com",
+				port: "",
+				pathname: "/**",
+			},
+		],
+	},
 };
 
 export default nextConfig;

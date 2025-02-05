@@ -1,15 +1,38 @@
-export type ButtonProps = {
-	children: React.ReactNode;
-	onClick: () => void;
-};
+import { ButtonProps } from "./types";
+import { cn } from "@/components/utils/helpers";
+import { Button as ShadcnButton } from "@/components/ui/button";
 
-export const Button = ({ children, onClick }: ButtonProps) => {
+export const Button = ({
+	children,
+	className,
+	variant = "default",
+	size = "default",
+	isLoading,
+	disabled,
+	"data-testid": dataTestId = "button",
+	"data-cc": dataCc,
+	type = "button",
+	...props
+}: ButtonProps) => {
 	return (
-		<button
-			className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-			onClick={onClick}
+		<ShadcnButton
+			type={type}
+			variant={variant}
+			size={size}
+			disabled={disabled || isLoading}
+			data-testid={dataTestId}
+			data-cc={dataCc}
+			className={cn(className)}
+			{...props}
 		>
-			{children}
-		</button>
+			{isLoading ? (
+				<div className="flex items-center gap-2">
+					<div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+					{children}
+				</div>
+			) : (
+				children
+			)}
+		</ShadcnButton>
 	);
 };
