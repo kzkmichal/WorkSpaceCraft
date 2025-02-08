@@ -1,4 +1,4 @@
-import { ProductCard } from "@/components/products/ProductCard";
+import { ProductCard } from "@/components/modules/products/ProductCard";
 import { Product } from "@/graphql/generated/graphql";
 
 export type ProductListProps = {

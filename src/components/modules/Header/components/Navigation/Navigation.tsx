@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import {
 	Search,
@@ -11,7 +10,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
+import { Container } from "@/components/common/molecules";
 import { Button } from "@/components/common/atoms";
+import { BaseProps } from "@/components/utils/types";
+
+export type NavigationProps = BaseProps;
 
 const categories = [
 	{
@@ -93,7 +96,9 @@ const SubcategoriesGrid = ({
 	);
 };
 
-export const Navigation = () => {
+export const Navigation = ({
+	"data-testid": testId = "navigation",
+}: NavigationProps) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [activeCategory, setActiveCategory] = useState<{
 		id: string;
@@ -104,10 +109,17 @@ export const Navigation = () => {
 	const isLoading = status === "loading";
 
 	return (
-		<nav className="fixed left-0 right-0 top-0 z-50 bg-white">
+		<Container
+			className="bg-white"
+			data-testid={testId}
+			paddingX="none"
+			paddingY={"none"}
+			as={"nav"}
+			size="2xl"
+		>
 			{/* Main Navigation */}
 			<div className="relative border-b border-gray-100">
-				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+				<div className="">
 					<div className="flex h-20 items-center justify-between">
 						{/* Logo */}
 						<a
@@ -285,6 +297,6 @@ export const Navigation = () => {
 					</div>
 				</div>
 			)}
-		</nav>
+		</Container>
 	);
 };

@@ -1,4 +1,4 @@
-import { SetupCard } from "@/components/setups/SetupCard";
+import { SetupCard } from "@/components/modules/setups/SetupCard";
 
 export type SetupListProps = {};
 

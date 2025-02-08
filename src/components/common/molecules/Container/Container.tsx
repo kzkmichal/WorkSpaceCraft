@@ -22,13 +22,19 @@ export const Container = ({
 			data-cc={dataCc}
 			className={cn(
 				"mx-auto",
-				createResponsiveClasses(size, sizes),
 				createResponsiveClasses(paddingX, PADDING_X),
 				createResponsiveClasses(paddingY, PADDING_Y),
 				className,
 			)}
 		>
-			{children}
+			<div
+				className={cn(
+					"mx-auto",
+					createResponsiveClasses(size, sizes),
+				)}
+			>
+				{children}
+			</div>
 		</Component>
 	);
 };

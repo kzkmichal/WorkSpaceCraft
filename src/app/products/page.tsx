@@ -1,6 +1,6 @@
 import { SearchBar } from "@/components/common/molecules/SearchBar";
 import { FilterOptions } from "@/components/common/molecules/FilterOptions";
-import { ProductList } from "@/components/products/ProductList";
+import { ProductList } from "@/components/modules/products/ProductList";
 import { getProducts } from "@/hooks/getProducts";
 
 type ProductPageProps = {

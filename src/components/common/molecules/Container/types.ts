@@ -15,7 +15,7 @@ export type SpacingSize = "none" | "sm" | "md" | "lg" | "xl" | "2xl";
 export type ContainerProps = WithChildrenProps &
 	ResponsiveProps<{
 		size?: ContainerSize;
-		paddingX?: string;
+		paddingX?: SpacingSize;
 		paddingY?: SpacingSize;
 	}> & {
 		as?: ElementType;
