@@ -10,14 +10,14 @@ export const Stack = ({
 	align = "start",
 	wrap = false,
 	className,
-	"data-testid": dataTestId,
+	"data-testid": testId,
 	"data-cc": dataCc,
 	id,
 }: StackProps) => {
 	return (
 		<div
 			id={id}
-			data-testid={dataTestId}
+			data-testid={testId}
 			data-cc={dataCc}
 			className={cn(
 				"flex",

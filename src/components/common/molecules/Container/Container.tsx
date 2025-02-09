@@ -6,11 +6,12 @@ import { createResponsiveClasses } from "@/components/utils/responsive";
 
 export const Container = ({
 	children,
-	size = "full",
+	size = "2xl",
 	as: Component = "div",
 	paddingX = { "": "sm", sm: "lg" },
 	paddingY = { "": "lg" },
 	className,
+	wrapperClassName,
 	"data-testid": dataTestId,
 	"data-cc": dataCc,
 	id,
@@ -29,7 +30,8 @@ export const Container = ({
 		>
 			<div
 				className={cn(
-					"mx-auto",
+					"mx-auto w-full",
+					wrapperClassName,
 					createResponsiveClasses(size, sizes),
 				)}
 			>

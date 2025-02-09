@@ -19,4 +19,5 @@ export type ContainerProps = WithChildrenProps &
 		paddingY?: SpacingSize;
 	}> & {
 		as?: ElementType;
+		wrapperClassName?: string;
 	};
