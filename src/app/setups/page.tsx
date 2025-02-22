@@ -1,4 +1,4 @@
-import { SetupList } from "@/components/setups/SetupList";
+import { SetupList } from "@/components/modules/setups/SetupList";
 
 export default function SetupsPage() {
 	return (

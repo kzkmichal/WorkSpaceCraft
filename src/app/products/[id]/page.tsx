@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getProduct } from "@/hooks/getProduct";
-import { ProductDetails } from "@/components/products/ProductDetails";
+import { ProductDetails } from "@/components/modules/products/ProductDetails";
 
 export default async function ProductPage({
 	params,

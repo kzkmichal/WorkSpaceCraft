@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { Stack } from "../../helpers/Stack";
+import { Stack } from "../../common/molecules/Stack";
 import { BaseProps } from "@/components/utils/types";
 
 type Category = BaseProps & {
@@ -79,7 +79,7 @@ export const Hero = () => {
 	const [activeCategory, setActiveCategory] = useState(categories[0]);
 
 	return (
-		<div className="relative mt-20">
+		<div className="relative">
 			<div className="relative h-[700px] w-full bg-black">
 				{/* Main Image */}
 				<div className="absolute inset-0 w-full md:w-2/3">
@@ -110,7 +110,7 @@ export const Hero = () => {
 					</div>
 				</div>
 				<Stack
-					className="absolute left-1/2 top-1/2 w-[80%] -translate-x-1/2 -translate-y-1/2 flex-col rounded-3xl bg-white/70 p-8 backdrop-blur-sm md:left-2/3 md:w-auto"
+					className="absolute left-1/2 top-1/2 w-[80%] -translate-x-1/2 -translate-y-1/2 flex-col rounded-3xl bg-white/70 p-8 backdrop-blur-sm md:w-auto lg:left-2/3"
 					spacing={{ "": 4, md: 8 }}
 					data-testid="box"
 				>

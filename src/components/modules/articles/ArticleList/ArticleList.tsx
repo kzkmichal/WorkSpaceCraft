@@ -1,4 +1,4 @@
-import { ArticleCard } from "@/components/articles/ArticleCard/ArticleCard";
+import { ArticleCard } from "@/components/modules/articles/ArticleCard/ArticleCard";
 
 export type ArticleListProps = {};
 

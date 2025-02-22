@@ -1,6 +1,6 @@
 import { HomePageProps } from "./types";
-import { Container } from "@/components/common/helpers/Container";
-import { Hero } from "@/components/common/organisms/Hero/Hero";
+import { Container } from "@/components/common/molecules/Container";
+import { Hero } from "@/components/modules/Hero/Hero";
 
 export const HomePage = ({
 	"data-testid": testId = "home",

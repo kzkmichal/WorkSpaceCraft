@@ -1,4 +1,4 @@
-import { ArticleList } from "@/components/articles/ArticleList";
+import { ArticleList } from "@/components/modules/articles/ArticleList";
 
 export default function ArticlesPage() {
 	return (
