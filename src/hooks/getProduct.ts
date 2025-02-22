@@ -1,14 +1,14 @@
 import { getClient } from "@/lib/apollo-server";
 import {
-	Product,
 	ProductDocument,
+	ProductFieldsFragment,
 	ProductQuery,
 	ProductQueryVariables,
 } from "@/graphql/generated/graphql";
 
 export async function getProduct(
 	id: string,
-): Promise<Product | null> {
+): Promise<ProductFieldsFragment | null> {
 	try {
 		const client = await getClient();
 		const { data } = await client.query<

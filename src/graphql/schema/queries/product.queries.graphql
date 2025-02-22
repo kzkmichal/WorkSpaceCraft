@@ -1,4 +1,9 @@
 type Query {
-	products(limit: Int, offset: Int): [Product!]!
+	products(
+		limit: Int
+		offset: Int
+		categoryType: CategoryType
+		subcategoryFullSlug: String
+	): [Product!]!
 	product(id: ID!): Product
 }

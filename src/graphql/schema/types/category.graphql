@@ -1,0 +1,15 @@
+enum CategoryType {
+	HOME
+	REMOTE
+	OFFICE
+}
+
+type CategoryInfo {
+	name: String!
+	slug: String!
+	description: String
+	imageUrl: String
+	type: CategoryType!
+	products: [Product]
+	subcategories: [Subcategory]
+}

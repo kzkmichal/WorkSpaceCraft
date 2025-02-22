@@ -1,0 +1,13 @@
+fragment SubcategoryFields on Subcategory {
+	id
+	name
+	slug
+	fullSlug
+	description
+	categoryType
+	products {
+		...ProductFields
+	}
+	createdAt
+	updatedAt
+}

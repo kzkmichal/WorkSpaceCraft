@@ -12,11 +12,18 @@ fragment ProductFields on Product {
 	description
 	imageUrl
 	price
-	category
-	subcategory
+	originalStoreLink
 	createdAt
 	updatedAt
 	createdBy {
 		...User
+	}
+	categories
+	subcategories {
+		id
+		name
+		slug
+		fullSlug
+		categoryType
 	}
 }

@@ -1,0 +1,11 @@
+query Subcategories($categoryType: CategoryType!) {
+	subcategories(categoryType: $categoryType) {
+		...SubcategoryFields
+	}
+}
+
+query Subcategory($fullSlug: String!) {
+	subcategory(fullSlug: $fullSlug) {
+		...SubcategoryFields
+	}
+}

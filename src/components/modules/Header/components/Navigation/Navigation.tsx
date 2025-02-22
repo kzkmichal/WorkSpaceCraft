@@ -238,6 +238,11 @@ export const Navigation = ({
 									</div>
 								)}
 							</div>
+							<Link href="/categories">
+								<p className="block py-2 text-sm font-light text-gray-600">
+									All Categories
+								</p>
+							</Link>
 						</div>
 					</div>
 				)}

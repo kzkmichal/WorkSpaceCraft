@@ -3,9 +3,8 @@ type User {
 	name: String!
 	email: String!
 	# password: String!
-	# products: [Product!]!
 	products: [Product]
-	# reviews: [Review!]!
+	reviews: [Review]
 	createdAt: String!
 	updatedAt: String!
 	# setups: [Setup!]!

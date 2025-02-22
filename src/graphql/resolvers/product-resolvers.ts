@@ -1,30 +1,53 @@
 import { GraphQLError } from "graphql";
+import { Product, Subcategory, User } from "@prisma/client";
 import type { Resolvers } from "../generated/graphql";
+import { formatDates, formatSubcategory } from "./utils";
+import { CategoryType } from "@/constant/categories";
+
+const formatUser = (user: User) => ({
+	...user,
+	...formatDates(user),
+});
+
+const formatProduct = (
+	product: Product & {
+		categories?: { categoryType: CategoryType }[];
+		createdBy: User;
+		subcategories?: { subcategory: Subcategory }[];
+	},
+) => ({
+	...product,
+	...formatDates(product),
+	categories: product.categories?.map((pc) => pc.categoryType) || [],
+	createdBy: formatUser(product.createdBy),
+	subcategories:
+		product.subcategories?.map((ps) =>
+			formatSubcategory(ps.subcategory),
+		) || [],
+});
 
 export const resolvers: Resolvers = {
 	Query: {
 		products: async (_, { limit = 10, offset = 0 }, { prisma }) => {
 			try {
 				const products = await prisma.product.findMany({
-					take: limit ?? undefined,
-					skip: offset ?? undefined,
+					take: limit,
+					skip: offset,
 					include: {
 						createdBy: true,
+						categories: true,
+						subcategories: {
+							include: {
+								subcategory: true,
+							},
+						},
+						reviews: true,
 					},
 				});
-				return products.map((product) => ({
-					...product,
-					subcategory: product.subcategory || undefined,
-					createdAt: product.createdAt.toISOString(),
-					updatedAt: product.updatedAt.toISOString(),
-					createdBy: {
-						...product.createdBy,
-						createdAt: product.createdBy.createdAt.toISOString(),
-						updatedAt: product.createdBy.updatedAt.toISOString(),
-					},
-				}));
+
+				return products.map(formatProduct);
 			} catch (error) {
-				console.log(error);
+				console.error("Failed to fetch products:", error);
 				throw new GraphQLError("Failed to fetch products", {
 					extensions: { code: "DATABASE_ERROR" },
 				});
@@ -34,11 +57,16 @@ export const resolvers: Resolvers = {
 		product: async (_, { id }, { prisma }) => {
 			try {
 				const product = await prisma.product.findUnique({
-					where: {
-						id,
-					},
+					where: { id },
 					include: {
 						createdBy: true,
+						categories: true,
+						subcategories: {
+							include: {
+								subcategory: true,
+							},
+						},
+						reviews: true,
 					},
 				});
 
@@ -48,17 +76,7 @@ export const resolvers: Resolvers = {
 					});
 				}
 
-				return {
-					...product,
-					subcategory: product.subcategory || undefined,
-					createdAt: product.createdAt.toISOString(),
-					updatedAt: product.updatedAt.toISOString(),
-					createdBy: {
-						...product.createdBy,
-						createdAt: product.createdBy.createdAt.toISOString(),
-						updatedAt: product.createdBy.updatedAt.toISOString(),
-					},
-				};
+				return formatProduct(product);
 			} catch (error) {
 				if (error instanceof GraphQLError) throw error;
 				throw new GraphQLError("Failed to fetch product", {
@@ -73,36 +91,50 @@ export const resolvers: Resolvers = {
 			if (!user) {
 				throw new GraphQLError(
 					"You must be logged in to create a product",
-					{ extensions: { code: "UNAUTHORIZED" } },
+					{
+						extensions: { code: "UNAUTHORIZED" },
+					},
 				);
 			}
 
 			try {
+				const { categoryTypes, subcategoryIds, ...productData } =
+					input;
+
 				const product = await prisma.product.create({
 					data: {
-						...input,
+						...productData,
 						createdBy: {
 							connect: { id: user.id },
+						},
+						categories: {
+							create: categoryTypes.map((categoryType) => ({
+								categoryType,
+							})),
+						},
+						subcategories: {
+							create: subcategoryIds?.map((subcategoryId) => ({
+								subcategory: {
+									connect: { id: subcategoryId },
+								},
+							})),
 						},
 					},
 					include: {
 						createdBy: true,
+						categories: true,
+						subcategories: {
+							include: {
+								subcategory: true,
+							},
+						},
+						reviews: true,
 					},
 				});
 
-				return {
-					...product,
-					subcategory: product.subcategory || undefined,
-					createdAt: product.createdAt.toISOString(),
-					updatedAt: product.updatedAt.toISOString(),
-					createdBy: {
-						...product.createdBy,
-						createdAt: product.createdBy.createdAt.toISOString(),
-						updatedAt: product.createdBy.updatedAt.toISOString(),
-					},
-				};
+				return formatProduct(product);
 			} catch (error) {
-				console.error(error);
+				console.error("Failed to create product:", error);
 				throw new GraphQLError("Failed to create product", {
 					extensions: { code: "DATABASE_ERROR" },
 				});
@@ -113,53 +145,92 @@ export const resolvers: Resolvers = {
 			if (!user) {
 				throw new GraphQLError(
 					"You must be logged in to update a product",
-					{ extensions: { code: "UNAUTHORIZED" } },
+					{
+						extensions: { code: "UNAUTHORIZED" },
+					},
 				);
 			}
 
 			try {
-				const product = await prisma.product.findUnique({
-					where: { id: input.id },
+				const { id, categoryTypes, subcategoryIds, ...updateData } =
+					input;
+
+				const existingProduct = await prisma.product.findUnique({
+					where: { id },
 				});
 
-				if (!product) {
+				if (!existingProduct) {
 					throw new GraphQLError("Product not found", {
 						extensions: { code: "NOT_FOUND" },
 					});
 				}
 
-				if (product.userId !== user.id) {
+				if (existingProduct.userId !== user.id) {
 					throw new GraphQLError(
 						"You can only update your own products",
-						{ extensions: { code: "FORBIDDEN" } },
+						{
+							extensions: { code: "FORBIDDEN" },
+						},
 					);
 				}
 
-				const updatedProduct = await prisma.product.update({
-					where: { id: input.id },
-					data: {
-						...input,
-					},
-					include: {
-						createdBy: true,
-					},
-				});
+				// Przygotowanie transakcji dla aktualizacji
+				const updatedProduct = await prisma.$transaction(
+					async (tx) => {
+						// Jeśli przekazano nowe kategorie, aktualizujemy je
+						if (categoryTypes) {
+							await tx.productToCategory.deleteMany({
+								where: { productId: id },
+							});
 
-				return {
-					...updatedProduct,
-					subcategory: updatedProduct.subcategory || undefined,
-					createdAt: updatedProduct.createdAt.toISOString(),
-					updatedAt: updatedProduct.updatedAt.toISOString(),
-					createdBy: {
-						...updatedProduct.createdBy,
-						createdAt:
-							updatedProduct.createdBy.createdAt.toISOString(),
-						updatedAt:
-							updatedProduct.createdBy.updatedAt.toISOString(),
+							if (categoryTypes.length > 0) {
+								await tx.productToCategory.createMany({
+									data: categoryTypes.map((categoryType) => ({
+										productId: id,
+										categoryType,
+									})),
+								});
+							}
+						}
+
+						// Jeśli przekazano nowe subkategorie, aktualizujemy je
+						if (subcategoryIds) {
+							await tx.productToSubcategory.deleteMany({
+								where: { productId: id },
+							});
+
+							if (subcategoryIds.length > 0) {
+								await tx.productToSubcategory.createMany({
+									data: subcategoryIds.map((subcategoryId) => ({
+										productId: id,
+										subcategoryId,
+									})),
+								});
+							}
+						}
+
+						// Aktualizacja podstawowych danych produktu
+						return tx.product.update({
+							where: { id },
+							data: updateData,
+							include: {
+								createdBy: true,
+								categories: true,
+								subcategories: {
+									include: {
+										subcategory: true,
+									},
+								},
+								reviews: true,
+							},
+						});
 					},
-				};
+				);
+
+				return formatProduct(updatedProduct);
 			} catch (error) {
 				if (error instanceof GraphQLError) throw error;
+				console.error("Failed to update product:", error);
 				throw new GraphQLError("Failed to update product", {
 					extensions: { code: "DATABASE_ERROR" },
 				});
@@ -170,7 +241,9 @@ export const resolvers: Resolvers = {
 			if (!user) {
 				throw new GraphQLError(
 					"You must be logged in to delete a product",
-					{ extensions: { code: "UNAUTHORIZED" } },
+					{
+						extensions: { code: "UNAUTHORIZED" },
+					},
 				);
 			}
 
@@ -188,7 +261,9 @@ export const resolvers: Resolvers = {
 				if (product.userId !== user.id) {
 					throw new GraphQLError(
 						"You can only delete your own products",
-						{ extensions: { code: "FORBIDDEN" } },
+						{
+							extensions: { code: "FORBIDDEN" },
+						},
 					);
 				}
 

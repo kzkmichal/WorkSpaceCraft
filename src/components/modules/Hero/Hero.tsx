@@ -21,7 +21,7 @@ const categories: Category[] = [
 			"Create your perfect home workspace with ergonomic furniture and essential accessories.",
 		image:
 			"https://images.unsplash.com/photo-1486946255434-2466348c2166?q=80&w=2940",
-		link: "/categories/home",
+		link: "home",
 		subcategories: [
 			"Furniture",
 			"Health",
@@ -141,7 +141,7 @@ export const Hero = () => {
 							{activeCategory.subcategories.map((subcategory) => (
 								<a
 									key={subcategory}
-									href={`/categories/${activeCategory.id}/${subcategory.toLowerCase()}`}
+									href={`/${activeCategory.id}/${subcategory.toLowerCase()}`}
 									className="text-lg text-gray-700 transition-colors hover:text-gray-900"
 								>
 									{subcategory}
