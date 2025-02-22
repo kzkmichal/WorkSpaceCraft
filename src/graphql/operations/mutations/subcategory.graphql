@@ -1,0 +1,39 @@
+mutation CreateSubcategory($input: CreateSubcategoryInput!) {
+	createSubcategory(input: $input) {
+		...SubcategoryFields
+	}
+}
+
+mutation UpdateSubcategory($input: UpdateSubcategoryInput!) {
+	updateSubcategory(input: $input) {
+		...SubcategoryFields
+	}
+}
+
+mutation DeleteSubcategory($id: ID!) {
+	deleteSubcategory(id: $id)
+}
+
+mutation AddProductSubcategories(
+	$productId: ID!
+	$subcategoryIds: [ID!]!
+) {
+	addProductSubcategories(
+		productId: $productId
+		subcategoryIds: $subcategoryIds
+	) {
+		...ProductFields
+	}
+}
+
+mutation RemoveProductSubcategories(
+	$productId: ID!
+	$subcategoryIds: [ID!]!
+) {
+	removeProductSubcategories(
+		productId: $productId
+		subcategoryIds: $subcategoryIds
+	) {
+		...ProductFields
+	}
+}

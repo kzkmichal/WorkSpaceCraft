@@ -1,0 +1,11 @@
+type Query {
+	categories: [CategoryInfo!]!
+	categoryByType(type: CategoryType!): CategoryInfo!
+	categoryProducts(
+		type: CategoryType!
+		limit: Int
+		offset: Int
+		subcategoryId: ID
+	): [Product!]!
+	categorySubcategories(type: CategoryType!): [Subcategory!]!
+}

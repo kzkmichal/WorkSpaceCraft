@@ -8,6 +8,64 @@ generator client {
   output   = "../../node_modules/.prisma/client"
 }
 
+enum CategoryType {
+  HOME
+  REMOTE
+  OFFICE
+}
+
+model Subcategory {
+  id           String                 @id @default(cuid())
+  name         String
+  slug         String
+  fullSlug     String                 @unique
+  description  String?
+  categoryType CategoryType
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  products     ProductToSubcategory[]
+
+  @@unique([categoryType, slug])
+}
+
+model Product {
+  id                String                 @id @default(cuid())
+  title             String
+  description       String
+  price             Float
+  imageUrl          String
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  createdBy         User                   @relation(fields: [userId], references: [id])
+  userId            String
+  reviews           Review[]
+  subcategories     ProductToSubcategory[]
+  categories        ProductToCategory[]
+  originalStoreLink String
+}
+
+model ProductToSubcategory {
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId     String
+  subcategory   Subcategory @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+  subcategoryId String
+  createdAt     DateTime    @default(now())
+
+  @@id([productId, subcategoryId])
+  @@index([subcategoryId])
+  @@index([productId])
+}
+
+model ProductToCategory {
+  product      Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId    String
+  categoryType CategoryType
+  createdAt    DateTime     @default(now())
+
+  @@id([productId, categoryType])
+  @@index([productId])
+}
+
 model User {
   id        String    @id @default(cuid())
   name      String
@@ -19,21 +77,6 @@ model User {
   reviews   Review[]
   setups    Setup[]
   articles  Article[]
-}
-
-model Product {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  price       Float
-  imageUrl    String
-  category    String
-  subcategory String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   User     @relation(fields: [userId], references: [id])
-  userId      String
-  reviews     Review[]
 }
 
 model Review {

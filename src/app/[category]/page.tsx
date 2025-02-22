@@ -1,28 +1,21 @@
+import { notFound } from "next/navigation";
 import { Category } from "@/components/modules";
+import { getCategory } from "@/hooks/getCategory";
 
-const data = {
-	title: "Category",
-	desc: "Explore our category and find the right one for you.",
-	subcategories: [
-		{
-			title: "Pay supplier invoices",
-			desc: "Our goal is to streamline SMB trade, making it easier and faster than ever.",
-		},
-		{
-			title: "Pay supplier invoices",
-			desc: "Our goal is to streamline SMB trade, making it easier and faster than ever.",
-		},
-		{
-			title: "Pay supplier invoices",
-			desc: "Our goal is to streamline SMB trade, making it easier and faster than ever.",
-		},
-		{
-			title: "Pay supplier invoices",
-			desc: "Our goal is to streamline SMB trade, making it easier and faster than ever.",
-		},
-	],
+type CategoryPageProps = {
+	params: {
+		category: string;
+	};
 };
 
-export default function CategoryPage() {
-	return <Category {...data} />;
+export default async function CategoryPage({
+	params,
+}: CategoryPageProps) {
+	const category = await getCategory(params.category);
+
+	if (!category) {
+		notFound();
+	}
+
+	return <Category {...category} />;
 }

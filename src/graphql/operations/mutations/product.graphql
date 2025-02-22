@@ -13,3 +13,27 @@ mutation UpdateProduct($input: UpdateProductInput!) {
 mutation DeleteProduct($id: ID!) {
 	deleteProduct(id: $id)
 }
+
+mutation AddProductCategories(
+	$productId: ID!
+	$categoryTypes: [CategoryType!]!
+) {
+	addProductCategories(
+		productId: $productId
+		categoryTypes: $categoryTypes
+	) {
+		...ProductFields
+	}
+}
+
+mutation RemoveProductCategories(
+	$productId: ID!
+	$categoryTypes: [CategoryType!]!
+) {
+	removeProductCategories(
+		productId: $productId
+		categoryTypes: $categoryTypes
+	) {
+		...ProductFields
+	}
+}

@@ -1,0 +1,13 @@
+fragment CategoryFields on CategoryInfo {
+	name
+	slug
+	description
+	imageUrl
+	type
+	products {
+		...ProductFields
+	}
+	subcategories {
+		...SubcategoryFields
+	}
+}

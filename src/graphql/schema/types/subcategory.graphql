@@ -1,0 +1,11 @@
+type Subcategory {
+	id: ID!
+	name: String!
+	slug: String!
+	fullSlug: String!
+	description: String
+	categoryType: CategoryType!
+	products: [Product]
+	createdAt: String!
+	updatedAt: String!
+}

@@ -1,13 +1,14 @@
 type Product {
 	id: ID!
-	title: String
-	description: String
-	imageUrl: String
-	originalStoreLink: String
-	price: Float
-	category: String!
-	subcategory: String
+	title: String!
+	description: String!
+	price: Float!
+	imageUrl: String!
+	originalStoreLink: String!
+	categories: [CategoryType!]!
+	subcategories: [Subcategory]
+	reviews: [Review]
+	createdBy: User!
 	createdAt: String!
 	updatedAt: String!
-	createdBy: User
 }

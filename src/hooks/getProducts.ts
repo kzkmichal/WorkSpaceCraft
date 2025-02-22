@@ -1,6 +1,6 @@
 import { getClient } from "@/lib/apollo-server";
 import {
-	Product,
+	ProductFieldsFragment,
 	ProductsDocument,
 	ProductsQuery,
 	ProductsQueryVariables,
@@ -9,7 +9,7 @@ import {
 export async function getProducts(
 	limit = 12,
 	offset = 0,
-): Promise<Product[]> {
+): Promise<ProductFieldsFragment[]> {
 	try {
 		const client = await getClient();
 		const { data } = await client.query<

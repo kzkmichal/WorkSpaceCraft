@@ -1,0 +1,13 @@
+input CreateSubcategoryInput {
+	name: String!
+	slug: String!
+	description: String
+	categoryType: CategoryType!
+}
+
+input UpdateSubcategoryInput {
+	id: ID!
+	name: String
+	slug: String
+	description: String
+}

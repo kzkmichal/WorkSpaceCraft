@@ -1,0 +1,33 @@
+query Categories {
+	categories {
+		...CategoryFields
+	}
+}
+
+query CategoryByType($type: CategoryType!) {
+	categoryByType(type: $type) {
+		...CategoryFields
+	}
+}
+
+query CategoryProducts(
+	$type: CategoryType!
+	$limit: Int
+	$offset: Int
+	$subcategoryId: ID
+) {
+	categoryProducts(
+		type: $type
+		limit: $limit
+		offset: $offset
+		subcategoryId: $subcategoryId
+	) {
+		...ProductFields
+	}
+}
+
+query CategorySubcategories($type: CategoryType!) {
+	categorySubcategories(type: $type) {
+		...SubcategoryFields
+	}
+}

@@ -1,0 +1,13 @@
+type Mutation {
+	createSubcategory(input: CreateSubcategoryInput!): Subcategory!
+	updateSubcategory(input: UpdateSubcategoryInput!): Subcategory!
+	deleteSubcategory(id: ID!): Boolean!
+	addProductSubcategories(
+		productId: ID!
+		subcategoryIds: [ID!]!
+	): Product!
+	removeProductSubcategories(
+		productId: ID!
+		subcategoryIds: [ID!]!
+	): Product!
+}
