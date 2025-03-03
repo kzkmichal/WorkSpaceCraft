@@ -1,0 +1,9 @@
+input UpdateUserProfileInput {
+	name: String
+	image: String
+}
+
+input ChangePasswordInput {
+	currentPassword: String!
+	newPassword: String!
+}

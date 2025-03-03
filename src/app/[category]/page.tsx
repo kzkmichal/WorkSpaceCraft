@@ -3,14 +3,13 @@ import { Category } from "@/components/modules";
 import { getCategory } from "@/hooks/getCategory";
 
 type CategoryPageProps = {
-	params: {
+	params: Promise<{
 		category: string;
-	};
+	}>;
 };
 
-export default async function CategoryPage({
-	params,
-}: CategoryPageProps) {
+export default async function CategoryPage(props: CategoryPageProps) {
+	const params = await props.params;
 	const category = await getCategory(params.category);
 
 	if (!category) {

@@ -1,9 +1,9 @@
 import { GraphQLError } from "graphql";
 import type { Resolvers } from "../generated/graphql";
 import {
-	formatDates,
 	formatProduct,
 	formatSubcategory,
+	formatUser,
 } from "./utils";
 
 type SubcategoryUpdateData = {
@@ -41,7 +41,7 @@ export const resolvers: Resolvers = {
 					...formatSubcategory(subcategory),
 					products: subcategory.products.map((sp) => ({
 						...formatProduct(sp.product),
-						createdBy: formatDates(sp.product.createdBy),
+						createdBy: formatUser(sp.product.createdBy),
 					})),
 				}));
 			} catch (error) {
@@ -81,7 +81,7 @@ export const resolvers: Resolvers = {
 					...formatSubcategory(subcategory),
 					products: subcategory.products.map((sp) => ({
 						...formatProduct(sp.product),
-						createdBy: formatDates(sp.product.createdBy),
+						createdBy: formatUser(sp.product.createdBy),
 					})),
 				};
 			} catch (error) {

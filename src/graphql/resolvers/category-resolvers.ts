@@ -1,7 +1,7 @@
 import { GraphQLError } from "graphql";
 import type { Resolvers } from "../generated/graphql";
 import {
-	formatDates,
+	formatUser,
 	formatProduct,
 	formatSubcategory,
 } from "./utils";
@@ -57,7 +57,7 @@ export const resolvers: Resolvers = {
 								...formatSubcategory(subcategory),
 								products: subcategory.products.map((sp) => ({
 									...formatProduct(sp.product),
-									createdBy: formatDates(sp.product.createdBy),
+									createdBy: formatUser(sp.product.createdBy),
 									categories: sp.product.categories.map(
 										(pc) => pc.categoryType,
 									),
@@ -65,7 +65,7 @@ export const resolvers: Resolvers = {
 							})),
 							products: products.map((product) => ({
 								...formatProduct(product),
-								createdBy: formatDates(product.createdBy),
+								createdBy: formatUser(product.createdBy),
 								categories: product.categories.map(
 									(pc) => pc.categoryType,
 								),
@@ -140,7 +140,7 @@ export const resolvers: Resolvers = {
 						...formatSubcategory(subcategory),
 						products: subcategory.products.map((sp) => ({
 							...formatProduct(sp.product),
-							createdBy: formatDates(sp.product.createdBy),
+							createdBy: formatUser(sp.product.createdBy),
 							categories: sp.product.categories.map(
 								(pc) => pc.categoryType,
 							),
@@ -148,7 +148,7 @@ export const resolvers: Resolvers = {
 					})),
 					products: products.map((product) => ({
 						...formatProduct(product),
-						createdBy: formatDates(product.createdBy),
+						createdBy: formatUser(product.createdBy),
 						categories: product.categories.map(
 							(pc) => pc.categoryType,
 						),
@@ -201,7 +201,7 @@ export const resolvers: Resolvers = {
 
 				return products.map((product) => ({
 					...formatProduct(product),
-					createdBy: formatDates(product.createdBy),
+					createdBy: formatUser(product.createdBy),
 					subcategories: product.subcategories.map((ps) =>
 						formatSubcategory(ps.subcategory),
 					),
@@ -239,7 +239,7 @@ export const resolvers: Resolvers = {
 					...formatSubcategory(subcategory),
 					products: subcategory.products.map((sp) => ({
 						...formatProduct(sp.product),
-						createdBy: formatDates(sp.product.createdBy),
+						createdBy: formatUser(sp.product.createdBy),
 					})),
 				}));
 			} catch (error) {
@@ -282,7 +282,7 @@ export const resolvers: Resolvers = {
 
 				return products.map((product) => ({
 					...formatProduct(product),
-					createdBy: formatDates(product.createdBy),
+					createdBy: formatUser(product.createdBy),
 					subcategories: product.subcategories.map((ps) =>
 						formatSubcategory(ps.subcategory),
 					),

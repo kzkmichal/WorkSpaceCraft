@@ -5,16 +5,16 @@ import { CategoryType } from "@/graphql/generated/graphql";
 import { Product } from "@/components/modules/Product";
 
 type ProductPageProps = {
-	params: {
+	params: Promise<{
 		productId: string;
 		subcategory: string;
 		category: string;
-	};
+	}>;
 };
 
-export default async function ProductPage({
-	params,
-}: ProductPageProps) {
+export default async function ProductPage(props: ProductPageProps) {
+	const params = await props.params;
+
 	const { category, subcategory, productId } = params;
 	const fullSlug = `${category}/${subcategory}`;
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	Search,
 	ShoppingCart,
@@ -9,10 +9,11 @@ import {
 	UserCheck,
 } from "lucide-react";
 import Link from "next/link";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Container } from "@/components/common/molecules";
-import { Button } from "@/components/common/atoms";
 import { BaseProps } from "@/components/utils/types";
+import { logout } from "@/app/actions/auth";
 
 export type NavigationProps = BaseProps;
 
@@ -105,8 +106,27 @@ export const Navigation = ({
 		subcategories: string[];
 	} | null>(null);
 	const [showCategories, setShowCategories] = useState(false);
-	const { data: session, status } = useSession();
+	const { data: session, status, update } = useSession();
+	const router = useRouter();
 	const isLoading = status === "loading";
+
+	const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+	const handleLogout = async () => {
+		setIsLoggingOut(true);
+		await logout();
+
+		await update();
+
+		router.refresh();
+		setIsLoggingOut(false);
+	};
+
+	useEffect(() => {
+		if (!isLoggingOut && status === "unauthenticated") {
+			router.refresh();
+		}
+	}, [status, isLoggingOut, router]);
 
 	return (
 		<Container
@@ -162,19 +182,19 @@ export const Navigation = ({
 							<button className="text-gray-600 hover:text-gray-900">
 								<Search className="h-5 w-5" />
 							</button>
-							{isLoading ? (
+							{isLoading || isLoggingOut ? (
 								<span>Loading...</span>
 							) : session ? (
 								<>
 									<Link href="/profile">
 										<User className="h-5 w-5" />
 									</Link>
-									<Button
-										onClick={() => signOut()}
-										variant="secondary"
+									<button
+										onClick={handleLogout}
+										className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
 									>
 										<UserCheck className="h-5 w-5" />
-									</Button>
+									</button>
 								</>
 							) : (
 								<Link href="/auth/signin">

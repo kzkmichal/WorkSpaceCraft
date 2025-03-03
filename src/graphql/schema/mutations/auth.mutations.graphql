@@ -1,0 +1,4 @@
+extend type Mutation {
+	updateUserProfile(input: UpdateUserProfileInput!): User
+	changePassword(input: ChangePasswordInput!): AuthResult
+}

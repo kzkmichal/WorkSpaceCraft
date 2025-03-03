@@ -2,9 +2,8 @@ import {
 	ApolloClient,
 	InMemoryCache,
 	createHttpLink,
-	from,
 } from "@apollo/client";
-import { clientAuthLink } from "./apollo-auth-link";
+import { Product } from "@prisma/client";
 
 const httpLink = createHttpLink({
 	uri: "/api/graphql",
@@ -15,8 +14,14 @@ const cache = new InMemoryCache({
 	typePolicies: {
 		Query: {
 			fields: {
-				me: {
-					merge: true,
+				products: {
+					keyArgs: false,
+					merge(
+						existing: Product[] = [],
+						incoming: Product[],
+					): Product[] {
+						return [...existing, ...incoming];
+					},
 				},
 			},
 		},
@@ -24,7 +29,7 @@ const cache = new InMemoryCache({
 });
 
 export const client = new ApolloClient({
-	link: from([clientAuthLink, httpLink]),
+	link: httpLink,
 	cache: cache,
 	defaultOptions: {
 		watchQuery: {

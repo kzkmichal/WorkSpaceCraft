@@ -1,13 +1,8 @@
 import { GraphQLError } from "graphql";
 import { Product, Subcategory, User } from "@prisma/client";
 import type { Resolvers } from "../generated/graphql";
-import { formatDates, formatSubcategory } from "./utils";
+import { formatDates, formatSubcategory, formatUser } from "./utils";
 import { CategoryType } from "@/constant/categories";
-
-const formatUser = (user: User) => ({
-	...user,
-	...formatDates(user),
-});
 
 const formatProduct = (
 	product: Product & {
@@ -174,10 +169,8 @@ export const resolvers: Resolvers = {
 					);
 				}
 
-				// Przygotowanie transakcji dla aktualizacji
 				const updatedProduct = await prisma.$transaction(
 					async (tx) => {
-						// Jeśli przekazano nowe kategorie, aktualizujemy je
 						if (categoryTypes) {
 							await tx.productToCategory.deleteMany({
 								where: { productId: id },
@@ -193,7 +186,6 @@ export const resolvers: Resolvers = {
 							}
 						}
 
-						// Jeśli przekazano nowe subkategorie, aktualizujemy je
 						if (subcategoryIds) {
 							await tx.productToSubcategory.deleteMany({
 								where: { productId: id },
@@ -209,7 +201,6 @@ export const resolvers: Resolvers = {
 							}
 						}
 
-						// Aktualizacja podstawowych danych produktu
 						return tx.product.update({
 							where: { id },
 							data: updateData,
