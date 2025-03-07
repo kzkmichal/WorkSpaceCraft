@@ -4,13 +4,28 @@ import { ProductList } from "@/components/modules/products/ProductList";
 import { getProducts } from "@/hooks/getProducts";
 
 type ProductPageProps = {
-	searchParams: { [key: string]: string | string[] | undefined };
+	searchParams: Promise<{
+		[key: string]: string | string[] | undefined;
+	}>;
 };
+
+export async function generateMetadata() {
+	return {
+		title: "Products",
+		description: "Browse products",
+		openGraph: {
+			title: "Products | WorkSpaceCraft",
+			description: "Browse products",
+		},
+	};
+}
 
 export default async function ProductsPage({
 	searchParams,
 }: ProductPageProps) {
-	const page = Number(searchParams.page) || 1;
+	const params = await searchParams;
+
+	const page = Number(params.page) || 1;
 	const limit = 12;
 	const offset = (page - 1) * limit;
 

@@ -2,8 +2,9 @@
 
 import { Input } from "@/components/common/atoms/Input";
 import { Button } from "@/components/common/atoms/Button";
+import { BaseProps } from "@/components/utils/types";
 
-export type SearchBarProps = {};
+export type SearchBarProps = BaseProps;
 
 export const SearchBar = ({}: SearchBarProps) => {
 	return (

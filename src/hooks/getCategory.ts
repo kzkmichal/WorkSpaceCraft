@@ -1,4 +1,8 @@
 import {
+	isBuildPhase,
+	staticCategoryToGraphQL,
+} from "./helpers/category-helpers";
+import {
 	CategoryByTypeDocument,
 	CategoryByTypeQuery,
 	CategoryByTypeQueryVariables,
@@ -6,10 +10,25 @@ import {
 	CategoryType,
 } from "@/graphql/generated/graphql";
 import { getClient } from "@/lib/apollo-server";
+import { getCategoryBySlug } from "@/constant/categories";
+
+const KNOWN_CATEGORIES = ["home", "remote", "office"];
 
 export async function getCategory(
-	type: string,
+	slug: string,
 ): Promise<CategoryFieldsFragment | null> {
+	if (!KNOWN_CATEGORIES.includes(slug.toLowerCase())) {
+		return null;
+	}
+
+	if (isBuildPhase()) {
+		return (
+			staticCategoryToGraphQL(
+				getCategoryBySlug(slug.toLowerCase()),
+			) || null
+		);
+	}
+
 	try {
 		const client = await getClient();
 		const { data } = await client.query<
@@ -17,12 +36,18 @@ export async function getCategory(
 			CategoryByTypeQueryVariables
 		>({
 			query: CategoryByTypeDocument,
-			variables: { type: type.toUpperCase() as CategoryType },
+			variables: { type: slug.toUpperCase() as CategoryType },
 		});
 
-		return data.categoryByType;
+		if (data?.categoryByType) {
+			return data.categoryByType;
+		}
 	} catch (error) {
-		console.error("Failed to fetch categories:", error);
-		return null;
+		console.log("Error fetching category data:", error);
 	}
+
+	return (
+		staticCategoryToGraphQL(getCategoryBySlug(slug.toLowerCase())) ||
+		null
+	);
 }

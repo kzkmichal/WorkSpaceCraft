@@ -1,6 +1,6 @@
 import {
 	SubcategoriesQuery,
-	Subcategory,
+	SubcategoryFieldsFragment,
 	CategoryType,
 	SubcategoriesDocument,
 } from "@/graphql/generated/graphql";
@@ -8,7 +8,7 @@ import { getClient } from "@/lib/apollo-server";
 
 export async function getSubcategories(
 	categoryType: CategoryType,
-): Promise<Subcategory[] | null> {
+): Promise<SubcategoryFieldsFragment[] | null> {
 	try {
 		const client = await getClient();
 		const { data } = await client.query<SubcategoriesQuery>({

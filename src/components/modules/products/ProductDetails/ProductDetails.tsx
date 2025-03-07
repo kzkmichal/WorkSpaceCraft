@@ -1,6 +1,6 @@
-import { Product } from "@/graphql/generated/graphql";
+import { ProductFieldsFragment } from "@/graphql/generated/graphql";
 
-export type ProductDetailsProps = Product;
+export type ProductDetailsProps = ProductFieldsFragment;
 
 export const ProductDetails = ({
 	title,

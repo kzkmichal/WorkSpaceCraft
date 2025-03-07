@@ -1,12 +1,16 @@
 import { notFound } from "next/navigation";
 
-export default function SetupPage({
-	params,
-}: {
-	params: { id: string };
-}) {
+type SetupProps = {
+	params: Promise<{
+		id: string;
+	}>;
+};
+
+export default async function SetupPage(props: SetupProps) {
 	// TODO: Fetch setup data based on params.id
-	const setup = null; // Replace with actual data fetching
+	const params = await props.params; // Replace with actual data fetching
+
+	const setup = null;
 
 	if (!setup) {
 		notFound();
@@ -16,6 +20,7 @@ export default function SetupPage({
 		<div>
 			<h1 className="mb-6 text-3xl font-bold">Setup Details</h1>
 			{/* TODO: Add setup details */}
+			{params.id}
 		</div>
 	);
 }

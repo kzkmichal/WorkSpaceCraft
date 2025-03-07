@@ -4,20 +4,16 @@ import {
 	CategoriesQuery,
 	CategoryFieldsFragment,
 } from "@/graphql/generated/graphql";
+import { getCategoriesData } from "@/hooks/helpers/category-helpers";
 
 export async function getCategories(): Promise<
-	CategoryFieldsFragment[] | null
+	CategoryFieldsFragment[]
 > {
-	try {
+	return getCategoriesData(async () => {
 		const client = await getClient();
-
 		const { data } = await client.query<CategoriesQuery>({
 			query: CategoriesDocument,
 		});
-
 		return data.categories;
-	} catch (error) {
-		console.error("Failed to fetch categories:", error);
-		return [];
-	}
+	});
 }
