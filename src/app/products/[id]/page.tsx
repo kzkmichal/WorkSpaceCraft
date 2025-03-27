@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getProduct } from "@/hooks/getProduct";
-import { ProductDetails } from "@/components/modules/products/ProductDetails";
+import { Product } from "@/components/modules";
 
 type ProductProps = {
 	params: Promise<{
@@ -17,5 +17,5 @@ export default async function ProductPage(props: ProductProps) {
 		notFound();
 	}
 
-	return <ProductDetails {...product} />;
+	return <Product {...product} />;
 }

@@ -9,6 +9,9 @@ type Product {
 	subcategories: [Subcategory]
 	reviews: [Review]
 	createdBy: User!
+	isReported: Boolean
+	reportCount: Int
+	reportReason: String
 	createdAt: String!
 	updatedAt: String!
 }

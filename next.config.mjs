@@ -16,6 +16,9 @@ const nextConfig = {
 				port: "",
 				pathname: "/**",
 			},
+			{
+				hostname: "*.googleusercontent.com",
+			},
 		],
 	},
 };

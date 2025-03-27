@@ -1,32 +1,48 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "./lib/auth";
 
+const PUBLIC_PATHS = [
+	"/",
+	"/auth/signin",
+	"/auth/signup",
+	"/categories",
+	"/products",
+	"/_next",
+	"/api",
+	"/images",
+	"/favicon.ico",
+];
+
+const CATEGORY_PATHS = [
+	"/home",
+	"/Home",
+	"/office",
+	"/Office",
+	"/Remote",
+];
+
 export async function middleware(request: NextRequest) {
 	const path = request.nextUrl.pathname;
 
-	const publicPaths = [
-		"/",
-		"/auth/signin",
-		"/auth/signup",
-		"/categories",
-		"/products",
-	];
-
-	const isPublicPath = publicPaths.some(
-		(publicPath) =>
-			path === publicPath ||
-			path.startsWith("/api/") ||
-			path.startsWith("/_next/") ||
-			path.startsWith("/images/") ||
-			path.startsWith("/home") ||
-			path.startsWith("/Home") ||
-			path.startsWith("/office") ||
-			path.startsWith("/Office") ||
-			path.startsWith("/Remote") ||
-			path.startsWith("/remote"),
-	);
+	const isPublicPath =
+		PUBLIC_PATHS.some((publicPath) => path.startsWith(publicPath)) ||
+		CATEGORY_PATHS.some((categoryPath) =>
+			path.startsWith(categoryPath),
+		);
 
 	if (isPublicPath) {
+		return NextResponse.next();
+	}
+
+	if (path.startsWith("/admin")) {
+		const session = await auth();
+
+		if (!session || session.user.role !== "ADMIN") {
+			return NextResponse.redirect(
+				new URL("/?access=denied", request.url),
+			);
+		}
+
 		return NextResponse.next();
 	}
 
@@ -42,5 +58,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
+	matcher: [
+		"/((?!_next/static|_next/image|favicon.ico).*)",
+		"/admin/:path*",
+	],
 };

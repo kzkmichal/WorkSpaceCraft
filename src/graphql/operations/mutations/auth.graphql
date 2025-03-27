@@ -10,3 +10,9 @@ mutation ChangePassword($input: ChangePasswordInput!) {
 		message
 	}
 }
+
+# mutation UpdateUserRole($userId: ID!, $role: String!) {
+# 	updateUserRole(userId: $userId, role: $role) {
+# 		...UserFields
+# 	}
+# }

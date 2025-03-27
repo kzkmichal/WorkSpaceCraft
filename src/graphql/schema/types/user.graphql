@@ -3,6 +3,8 @@ type User {
 	name: String
 	email: String!
 	image: String
+	role: Role!
+	bio: String
 	emailVerified: DateTime
 	products: [Product!]
 	reviews: [Review!]
@@ -10,4 +12,9 @@ type User {
 	# articles: [Article!]
 	createdAt: DateTime!
 	updatedAt: DateTime!
+}
+
+enum Role {
+	ADMIN
+	USER
 }

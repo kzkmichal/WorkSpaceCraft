@@ -19,6 +19,10 @@ const formatProduct = (
 		product.subcategories?.map((ps) =>
 			formatSubcategory(ps.subcategory),
 		) || [],
+
+	reportReason: product.reportReason ?? undefined,
+	moderatedBy: product.moderatedBy ?? undefined,
+	moderatedAt: product.moderatedAt?.toISOString(),
 });
 
 export const resolvers: Resolvers = {
@@ -78,6 +82,60 @@ export const resolvers: Resolvers = {
 					extensions: { code: "DATABASE_ERROR" },
 				});
 			}
+		},
+		// reportedProducts: async (
+		// 	_,
+		// 	{ limit = 10, offset = 0 },
+		// 	{ user, prisma },
+		// ) => {
+		// 	if (!user || user.role !== "ADMIN") {
+		// 		throw new GraphQLError("Not authorized", {
+		// 			extensions: { code: "FORBIDDEN" },
+		// 		});
+		// 	}
+		// 	const products = await prisma.product.findMany({
+		// 		where: { isReported: true },
+		// 		take: limit,
+		// 		skip: offset,
+		// 		orderBy: { reportCount: "desc" },
+		// 		include: {
+		// 			createdBy: true,
+		// 			categories: true,
+		// 			subcategories: {
+		// 				include: {
+		// 					subcategory: true,
+		// 				},
+		// 			},
+		// 		},
+		// 	});
+
+		// 	return products.map(formatProduct);
+		// },
+		myProducts: async (_, __, { user, prisma }) => {
+			if (!user) {
+				throw new GraphQLError("You must be logged in", {
+					extensions: { code: "UNAUTHORIZED" },
+				});
+			}
+
+			const products = await prisma.product.findMany({
+				where: {
+					userId: user.id,
+				},
+				include: {
+					createdBy: true,
+					categories: true,
+					subcategories: {
+						include: {
+							subcategory: true,
+						},
+					},
+					reviews: true,
+				},
+				orderBy: { createdAt: "desc" },
+			});
+
+			return products.map(formatProduct);
 		},
 	},
 
@@ -270,5 +328,116 @@ export const resolvers: Resolvers = {
 				});
 			}
 		},
+
+		reportProduct: async (
+			_,
+			{ productId, reason },
+			{ user, prisma },
+		) => {
+			if (!user) {
+				throw new GraphQLError(
+					"You must be logged in to report a product",
+					{
+						extensions: { code: "UNAUTHORIZED" },
+					},
+				);
+			}
+			try {
+				const product = await prisma.product.findUnique({
+					where: { id: productId },
+				});
+
+				if (!product) {
+					throw new GraphQLError("Product not found", {
+						extensions: { code: "NOT_FOUND" },
+					});
+				}
+
+				const updatedProduct = await prisma.product.update({
+					where: { id: productId },
+					data: {
+						isReported: true,
+						reportCount: { increment: 1 },
+						reportReason: reason,
+					},
+					include: {
+						createdBy: true,
+						categories: true,
+						subcategories: {
+							include: {
+								subcategory: true,
+							},
+						},
+					},
+				});
+
+				return formatProduct(updatedProduct);
+			} catch (error) {
+				console.error("Failed to report product:", error);
+				throw new GraphQLError("Failed to report product", {
+					extensions: { code: "DATABASE_ERROR" },
+				});
+			}
+		},
+
+		// moderateProduct: async (
+		// 	_,
+		// 	{ productId, action, reason },
+		// 	{ user, prisma },
+		// ) => {
+		// 	if (!user || user.role !== "ADMIN") {
+		// 		throw new GraphQLError("Not authorized", {
+		// 			extensions: { code: "FORBIDDEN" },
+		// 		});
+		// 	}
+
+		// 	const product = await prisma.product.findUnique({
+		// 		where: { id: productId },
+		// 	});
+
+		// 	if (!product) {
+		// 		throw new GraphQLError("Product not found", {
+		// 			extensions: { code: "NOT_FOUND" },
+		// 		});
+		// 	}
+
+		// 	let updateData;
+
+		// 	if (action === "APPROVE") {
+		// 		updateData = {
+		// 			moderatedBy: user.id,
+		// 			moderatedAt: new Date(),
+		// 			isReported: false,
+		// 			reportCount: 0,
+		// 			reportReason: null,
+		// 		};
+		// 	} else if (action === "REMOVE") {
+		// 		updateData = {
+		// 			moderatedBy: user.id,
+		// 			moderatedAt: new Date(),
+		// 			isReported: false,
+		// 			isDeleted: true,
+		// 		};
+		// 	}
+
+		// 	const updatedProduct = await prisma.product.update({
+		// 		where: { id: productId },
+		// 		data: {
+		// 			...updateData,
+		// 			reportReason: reason,
+		// 		},
+		// 		include: {
+		// 			createdBy: true,
+		// 			categories: true,
+		// 			subcategories: {
+		// 				include: {
+		// 					subcategory: true,
+		// 				},
+		// 			},
+		// 		},
+		// 	});
+
+		// 	return formatProduct(updatedProduct);
+		// },
 	},
 };

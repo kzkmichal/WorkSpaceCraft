@@ -31,6 +31,9 @@ export const formatProduct = (
 		product.subcategories?.map((ps) =>
 			formatSubcategory(ps.subcategory),
 		) || [],
+	reportReason: product.reportReason ?? undefined,
+	moderatedBy: product.moderatedBy ?? undefined,
+	moderatedAt: product.moderatedAt?.toISOString(),
 });
 
 export const formatSubcategory = (subcategory: Subcategory) => ({
@@ -44,4 +47,6 @@ export const formatUser = (user: User) => ({
 	...formatDates(user),
 	emailVerified: user.emailVerified?.toISOString() ?? undefined,
 	image: user.image ?? undefined,
+	role: user.role as "USER" | "ADMIN",
+	bio: user.bio ?? undefined,
 });
