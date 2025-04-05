@@ -1,46 +1,86 @@
 "use server";
 
 import { hash } from "bcryptjs";
-import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
+import {
+	signInSchema,
+	SignInValues,
+	signUpSchema,
+	SignUpValues,
+} from "@/lib/validations/auth";
 import { signIn, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/prisma/prisma";
 
+export type BaseAuthState = {
+	error?: string;
+	success?: boolean;
+	fieldErrors?: Record<string, string[]>;
+};
+
+export type SignInState = BaseAuthState & {
+	data?: SignInValues;
+};
+
+export type SignUpState = BaseAuthState & {
+	data?: SignUpValues;
+};
+
 export async function authenticate(
-	prevState: { error: string } | undefined,
+	prevState: SignInState | undefined,
 	formData: FormData,
-) {
+): Promise<SignInState> {
+	const email = formData.get("email") as string;
+	const password = formData.get("password") as string;
+	const data = { email, password };
+
+	const validationResult = signInSchema.safeParse(data);
+
+	if (!validationResult.success) {
+		return {
+			fieldErrors: validationResult.error.flatten().fieldErrors,
+			data,
+		};
+	}
+
 	try {
 		await signIn("credentials", {
-			email: formData.get("email") as string,
-			password: formData.get("password") as string,
+			email,
+			password,
 			redirect: false,
 		});
-
-		redirect("/");
+		return { success: true };
 	} catch (error) {
 		if (error instanceof AuthError) {
 			switch (error.type) {
 				case "CredentialsSignin":
-					return { error: "Wrong login data" };
+					return { error: "Wrong login data", data };
 				default:
-					return { error: "Problem occurred after login attempt" };
+					return {
+						error: "Unexpected error during login",
+						data,
+					};
 			}
 		}
-		throw error;
+		return { error: "Unexpected error", data };
 	}
 }
 
 export async function registerUser(
-	prevState: { error: string; success?: boolean } | undefined,
+	prevState: SignUpState | undefined,
 	formData: FormData,
-) {
+): Promise<SignUpState> {
 	const email = formData.get("email") as string;
 	const password = formData.get("password") as string;
 	const name = formData.get("name") as string;
+	const data = { email, password, name };
 
-	if (!email || !password || !name) {
-		return { error: "All fields are mandatory", success: false };
+	const validationResult = signUpSchema.safeParse(data);
+
+	if (!validationResult.success) {
+		return {
+			fieldErrors: validationResult.error.flatten().fieldErrors,
+			data,
+		};
 	}
 
 	try {
@@ -50,8 +90,8 @@ export async function registerUser(
 
 		if (existingUser) {
 			return {
-				error: "User with this email already exists.",
-				success: false,
+				error: "User with this email already exists",
+				data,
 			};
 		}
 
@@ -72,14 +112,13 @@ export async function registerUser(
 		});
 
 		return {
-			error: "",
 			success: true,
 		};
 	} catch (error) {
 		console.error("Register error", error);
 		return {
-			error: "An error occurred during registration",
-			success: false,
+			error: "Unexpected error during registration",
+			data,
 		};
 	}
 }

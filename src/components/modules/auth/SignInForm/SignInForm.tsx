@@ -1,22 +1,43 @@
 "use client";
 
-import { useActionState } from "react";
+import { useEffect, useActionState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { authenticate, loginWithGoogle } from "@/app/actions/auth";
+import {
+	authenticate,
+	loginWithGoogle,
+	type SignInState,
+} from "@/app/actions/auth";
+import { FormError } from "@/components/common/molecules/Form";
 import { Container } from "@/components/common/molecules";
 
 export function SignInForm() {
-	const [state, formAction] = useActionState(authenticate, undefined);
+	const router = useRouter();
+	const [state, formAction] = useActionState<
+		SignInState | undefined,
+		FormData
+	>(authenticate, undefined);
+
+	useEffect(() => {
+		if (state?.success) {
+			router.push("/");
+			router.refresh();
+		}
+	}, [state?.success, router]);
 
 	return (
 		<Container size={"sm"}>
 			<div>
-				<h2 className="text-center text-3xl font-bold">Sign in</h2>
+				<h2 className="text-center text-3xl font-bold">Sign In</h2>
 			</div>
 			<form action={formAction} className="mt-8 space-y-6">
+				{state?.error && <FormError message={state.error} />}
 				<div className="space-y-4 rounded-md shadow-sm">
 					<div>
-						<label htmlFor="email" className="sr-only">
+						<label
+							htmlFor="email"
+							className="block text-sm font-medium text-gray-700"
+						>
 							Email
 						</label>
 						<input
@@ -24,37 +45,54 @@ export function SignInForm() {
 							name="email"
 							type="email"
 							required
-							className="relative block w-full rounded-md border-0 p-2 text-gray-900 ring-1 ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600"
-							placeholder="Email"
+							defaultValue={state?.data?.email || ""}
+							className={`relative mt-1 block w-full rounded-md border-0 p-2 text-gray-900 ring-1 ${
+								state?.fieldErrors?.email
+									? "ring-red-500"
+									: "ring-gray-300"
+							} placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600`}
+							placeholder="Your email"
 						/>
+						{state?.fieldErrors?.email && (
+							<p className="mt-1 text-sm text-red-600">
+								{state.fieldErrors.email[0]}
+							</p>
+						)}
 					</div>
 					<div>
-						<label htmlFor="password" className="sr-only">
+						<label
+							htmlFor="password"
+							className="block text-sm font-medium text-gray-700"
+						>
 							Password
 						</label>
 						<input
 							id="password"
 							name="password"
 							type="password"
+							defaultValue={state?.data?.password || ""}
 							required
-							className="relative block w-full rounded-md border-0 p-2 text-gray-900 ring-1 ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600"
-							placeholder="Password"
+							className={`relative mt-1 block w-full rounded-md border-0 p-2 text-gray-900 ring-1 ${
+								state?.fieldErrors?.password
+									? "ring-red-500"
+									: "ring-gray-300"
+							} placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600`}
+							placeholder="Your password"
 						/>
+						{state?.fieldErrors?.password && (
+							<p className="mt-1 text-sm text-red-600">
+								{state.fieldErrors.password[0]}
+							</p>
+						)}
 					</div>
 				</div>
-
-				{state?.error && (
-					<div className="rounded-md bg-red-50 p-4 text-sm text-red-500">
-						{state.error}
-					</div>
-				)}
 
 				<div>
 					<button
 						type="submit"
 						className="group relative flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
 					>
-						Sign in
+						Sign In
 					</button>
 				</div>
 			</form>
@@ -74,25 +112,20 @@ export function SignInForm() {
 					type="submit"
 				>
 					<svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
-						{/* Logo Google SVG */}
-						<path
-							d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0012.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-.013z"
-							fill="#4285F4"
-						/>
 						<path
 							d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0012.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-.013z"
 							fill="#4285F4"
 						/>
 					</svg>
-					Sign in with Google
+					Sign In with Google
 				</button>
-				<div className="text-center text-sm">
+				<div className="mt-4 text-center text-sm">
 					Don&apos;t have an account?
 					<Link
 						href="/auth/signup"
 						className="text-blue-600 hover:text-blue-800"
 					>
-						Sign up
+						Sign Up
 					</Link>
 				</div>
 			</form>
