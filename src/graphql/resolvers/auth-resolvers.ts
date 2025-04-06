@@ -1,9 +1,7 @@
 import { GraphQLError } from "graphql";
-import { compare, hash } from "bcrypt";
-import { sign } from "jsonwebtoken";
 import type { Resolvers } from "../generated/graphql";
-
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || "your-secret-key";
+import { formatUser } from "./utils";
+import { comparePasswords, hashPassword } from "@/lib/password";
 
 export const resolvers: Resolvers = {
 	Query: {
@@ -21,83 +19,74 @@ export const resolvers: Resolvers = {
 			}
 
 			return {
-				...dbUser,
-				createdAt: dbUser.createdAt.toISOString(),
-				updatedAt: dbUser.updatedAt.toISOString(),
+				...formatUser(dbUser),
 			};
 		},
 	},
-
 	Mutation: {
-		signUp: async (_, { input }, { prisma }) => {
-			const user = await prisma.user.findUnique({
-				where: { email: input.email },
-			});
-
-			if (user) {
-				throw new GraphQLError("User already exists", {
-					extensions: { code: "BAD_USER_INPUT" },
+		updateUserProfile: async (_, { input }, { user, prisma }) => {
+			if (!user) {
+				throw new GraphQLError("You must be logged in", {
+					extensions: { code: "UNAUTHENTICATED" },
 				});
 			}
 
-			const hashedPassword = await hash(input.password, 10);
-
-			const newUser = await prisma.user.create({
+			const updatedUser = await prisma.user.update({
+				where: { id: user.id },
 				data: {
-					name: input.name,
-					email: input.email,
-					password: hashedPassword,
+					...(input.name && { name: input.name }),
+					...(input.image && { image: input.image }),
 				},
 			});
 
-			const token = sign(
-				{ userId: newUser.id, email: newUser.email },
-				JWT_SECRET,
-				{ expiresIn: "7d" },
-			);
-
 			return {
-				user: {
-					...newUser,
-					createdAt: newUser.createdAt.toISOString(),
-					updatedAt: newUser.updatedAt.toISOString(),
-				},
-				token,
+				...formatUser(updatedUser),
 			};
 		},
 
-		signIn: async (_, { input }, { prisma }) => {
-			const user = await prisma.user.findUnique({
-				where: { email: input.email },
+		changePassword: async (_, { input }, { user, prisma }) => {
+			if (!user) {
+				throw new GraphQLError("You must be logged in", {
+					extensions: { code: "UNAUTHENTICATED" },
+				});
+			}
+
+			const dbUser = await prisma.user.findUnique({
+				where: { id: user.id },
 			});
 
-			if (!user) {
-				throw new GraphQLError("Invalid credentials", {
-					extensions: { code: "UNAUTHORIZED" },
+			if (!dbUser || !dbUser.password) {
+				throw new GraphQLError("User not found or has no password", {
+					extensions: { code: "NOT_FOUND" },
 				});
 			}
 
-			const isValid = await compare(input.password, user.password);
-
-			if (!isValid) {
-				throw new GraphQLError("Invalid credentials", {
-					extensions: { code: "UNAUTHORIZED" },
-				});
-			}
-
-			const token = sign(
-				{ userId: user.id, email: user.email },
-				JWT_SECRET,
-				{ expiresIn: "7d" },
+			const isValid = await comparePasswords(
+				input.currentPassword,
+				dbUser.password,
 			);
 
+			if (!isValid) {
+				return {
+					success: false,
+					message: "Current password is incorrect",
+					user: undefined,
+				};
+			}
+
+			const hashedPassword = await hashPassword(input.newPassword);
+
+			await prisma.user.update({
+				where: { id: user.id },
+				data: { password: hashedPassword },
+			});
+
 			return {
+				success: true,
+				message: "Password changed successfully",
 				user: {
-					...user,
-					createdAt: user.createdAt.toISOString(),
-					updatedAt: user.updatedAt.toISOString(),
+					...formatUser(dbUser),
 				},
-				token,
 			};
 		},
 	},

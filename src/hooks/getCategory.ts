@@ -3,7 +3,6 @@ import {
 	CategoryByTypeQuery,
 	CategoryByTypeQueryVariables,
 	CategoryFieldsFragment,
-	// CategoryInfo,
 	CategoryType,
 } from "@/graphql/generated/graphql";
 import { getClient } from "@/lib/apollo-server";

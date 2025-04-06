@@ -1,28 +1,36 @@
 import { PrismaClient } from "@prisma/client";
-import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma/prisma";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 
 export interface ApolloContext {
 	prisma: PrismaClient;
 	user?: {
 		id: string;
 		email: string;
-	} | null;
+		name: string;
+	};
 }
 
 export async function createContext(): Promise<ApolloContext> {
-	const session = await getServerSession(authOptions);
+	const session = await auth();
 
-	if (!session || !session.user?.id) {
+	if (
+		!session ||
+		!session.user?.id ||
+		!session.user?.email ||
+		!session.user.name
+	) {
 		return { prisma };
 	}
 
 	return {
 		prisma,
-		user: {
-			id: session.user.id,
-			email: session.user.email,
-		},
+		user: session?.user
+			? {
+					id: session.user.id,
+					email: session.user.email,
+					name: session.user.name,
+				}
+			: undefined,
 	};
 }

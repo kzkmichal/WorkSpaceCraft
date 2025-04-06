@@ -1,7 +1,15 @@
-import { CategoryType, Product, Subcategory } from "@prisma/client";
+import {
+	CategoryType,
+	Product,
+	Subcategory,
+	User,
+} from "@prisma/client";
 
 export const formatDates = <
-	T extends { createdAt: Date; updatedAt: Date },
+	T extends {
+		createdAt: Date;
+		updatedAt: Date;
+	},
 >(
 	obj: T,
 ) => ({
@@ -24,4 +32,11 @@ export const formatSubcategory = (subcategory: Subcategory) => ({
 	...subcategory,
 	...formatDates(subcategory),
 	description: subcategory.description || undefined,
+});
+
+export const formatUser = (user: User) => ({
+	...user,
+	...formatDates(user),
+	emailVerified: user.emailVerified?.toDateString() ?? undefined,
+	image: user.image ?? undefined,
 });

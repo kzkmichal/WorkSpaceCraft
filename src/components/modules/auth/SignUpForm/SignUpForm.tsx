@@ -1,124 +1,99 @@
 "use client";
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+
+import { useActionState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSignUpMutation } from "@/graphql/generated/graphql";
+import { registerUser } from "@/app/actions/auth";
+import { Container } from "@/components/common/molecules";
 
-export const SignUpForm = () => {
+export function SignUpForm() {
+	const [state, formAction] = useActionState(registerUser, undefined);
 	const router = useRouter();
-	const [error, setError] = useState<string | null>(null);
-	const [loading, setLoading] = useState(false);
 
-	const [signUp] = useSignUpMutation();
-
-	async function handleSubmit(
-		event: React.FormEvent<HTMLFormElement>,
-	) {
-		event.preventDefault();
-		setError(null);
-		setLoading(true);
-
-		const formData = new FormData(event.currentTarget);
-		const name = formData.get("name") as string;
-		const email = formData.get("email") as string;
-		const password = formData.get("password") as string;
-
-		try {
-			const result = await signUp({
-				variables: {
-					input: {
-						name,
-						email,
-						password,
-					},
-				},
-			});
-
-			if (!result.data) {
-				setError("Registration failed");
-				return;
-			}
-			const signInResult = await signIn("credentials", {
-				email,
-				password,
-				redirect: false,
-			});
-
-			if (signInResult?.error) {
-				setError("Failed to sign in after registration");
-				return;
-			}
-
+	useEffect(() => {
+		if (state?.success) {
 			router.push("/");
-			router.refresh();
-		} catch (e) {
-			setError(
-				e instanceof Error
-					? e.message
-					: "An error occurred during sign up",
-			);
-		} finally {
-			setLoading(false);
 		}
-	}
+	}, [state?.success, router]);
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
-			{error && (
-				<div className="rounded-md bg-red-50 p-4 text-sm text-red-500">
-					{error}
+		<Container size={"sm"}>
+			<div>
+				<h2 className="text-center text-3xl font-bold">
+					Create an account
+				</h2>
+			</div>
+
+			<form action={formAction} className="mt-8 space-y-6">
+				<div className="space-y-4 rounded-md shadow-sm">
+					<div>
+						<label htmlFor="name" className="sr-only">
+							Name
+						</label>
+						<input
+							id="name"
+							name="name"
+							type="text"
+							required
+							className="relative block w-full rounded-md border-0 p-2 text-gray-900 ring-1 ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600"
+							placeholder="Name"
+						/>
+					</div>
+
+					<div>
+						<label htmlFor="email" className="sr-only">
+							Email
+						</label>
+						<input
+							id="email"
+							name="email"
+							type="email"
+							required
+							className="relative block w-full rounded-md border-0 p-2 text-gray-900 ring-1 ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600"
+							placeholder="Email"
+						/>
+					</div>
+
+					<div>
+						<label htmlFor="password" className="sr-only">
+							Password
+						</label>
+						<input
+							id="password"
+							name="password"
+							type="password"
+							required
+							className="relative block w-full rounded-md border-0 p-2 text-gray-900 ring-1 ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600"
+							placeholder="Password"
+						/>
+					</div>
 				</div>
-			)}
 
-			<div>
-				<label htmlFor="name" className="block text-sm font-medium">
-					Name
-				</label>
-				<input
-					type="text"
-					id="name"
-					name="name"
-					required
-					className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-black shadow-sm"
-				/>
-			</div>
+				{state?.error && (
+					<div className="rounded-md bg-red-50 p-4 text-sm text-red-500">
+						{state.error}
+					</div>
+				)}
 
-			<div>
-				<label htmlFor="email" className="block text-sm font-medium">
-					Email
-				</label>
-				<input
-					type="email"
-					id="email"
-					name="email"
-					required
-					className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-black shadow-sm"
-				/>
-			</div>
+				<div>
+					<button
+						type="submit"
+						className="group relative flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+					>
+						Sign up
+					</button>
+				</div>
+			</form>
 
-			<div>
-				<label
-					htmlFor="password"
-					className="block text-sm font-medium"
+			<div className="text-center text-sm">
+				Already have an account?
+				<Link
+					href="/auth/signin"
+					className="text-blue-600 hover:text-blue-800"
 				>
-					Password
-				</label>
-				<input
-					type="password"
-					id="password"
-					name="password"
-					required
-					className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-black shadow-sm"
-				/>
+					Sign in
+				</Link>
 			</div>
-
-			<button
-				type="submit"
-				disabled={loading}
-				className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-blue-300"
-			>
-				{loading ? "Creating account..." : "Sign Up"}
-			</button>
-		</form>
+		</Container>
 	);
-};
+}

@@ -1,14 +1,24 @@
-import { type NextAuthOptions } from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import NextAuth, { type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { createAuthClient } from "./auth-client";
-import {
-	SignInMutation,
-	SignInMutationVariables,
-	SignInDocument,
-} from "@/graphql/generated/graphql";
+import GoogleProvider from "next-auth/providers/google";
+import { prisma } from "./prisma/prisma";
+import { comparePasswords } from "./password";
 
-export const authOptions: NextAuthOptions = {
+export const authConfig: NextAuthConfig = {
+	adapter: PrismaAdapter(prisma),
+	session: {
+		strategy: "jwt",
+	},
+	pages: {
+		signIn: "/auth/signin",
+		error: "/auth/error",
+	},
 	providers: [
+		GoogleProvider({
+			clientId: process.env.GOOGLE_CLIENT_ID!,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+		}),
 		CredentialsProvider({
 			name: "Credentials",
 			credentials: {
@@ -19,62 +29,50 @@ export const authOptions: NextAuthOptions = {
 				if (!credentials?.email || !credentials?.password) {
 					return null;
 				}
+				const email = credentials.email as string;
+				const password = credentials.password as string;
 
-				try {
-					const client = createAuthClient();
-					const { data } = await client.mutate<
-						SignInMutation,
-						SignInMutationVariables
-					>({
-						mutation: SignInDocument,
-						variables: {
-							input: {
-								email: credentials.email,
-								password: credentials.password,
-							},
-						},
-					});
+				const user = await prisma.user.findUnique({
+					where: { email },
+				});
 
-					if (!data?.signIn) {
-						return null;
-					}
-
-					return {
-						id: data.signIn.user.id,
-						email: data.signIn.user.email,
-						name: data.signIn.user.name,
-						accessToken: data.signIn.token,
-					};
-				} catch (error) {
-					console.error("Authentication error:", error);
+				if (!user || !user.password) {
 					return null;
 				}
+
+				const isPasswordValid = await comparePasswords(
+					password,
+					user.password,
+				);
+
+				if (!isPasswordValid) {
+					return null;
+				}
+
+				return {
+					id: user.id,
+					email: user.email,
+					name: user.name,
+					image: user.image,
+				};
 			},
 		}),
 	],
 	callbacks: {
 		async jwt({ token, user }) {
 			if (user) {
-				token.accessToken = user.accessToken;
-				token.sub = user.id;
+				token.id = user.id;
 			}
 			return token;
 		},
 		async session({ session, token }) {
-			if (token) {
-				session.user.id = token.sub as string;
-				session.accessToken = token.accessToken;
+			if (token && session.user) {
+				session.user.id = token.id as string;
 			}
 			return session;
 		},
 	},
-	session: {
-		strategy: "jwt",
-		maxAge: 7 * 24 * 60 * 60, // 7 days
-	},
-	pages: {
-		signIn: "/auth/signin",
-		error: "/auth/error",
-	},
-	secret: process.env.NEXTAUTH_SECRET,
 };
+
+export const { handlers, auth, signIn, signOut } =
+	NextAuth(authConfig);

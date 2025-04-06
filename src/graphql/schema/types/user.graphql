@@ -1,11 +1,13 @@
 type User {
 	id: ID!
-	name: String!
+	name: String
 	email: String!
-	# password: String!
-	products: [Product]
-	reviews: [Review]
-	createdAt: String!
-	updatedAt: String!
-	# setups: [Setup!]!
+	image: String
+	emailVerified: DateTime
+	products: [Product!]
+	reviews: [Review!]
+	# setups: [Setup!]
+	# articles: [Article!]
+	createdAt: DateTime!
+	updatedAt: DateTime!
 }

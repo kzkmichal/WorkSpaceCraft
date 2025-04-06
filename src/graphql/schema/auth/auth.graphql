@@ -1,24 +1,17 @@
-type AuthPayload {
-	token: String!
-	user: User!
+type AuthResult {
+	user: User
+	success: Boolean!
+	message: String
 }
 
-input SignUpInput {
-	email: String!
-	password: String!
-	name: String!
+type Session {
+	user: User
+	expires: String
 }
 
-input SignInInput {
-	email: String!
-	password: String!
-}
+scalar DateTime
 
-type Mutation {
-	signUp(input: SignUpInput!): AuthPayload!
-	signIn(input: SignInInput!): AuthPayload!
-}
-
-type Query {
+extend type Query {
 	me: User
+	session: Session
 }

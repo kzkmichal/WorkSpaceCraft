@@ -3,3 +3,9 @@ query Me {
 		...UserFields
 	}
 }
+
+query GetSession {
+	session {
+		...SessionFields
+	}
+}

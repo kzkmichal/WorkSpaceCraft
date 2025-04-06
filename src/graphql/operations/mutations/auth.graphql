@@ -1,11 +1,12 @@
-mutation SignIn($input: SignInInput!) {
-	signIn(input: $input) {
-		...AuthPayloadFields
+mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
+	updateUserProfile(input: $input) {
+		...UserFields
 	}
 }
 
-mutation SignUp($input: SignUpInput!) {
-	signUp(input: $input) {
-		...AuthPayloadFields
+mutation ChangePassword($input: ChangePasswordInput!) {
+	changePassword(input: $input) {
+		success
+		message
 	}
 }
