@@ -12,6 +12,41 @@ type ProductPageProps = {
 	}>;
 };
 
+export async function generateMetadata(props: ProductPageProps) {
+	const params = await props.params;
+	const { category, subcategory, productId } = params;
+
+	const product = await getProduct(productId);
+
+	if (!product) {
+		return {
+			title: "Product Not Found",
+		};
+	}
+
+	return {
+		title: product.title,
+		description: product.description || "Product description",
+		openGraph: {
+			title: `${product.title} | WorkSpaceCraft`,
+			description: product.description || "Product description",
+			images: product.imageUrl
+				? [
+						{
+							url: product.imageUrl,
+							width: 800,
+							height: 600,
+							alt: product.title,
+						},
+					]
+				: [],
+		},
+		alternates: {
+			canonical: `/products/${category}/${subcategory}/${productId}`,
+		},
+	};
+}
+
 export default async function ProductPage(props: ProductPageProps) {
 	const params = await props.params;
 

@@ -7,8 +7,14 @@ const server = new ApolloServer<ApolloContext>({
 	schema,
 });
 
-const handler = startServerAndCreateNextHandler(server, {
+const apolloHandler = startServerAndCreateNextHandler(server, {
 	context: async () => createContext(),
 });
 
-export { handler as GET, handler as POST };
+export async function GET(request: Request) {
+	return apolloHandler(request);
+}
+
+export async function POST(request: Request) {
+	return apolloHandler(request);
+}

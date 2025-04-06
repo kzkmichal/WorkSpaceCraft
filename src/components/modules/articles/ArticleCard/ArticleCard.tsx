@@ -1,10 +1,10 @@
 import Link from "next/link";
 
 export type ArticleCardProps = {
-	id: string;
-	title: string;
-	excerpt: string;
-	author: string;
+	id?: string;
+	title?: string;
+	excerpt?: string;
+	author?: string;
 };
 
 export const ArticleCard = ({

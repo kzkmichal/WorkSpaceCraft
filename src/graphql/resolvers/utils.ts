@@ -21,11 +21,16 @@ export const formatDates = <
 export const formatProduct = (
 	product: Product & {
 		categories?: { categoryType: CategoryType }[];
+		subcategories?: { subcategory: Subcategory }[];
 	},
 ) => ({
 	...product,
 	...formatDates(product),
 	categories: product.categories?.map((pc) => pc.categoryType) || [],
+	subcategories:
+		product.subcategories?.map((ps) =>
+			formatSubcategory(ps.subcategory),
+		) || [],
 });
 
 export const formatSubcategory = (subcategory: Subcategory) => ({
@@ -37,6 +42,6 @@ export const formatSubcategory = (subcategory: Subcategory) => ({
 export const formatUser = (user: User) => ({
 	...user,
 	...formatDates(user),
-	emailVerified: user.emailVerified?.toDateString() ?? undefined,
+	emailVerified: user.emailVerified?.toISOString() ?? undefined,
 	image: user.image ?? undefined,
 });

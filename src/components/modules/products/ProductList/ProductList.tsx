@@ -1,8 +1,8 @@
 import { ProductCard } from "@/components/modules/products/ProductCard";
-import { Product } from "@/graphql/generated/graphql";
+import { ProductFieldsFragment } from "@/graphql/generated/graphql";
 
 export type ProductListProps = {
-	products: Product[];
+	products: ProductFieldsFragment[];
 };
 
 export const ProductList = ({ products }: ProductListProps) => {

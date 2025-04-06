@@ -4,15 +4,12 @@ import {
 	HttpLink,
 } from "@apollo/client";
 import { registerApolloClient } from "@apollo/experimental-nextjs-app-support";
-import { headers } from "next/headers";
 
 export const { getClient } = registerApolloClient(async () => {
 	const httpLink = new HttpLink({
 		uri:
 			process.env.NEXT_PUBLIC_GRAPHQL_URL ||
 			"http://localhost:3000/api/graphql",
-		headers: Object.fromEntries(await headers()),
-		fetchOptions: { cache: "no-store" },
 	});
 
 	return new ApolloClient({
@@ -20,8 +17,7 @@ export const { getClient } = registerApolloClient(async () => {
 		link: httpLink,
 		defaultOptions: {
 			query: {
-				fetchPolicy: "no-cache",
-				errorPolicy: "all",
+				fetchPolicy: "network-only",
 			},
 		},
 	});

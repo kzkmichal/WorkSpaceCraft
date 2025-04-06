@@ -53,6 +53,7 @@ export function useProducts(initialLimit = 10) {
 				}
 			}
 		});
+		// eslint-disable-next-line
 	}, [data?.products, fetchMore, initialLimit, withLoading]);
 
 	const addProduct = useCallback(
@@ -97,6 +98,7 @@ export function useProducts(initialLimit = 10) {
 				}
 			});
 		},
+		// eslint-disable-next-line
 		[createProduct, withLoading],
 	);
 

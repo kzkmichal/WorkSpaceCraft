@@ -9,6 +9,44 @@ type SubcategoryPageProps = {
 	}>;
 };
 
+export async function generateMetadata(props: SubcategoryPageProps) {
+	const params = await props.params;
+
+	const fullSlug = `${params.category}/${params.subcategory}`;
+
+	const subcategory = await getSubcategory(fullSlug);
+
+	if (!subcategory) {
+		return {
+			title: "Subcategory Not Found",
+		};
+	}
+
+	return {
+		title: subcategory.name,
+		description:
+			subcategory.description ||
+			`Browse products in the ${subcategory.name} subcategory.`,
+		openGraph: {
+			title: `${subcategory.name} | WorkSpaceCraft`,
+			description:
+				subcategory.description ||
+				`Browse products in the ${subcategory.name} subcategory.`,
+		},
+		alternates: {
+			canonical: `${params.category}/${params.subcategory}`,
+		},
+
+		// twitter: {
+		// 	title: `${subcategory.name} | WorkSpaceCraft`,
+		// 	description:
+		// 		subcategory.description ||
+		// 		`Browse products in the ${subcategory.name} subcategory.`,
+		// 	images: subcategory.imageUrl ? [subcategory.imageUrl] : [],
+		// },
+	};
+}
+
 export default async function SubcategoryPage(
 	props: SubcategoryPageProps,
 ) {

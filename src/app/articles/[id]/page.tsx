@@ -1,11 +1,14 @@
 import { notFound } from "next/navigation";
 
-export default function ArticlePage({
-	params,
-}: {
-	params: { id: string };
-}) {
-	// TODO: Fetch article data based on params.id
+type ArticlesPageProps = {
+	params: Promise<{
+		id: string;
+	}>;
+};
+
+export default async function ArticlePage(props: ArticlesPageProps) {
+	const params = await props.params;
+
 	const article = null; // Replace with actual data fetching
 
 	if (!article) {
@@ -16,6 +19,7 @@ export default function ArticlePage({
 		<div>
 			<h1 className="mb-6 text-3xl font-bold">Article</h1>
 			{/* TODO: Add article content */}
+			{params.id}
 		</div>
 	);
 }

@@ -120,7 +120,7 @@
 
 @layer components {
 	.card {
-		@apply bg-card rounded-lg border p-6 shadow-sm;
+		@apply rounded-lg border p-6 shadow-sm;
 	}
 
 	.input-base {
