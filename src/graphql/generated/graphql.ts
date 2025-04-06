@@ -72,11 +72,14 @@ export type Mutation = {
   createSubcategory: Subcategory;
   deleteProduct: Scalars['Boolean']['output'];
   deleteSubcategory: Scalars['Boolean']['output'];
+  moderateProduct: Product;
   removeProductCategories: Product;
   removeProductSubcategories: Product;
+  reportProduct: Product;
   updateProduct: Product;
   updateSubcategory: Subcategory;
   updateUserProfile?: Maybe<User>;
+  updateUserRole: User;
 };
 
 
@@ -117,6 +120,13 @@ export type MutationDeleteSubcategoryArgs = {
 };
 
 
+export type MutationModerateProductArgs = {
+  action: Scalars['String']['input'];
+  productId: Scalars['ID']['input'];
+  reason?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type MutationRemoveProductCategoriesArgs = {
   categoryTypes: Array<CategoryType>;
   productId: Scalars['ID']['input'];
@@ -126,6 +136,12 @@ export type MutationRemoveProductCategoriesArgs = {
 export type MutationRemoveProductSubcategoriesArgs = {
   productId: Scalars['ID']['input'];
   subcategoryIds: Array<Scalars['ID']['input']>;
+};
+
+
+export type MutationReportProductArgs = {
+  productId: Scalars['ID']['input'];
+  reason: Scalars['String']['input'];
 };
 
 
@@ -143,6 +159,12 @@ export type MutationUpdateUserProfileArgs = {
   input: UpdateUserProfileInput;
 };
 
+
+export type MutationUpdateUserRoleArgs = {
+  role: Scalars['String']['input'];
+  userId: Scalars['ID']['input'];
+};
+
 export type Product = {
   categories: Array<CategoryType>;
   createdAt: Scalars['String']['output'];
@@ -150,8 +172,11 @@ export type Product = {
   description: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   imageUrl: Scalars['String']['output'];
+  isReported?: Maybe<Scalars['Boolean']['output']>;
   originalStoreLink: Scalars['String']['output'];
   price: Scalars['Float']['output'];
+  reportCount?: Maybe<Scalars['Int']['output']>;
+  reportReason?: Maybe<Scalars['String']['output']>;
   reviews?: Maybe<Array<Maybe<Review>>>;
   subcategories?: Maybe<Array<Maybe<Subcategory>>>;
   title: Scalars['String']['output'];
@@ -159,18 +184,27 @@ export type Product = {
 };
 
 export type Query = {
+  allUsers: Array<User>;
   categories: Array<CategoryInfo>;
   categoryByType: CategoryInfo;
   categoryProducts: Array<Product>;
   categorySubcategories: Array<Subcategory>;
   me?: Maybe<User>;
+  myProducts: Array<Product>;
   product?: Maybe<Product>;
   products: Array<Product>;
+  reportedProducts: Array<Product>;
   session?: Maybe<Session>;
   subcategories: Array<Subcategory>;
   subcategory?: Maybe<Subcategory>;
   user?: Maybe<User>;
   users: Array<User>;
+};
+
+
+export type QueryAllUsersArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -205,6 +239,12 @@ export type QueryProductsArgs = {
 };
 
 
+export type QueryReportedProductsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type QuerySubcategoriesArgs = {
   categoryType?: InputMaybe<CategoryType>;
 };
@@ -228,6 +268,10 @@ export type Review = {
   updatedAt: Scalars['String']['output'];
   user: User;
 };
+
+export type Role =
+  | 'ADMIN'
+  | 'USER';
 
 export type Session = {
   expires?: Maybe<Scalars['String']['output']>;
@@ -270,6 +314,7 @@ export type UpdateUserProfileInput = {
 };
 
 export type User = {
+  bio?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['DateTime']['output'];
   email: Scalars['String']['output'];
   emailVerified?: Maybe<Scalars['DateTime']['output']>;
@@ -278,6 +323,7 @@ export type User = {
   name?: Maybe<Scalars['String']['output']>;
   products?: Maybe<Array<Product>>;
   reviews?: Maybe<Array<Review>>;
+  role: Role;
   updatedAt: Scalars['DateTime']['output'];
 };
 
@@ -363,6 +409,7 @@ export type ResolversTypes = {
   Product: ResolverTypeWrapper<Product>;
   Query: ResolverTypeWrapper<{}>;
   Review: ResolverTypeWrapper<Review>;
+  Role: Role;
   Session: ResolverTypeWrapper<Session>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Subcategory: ResolverTypeWrapper<Subcategory>;
@@ -427,11 +474,14 @@ export type MutationResolvers<ContextType = ApolloContext, ParentType extends Re
   createSubcategory?: Resolver<ResolversTypes['Subcategory'], ParentType, ContextType, RequireFields<MutationCreateSubcategoryArgs, 'input'>>;
   deleteProduct?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteProductArgs, 'id'>>;
   deleteSubcategory?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteSubcategoryArgs, 'id'>>;
+  moderateProduct?: Resolver<ResolversTypes['Product'], ParentType, ContextType, RequireFields<MutationModerateProductArgs, 'action' | 'productId'>>;
   removeProductCategories?: Resolver<ResolversTypes['Product'], ParentType, ContextType, RequireFields<MutationRemoveProductCategoriesArgs, 'categoryTypes' | 'productId'>>;
   removeProductSubcategories?: Resolver<ResolversTypes['Product'], ParentType, ContextType, RequireFields<MutationRemoveProductSubcategoriesArgs, 'productId' | 'subcategoryIds'>>;
+  reportProduct?: Resolver<ResolversTypes['Product'], ParentType, ContextType, RequireFields<MutationReportProductArgs, 'productId' | 'reason'>>;
   updateProduct?: Resolver<ResolversTypes['Product'], ParentType, ContextType, RequireFields<MutationUpdateProductArgs, 'input'>>;
   updateSubcategory?: Resolver<ResolversTypes['Subcategory'], ParentType, ContextType, RequireFields<MutationUpdateSubcategoryArgs, 'input'>>;
   updateUserProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateUserProfileArgs, 'input'>>;
+  updateUserRole?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateUserRoleArgs, 'role' | 'userId'>>;
 };
 
 export type ProductResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['Product'] = ResolversParentTypes['Product']> = {
@@ -441,8 +491,11 @@ export type ProductResolvers<ContextType = ApolloContext, ParentType extends Res
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   imageUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  isReported?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   originalStoreLink?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   price?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  reportCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  reportReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   reviews?: Resolver<Maybe<Array<Maybe<ResolversTypes['Review']>>>, ParentType, ContextType>;
   subcategories?: Resolver<Maybe<Array<Maybe<ResolversTypes['Subcategory']>>>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -451,13 +504,16 @@ export type ProductResolvers<ContextType = ApolloContext, ParentType extends Res
 };
 
 export type QueryResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  allUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, Partial<QueryAllUsersArgs>>;
   categories?: Resolver<Array<ResolversTypes['CategoryInfo']>, ParentType, ContextType>;
   categoryByType?: Resolver<ResolversTypes['CategoryInfo'], ParentType, ContextType, RequireFields<QueryCategoryByTypeArgs, 'type'>>;
   categoryProducts?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<QueryCategoryProductsArgs, 'type'>>;
   categorySubcategories?: Resolver<Array<ResolversTypes['Subcategory']>, ParentType, ContextType, RequireFields<QueryCategorySubcategoriesArgs, 'type'>>;
   me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  myProducts?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType>;
   product?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<QueryProductArgs, 'id'>>;
   products?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType, Partial<QueryProductsArgs>>;
+  reportedProducts?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType, Partial<QueryReportedProductsArgs>>;
   session?: Resolver<Maybe<ResolversTypes['Session']>, ParentType, ContextType>;
   subcategories?: Resolver<Array<ResolversTypes['Subcategory']>, ParentType, ContextType, Partial<QuerySubcategoriesArgs>>;
   subcategory?: Resolver<Maybe<ResolversTypes['Subcategory']>, ParentType, ContextType, RequireFields<QuerySubcategoryArgs, 'fullSlug'>>;
@@ -496,6 +552,7 @@ export type SubcategoryResolvers<ContextType = ApolloContext, ParentType extends
 };
 
 export type UserResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
+  bio?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   emailVerified?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
@@ -504,6 +561,7 @@ export type UserResolvers<ContextType = ApolloContext, ParentType extends Resolv
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   products?: Resolver<Maybe<Array<ResolversTypes['Product']>>, ParentType, ContextType>;
   reviews?: Resolver<Maybe<Array<ResolversTypes['Review']>>, ParentType, ContextType>;
+  role?: Resolver<ResolversTypes['Role'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -522,26 +580,26 @@ export type Resolvers<ContextType = ApolloContext> = {
 };
 
 
-export type UserFieldsFragment = { id: string, name?: string | undefined, email: string, image?: string | undefined, createdAt: string, updatedAt: string };
+export type UserFieldsFragment = { id: string, name?: string | undefined, email: string, image?: string | undefined, role: Role, bio?: string | undefined, createdAt: string, updatedAt: string };
 
-export type SessionFieldsFragment = { expires?: string | undefined, user?: { id: string, name?: string | undefined, email: string, image?: string | undefined, createdAt: string, updatedAt: string } | undefined };
+export type SessionFieldsFragment = { expires?: string | undefined, user?: { id: string, name?: string | undefined, email: string, image?: string | undefined, role: Role, bio?: string | undefined, createdAt: string, updatedAt: string } | undefined };
 
-export type AuthResultFieldsFragment = { success: boolean, message?: string | undefined, user?: { id: string, name?: string | undefined, email: string, image?: string | undefined, createdAt: string, updatedAt: string } | undefined };
+export type AuthResultFieldsFragment = { success: boolean, message?: string | undefined, user?: { id: string, name?: string | undefined, email: string, image?: string | undefined, role: Role, bio?: string | undefined, createdAt: string, updatedAt: string } | undefined };
 
-export type CategoryFieldsFragment = { name: string, slug: string, description?: string | undefined, imageUrl?: string | undefined, type: CategoryType, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined } | undefined> | undefined };
+export type CategoryFieldsFragment = { name: string, slug: string, description?: string | undefined, imageUrl?: string | undefined, type: CategoryType, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined } | undefined> | undefined };
 
-export type UserFragment = { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string };
+export type UserFragment = { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role };
 
-export type ProductFieldsFragment = { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined };
+export type ProductFieldsFragment = { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined };
 
-export type SubcategoryFieldsFragment = { id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined };
+export type SubcategoryFieldsFragment = { id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined };
 
 export type UpdateUserProfileMutationVariables = Exact<{
   input: UpdateUserProfileInput;
 }>;
 
 
-export type UpdateUserProfileMutation = { updateUserProfile?: { id: string, name?: string | undefined, email: string, image?: string | undefined, createdAt: string, updatedAt: string } | undefined };
+export type UpdateUserProfileMutation = { updateUserProfile?: { id: string, name?: string | undefined, email: string, image?: string | undefined, role: Role, bio?: string | undefined, createdAt: string, updatedAt: string } | undefined };
 
 export type ChangePasswordMutationVariables = Exact<{
   input: ChangePasswordInput;
@@ -555,14 +613,14 @@ export type CreateProductMutationVariables = Exact<{
 }>;
 
 
-export type CreateProductMutation = { createProduct: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } };
+export type CreateProductMutation = { createProduct: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } };
 
 export type UpdateProductMutationVariables = Exact<{
   input: UpdateProductInput;
 }>;
 
 
-export type UpdateProductMutation = { updateProduct: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } };
+export type UpdateProductMutation = { updateProduct: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } };
 
 export type DeleteProductMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -577,7 +635,7 @@ export type AddProductCategoriesMutationVariables = Exact<{
 }>;
 
 
-export type AddProductCategoriesMutation = { addProductCategories: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } };
+export type AddProductCategoriesMutation = { addProductCategories: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } };
 
 export type RemoveProductCategoriesMutationVariables = Exact<{
   productId: Scalars['ID']['input'];
@@ -585,21 +643,21 @@ export type RemoveProductCategoriesMutationVariables = Exact<{
 }>;
 
 
-export type RemoveProductCategoriesMutation = { removeProductCategories: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } };
+export type RemoveProductCategoriesMutation = { removeProductCategories: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } };
 
 export type CreateSubcategoryMutationVariables = Exact<{
   input: CreateSubcategoryInput;
 }>;
 
 
-export type CreateSubcategoryMutation = { createSubcategory: { id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined } };
+export type CreateSubcategoryMutation = { createSubcategory: { id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined } };
 
 export type UpdateSubcategoryMutationVariables = Exact<{
   input: UpdateSubcategoryInput;
 }>;
 
 
-export type UpdateSubcategoryMutation = { updateSubcategory: { id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined } };
+export type UpdateSubcategoryMutation = { updateSubcategory: { id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined } };
 
 export type DeleteSubcategoryMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -614,7 +672,7 @@ export type AddProductSubcategoriesMutationVariables = Exact<{
 }>;
 
 
-export type AddProductSubcategoriesMutation = { addProductSubcategories: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } };
+export type AddProductSubcategoriesMutation = { addProductSubcategories: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } };
 
 export type RemoveProductSubcategoriesMutationVariables = Exact<{
   productId: Scalars['ID']['input'];
@@ -622,29 +680,29 @@ export type RemoveProductSubcategoriesMutationVariables = Exact<{
 }>;
 
 
-export type RemoveProductSubcategoriesMutation = { removeProductSubcategories: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } };
+export type RemoveProductSubcategoriesMutation = { removeProductSubcategories: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { me?: { id: string, name?: string | undefined, email: string, image?: string | undefined, createdAt: string, updatedAt: string } | undefined };
+export type MeQuery = { me?: { id: string, name?: string | undefined, email: string, image?: string | undefined, role: Role, bio?: string | undefined, createdAt: string, updatedAt: string } | undefined };
 
 export type GetSessionQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetSessionQuery = { session?: { expires?: string | undefined, user?: { id: string, name?: string | undefined, email: string, image?: string | undefined, createdAt: string, updatedAt: string } | undefined } | undefined };
+export type GetSessionQuery = { session?: { expires?: string | undefined, user?: { id: string, name?: string | undefined, email: string, image?: string | undefined, role: Role, bio?: string | undefined, createdAt: string, updatedAt: string } | undefined } | undefined };
 
 export type CategoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CategoriesQuery = { categories: Array<{ name: string, slug: string, description?: string | undefined, imageUrl?: string | undefined, type: CategoryType, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined } | undefined> | undefined }> };
+export type CategoriesQuery = { categories: Array<{ name: string, slug: string, description?: string | undefined, imageUrl?: string | undefined, type: CategoryType, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined } | undefined> | undefined }> };
 
 export type CategoryByTypeQueryVariables = Exact<{
   type: CategoryType;
 }>;
 
 
-export type CategoryByTypeQuery = { categoryByType: { name: string, slug: string, description?: string | undefined, imageUrl?: string | undefined, type: CategoryType, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined } | undefined> | undefined } };
+export type CategoryByTypeQuery = { categoryByType: { name: string, slug: string, description?: string | undefined, imageUrl?: string | undefined, type: CategoryType, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined } | undefined> | undefined } };
 
 export type CategoryProductsQueryVariables = Exact<{
   type: CategoryType;
@@ -654,14 +712,14 @@ export type CategoryProductsQueryVariables = Exact<{
 }>;
 
 
-export type CategoryProductsQuery = { categoryProducts: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined }> };
+export type CategoryProductsQuery = { categoryProducts: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined }> };
 
 export type CategorySubcategoriesQueryVariables = Exact<{
   type: CategoryType;
 }>;
 
 
-export type CategorySubcategoriesQuery = { categorySubcategories: Array<{ id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined }> };
+export type CategorySubcategoriesQuery = { categorySubcategories: Array<{ id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined }> };
 
 export type ProductsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -669,28 +727,41 @@ export type ProductsQueryVariables = Exact<{
 }>;
 
 
-export type ProductsQuery = { products: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined }> };
+export type ProductsQuery = { products: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined }> };
 
 export type ProductQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ProductQuery = { product?: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined };
+export type ProductQuery = { product?: { id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined };
+
+export type ReportedProductsQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ReportedProductsQuery = { reportedProducts: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined }> };
+
+export type MyProductsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MyProductsQuery = { myProducts: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined }> };
 
 export type SubcategoriesQueryVariables = Exact<{
   categoryType: CategoryType;
 }>;
 
 
-export type SubcategoriesQuery = { subcategories: Array<{ id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined }> };
+export type SubcategoriesQuery = { subcategories: Array<{ id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined }> };
 
 export type SubcategoryQueryVariables = Exact<{
   fullSlug: Scalars['String']['input'];
 }>;
 
 
-export type SubcategoryQuery = { subcategory?: { id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined } | undefined };
+export type SubcategoryQuery = { subcategory?: { id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, imageUrl: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined } | undefined> | undefined } | undefined };
 
 export const UserFieldsFragmentDoc = gql`
     fragment UserFields on User {
@@ -698,6 +769,8 @@ export const UserFieldsFragmentDoc = gql`
   name
   email
   image
+  role
+  bio
   createdAt
   updatedAt
 }
@@ -726,6 +799,7 @@ export const UserFragmentDoc = gql`
   email
   createdAt
   updatedAt
+  role
 }
     `;
 export const ProductFieldsFragmentDoc = gql`
@@ -742,6 +816,8 @@ export const ProductFieldsFragmentDoc = gql`
     ...User
   }
   categories
+  isReported
+  reportCount
   subcategories {
     id
     name
@@ -1508,6 +1584,86 @@ export type ProductQueryHookResult = ReturnType<typeof useProductQuery>;
 export type ProductLazyQueryHookResult = ReturnType<typeof useProductLazyQuery>;
 export type ProductSuspenseQueryHookResult = ReturnType<typeof useProductSuspenseQuery>;
 export type ProductQueryResult = Apollo.QueryResult<ProductQuery, ProductQueryVariables>;
+export const ReportedProductsDocument = gql`
+    query ReportedProducts($limit: Int, $offset: Int) {
+  reportedProducts(limit: $limit, offset: $offset) {
+    ...ProductFields
+  }
+}
+    ${ProductFieldsFragmentDoc}`;
+
+/**
+ * __useReportedProductsQuery__
+ *
+ * To run a query within a React component, call `useReportedProductsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReportedProductsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReportedProductsQuery({
+ *   variables: {
+ *      limit: // value for 'limit'
+ *      offset: // value for 'offset'
+ *   },
+ * });
+ */
+export function useReportedProductsQuery(baseOptions?: Apollo.QueryHookOptions<ReportedProductsQuery, ReportedProductsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ReportedProductsQuery, ReportedProductsQueryVariables>(ReportedProductsDocument, options);
+      }
+export function useReportedProductsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReportedProductsQuery, ReportedProductsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ReportedProductsQuery, ReportedProductsQueryVariables>(ReportedProductsDocument, options);
+        }
+export function useReportedProductsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ReportedProductsQuery, ReportedProductsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ReportedProductsQuery, ReportedProductsQueryVariables>(ReportedProductsDocument, options);
+        }
+export type ReportedProductsQueryHookResult = ReturnType<typeof useReportedProductsQuery>;
+export type ReportedProductsLazyQueryHookResult = ReturnType<typeof useReportedProductsLazyQuery>;
+export type ReportedProductsSuspenseQueryHookResult = ReturnType<typeof useReportedProductsSuspenseQuery>;
+export type ReportedProductsQueryResult = Apollo.QueryResult<ReportedProductsQuery, ReportedProductsQueryVariables>;
+export const MyProductsDocument = gql`
+    query MyProducts {
+  myProducts {
+    ...ProductFields
+  }
+}
+    ${ProductFieldsFragmentDoc}`;
+
+/**
+ * __useMyProductsQuery__
+ *
+ * To run a query within a React component, call `useMyProductsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyProductsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMyProductsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMyProductsQuery(baseOptions?: Apollo.QueryHookOptions<MyProductsQuery, MyProductsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MyProductsQuery, MyProductsQueryVariables>(MyProductsDocument, options);
+      }
+export function useMyProductsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MyProductsQuery, MyProductsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MyProductsQuery, MyProductsQueryVariables>(MyProductsDocument, options);
+        }
+export function useMyProductsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MyProductsQuery, MyProductsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MyProductsQuery, MyProductsQueryVariables>(MyProductsDocument, options);
+        }
+export type MyProductsQueryHookResult = ReturnType<typeof useMyProductsQuery>;
+export type MyProductsLazyQueryHookResult = ReturnType<typeof useMyProductsLazyQuery>;
+export type MyProductsSuspenseQueryHookResult = ReturnType<typeof useMyProductsSuspenseQuery>;
+export type MyProductsQueryResult = Apollo.QueryResult<MyProductsQuery, MyProductsQueryVariables>;
 export const SubcategoriesDocument = gql`
     query Subcategories($categoryType: CategoryType!) {
   subcategories(categoryType: $categoryType) {

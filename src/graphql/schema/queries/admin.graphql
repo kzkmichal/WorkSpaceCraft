@@ -1,0 +1,4 @@
+extend type Query {
+	allUsers(limit: Int, offset: Int): [User!]!
+	reportedProducts(limit: Int, offset: Int): [Product!]!
+}

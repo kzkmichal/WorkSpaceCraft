@@ -37,3 +37,9 @@ mutation RemoveProductCategories(
 		...ProductFields
 	}
 }
+
+# mutation ReportProduct($productId: ID!, $reason: String!) {
+# 	reportProduct(productId: $productId, reason: $reason) {
+# 		...ProductFields
+# 	}
+# }

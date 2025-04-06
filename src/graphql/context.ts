@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma/prisma";
 import { auth } from "@/lib/auth";
 
@@ -8,6 +8,7 @@ export interface ApolloContext {
 		id: string;
 		email: string;
 		name: string;
+		role: UserRole;
 	};
 }
 
@@ -16,7 +17,7 @@ export async function createContext(): Promise<ApolloContext> {
 
 	if (
 		!session ||
-		!session.user?.id ||
+		!session.user.id ||
 		!session.user?.email ||
 		!session.user.name
 	) {
@@ -30,6 +31,7 @@ export async function createContext(): Promise<ApolloContext> {
 					id: session.user.id,
 					email: session.user.email,
 					name: session.user.name,
+					role: session.user.role || UserRole.USER,
 				}
 			: undefined,
 	};

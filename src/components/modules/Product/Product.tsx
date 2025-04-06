@@ -1,16 +1,26 @@
+import Image from "next/image";
 import { ProductProps } from "./types";
 import { Container } from "@/components/common/molecules";
 
 export const Product = ({
 	title,
 	description,
+	imageUrl,
 	price,
 }: ProductProps) => {
 	return (
 		<Container>
 			<div className="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
 				<div className="mx-auto max-w-md shrink-0 lg:max-w-lg">
-					<div className="mb-2 aspect-video size-full rounded-md bg-muted"></div>
+					<div className="relative mb-2 aspect-video size-full overflow-hidden rounded-md bg-muted">
+						<Image
+							src={imageUrl}
+							alt={title}
+							layout="fill"
+							objectFit="cover"
+							objectPosition="center"
+						/>
+					</div>
 				</div>
 
 				<div className="mt-6 sm:mt-8 lg:mt-0">

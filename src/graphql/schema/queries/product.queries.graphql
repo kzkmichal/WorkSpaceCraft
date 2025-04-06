@@ -6,4 +6,5 @@ type Query {
 		subcategoryFullSlug: String
 	): [Product!]!
 	product(id: ID!): Product
+	myProducts: [Product!]!
 }

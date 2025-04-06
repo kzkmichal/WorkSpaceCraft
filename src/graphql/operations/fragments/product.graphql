@@ -4,6 +4,7 @@ fragment User on User {
 	email
 	createdAt
 	updatedAt
+	role
 }
 
 fragment ProductFields on Product {
@@ -19,6 +20,8 @@ fragment ProductFields on Product {
 		...User
 	}
 	categories
+	isReported
+	reportCount
 	subcategories {
 		id
 		name

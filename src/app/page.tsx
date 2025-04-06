@@ -3,10 +3,7 @@
 // import { ProductList } from "@/components/products/ProductList";
 import { HomePage as HomePageComponent } from "@/components/layouts/HomePage/HomePage";
 
-export default function HomePage() {
-	// TODO: Implement product fetching logic
-	// TODO: Implement search and filter functionality
-
+export default async function HomePage() {
 	return (
 		<>
 			<HomePageComponent />

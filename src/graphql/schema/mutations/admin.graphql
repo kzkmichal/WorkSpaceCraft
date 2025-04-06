@@ -1,0 +1,9 @@
+extend type Mutation {
+	updateUserRole(userId: ID!, role: String!): User!
+	moderateProduct(
+		productId: ID!
+		action: String!
+		reason: String
+	): Product!
+	reportProduct(productId: ID!, reason: String!): Product!
+}

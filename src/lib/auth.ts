@@ -2,6 +2,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth, { type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import { UserRole } from "@prisma/client";
 import { prisma } from "./prisma/prisma";
 import { comparePasswords } from "./password";
 
@@ -54,6 +55,7 @@ export const authConfig: NextAuthConfig = {
 					email: user.email,
 					name: user.name,
 					image: user.image,
+					role: user.role,
 				};
 			},
 		}),
@@ -62,12 +64,18 @@ export const authConfig: NextAuthConfig = {
 		async jwt({ token, user }) {
 			if (user) {
 				token.id = user.id;
+				if (user.role) {
+					token.role = user.role;
+				} else {
+					token.role = "USER" as UserRole;
+				}
 			}
 			return token;
 		},
 		async session({ session, token }) {
 			if (token && session.user) {
 				session.user.id = token.id as string;
+				session.user.role = token.role as UserRole;
 			}
 			return session;
 		},
