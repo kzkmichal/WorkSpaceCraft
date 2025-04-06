@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { SubCategoryProps } from "./types";
 import { Container } from "@/components/common/molecules";
 
@@ -31,7 +32,17 @@ export const SubCategory = ({
 									className="w-full"
 								>
 									<div className="flex flex-col gap-2" key={index}>
-										<div className="mb-2 aspect-video rounded-md bg-muted"></div>
+										<div className="relative mb-2 aspect-video rounded-md bg-muted">
+											{product?.imageUrl && (
+												<Image
+													objectFit="cover"
+													src={product?.imageUrl}
+													alt={product?.title}
+													fill
+													className="absolute h-full w-full rounded-md"
+												/>
+											)}
+										</div>
 										<h3 className="text-xl tracking-tight">
 											{product?.title}
 										</h3>

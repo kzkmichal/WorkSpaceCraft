@@ -1,5 +1,6 @@
 import { CategoryType } from "@prisma/client";
 import { BaseProps } from "@/components/utils/types";
+import { ProductFormValues } from "@/lib/validations/product";
 
 export type CategoryInfo = {
 	type: CategoryType;
@@ -26,6 +27,6 @@ export type ProductValues = {
 
 export type ProductFormProps = BaseProps & {
 	categories: CategoryInfo[];
-	product?: ProductValues;
+	product?: ProductFormValues & { id?: string };
 	isEditing?: boolean;
 };

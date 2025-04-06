@@ -4,18 +4,17 @@ import { revalidatePath } from "next/cache";
 import { CategoryType } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma/prisma";
+import { ProductFormValues } from "@/lib/validations/product";
 
-export type ProductFormData = {
-	title: string;
-	description: string;
-	price: number;
-	imageUrl: string;
-	originalStoreLink: string;
-	categoryTypes: string[];
-	subcategoryIds: string[];
+export type ProductResult = {
+	success: boolean;
+	error?: string;
+	productId?: string;
 };
 
-export async function createProduct(data: ProductFormData) {
+export async function createProduct(
+	data: ProductFormValues,
+): Promise<ProductResult> {
 	const session = await auth();
 
 	if (!session) {
@@ -41,7 +40,7 @@ export async function createProduct(data: ProductFormData) {
 					})),
 				},
 				subcategories:
-					data.subcategoryIds.length > 0
+					data.subcategoryIds && data.subcategoryIds.length > 0
 						? {
 								create: data.subcategoryIds.map((subcategoryId) => ({
 									subcategoryId,
@@ -72,8 +71,8 @@ export async function createProduct(data: ProductFormData) {
 
 export async function updateProduct(
 	productId: string,
-	data: ProductFormData,
-) {
+	data: ProductFormValues,
+): Promise<ProductResult> {
 	const session = await auth();
 
 	if (!session) {
@@ -117,7 +116,7 @@ export async function updateProduct(
 				where: { productId },
 			});
 
-			if (data.subcategoryIds.length > 0) {
+			if (data.subcategoryIds && data.subcategoryIds.length > 0) {
 				await tx.productToSubcategory.createMany({
 					data: data.subcategoryIds.map((subcategoryId) => ({
 						productId,
@@ -158,7 +157,9 @@ export async function updateProduct(
 	}
 }
 
-export async function deleteProduct(productId: string) {
+export async function deleteProduct(
+	productId: string,
+): Promise<ProductResult> {
 	const session = await auth();
 
 	if (!session) {
