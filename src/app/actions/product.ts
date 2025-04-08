@@ -22,8 +22,10 @@ export async function createProduct(
 	}
 
 	try {
-		if (!data.title || !data.description || data.price <= 0) {
-			return { success: false, error: "Invalid product data" };
+		const primaryImage = data.images.find((image) => image.isPrimary);
+
+		if (!primaryImage) {
+			data.images[0].isPrimary = true;
 		}
 
 		const product = await prisma.product.create({
@@ -31,7 +33,17 @@ export async function createProduct(
 				title: data.title,
 				description: data.description,
 				price: data.price,
-				imageUrl: data.imageUrl,
+				imageUrl:
+					data.images.find((img) => img.isPrimary)?.url ||
+					data.images[0].url ||
+					data.imageUrl,
+				images: {
+					create: data.images.map((image) => ({
+						url: image.url,
+						fileName: image.fileName,
+						isPrimary: image.isPrimary,
+					})),
+				},
 				originalStoreLink: data.originalStoreLink,
 				userId: session.user.id as string,
 				categories: {
@@ -98,6 +110,16 @@ export async function updateProduct(
 			};
 		}
 
+		const primaryImage = data.images.find((image) => image.isPrimary);
+
+		if (!primaryImage) {
+			data.images[0].isPrimary = true;
+		}
+
+		const keepImageIds = data.images
+			.filter((img) => img.id)
+			.map((img) => img.id as string);
+
 		await prisma.$transaction(async (tx) => {
 			await tx.productToCategory.deleteMany({
 				where: { productId },
@@ -125,13 +147,44 @@ export async function updateProduct(
 				});
 			}
 
+			await tx.productImage.deleteMany({
+				where: {
+					productId,
+					id: { notIn: keepImageIds },
+				},
+			});
+
+			for (const img of data.images.filter((img) => img.id)) {
+				await tx.productImage.update({
+					where: { id: img.id },
+					data: {
+						url: img.url,
+						isPrimary: img.isPrimary,
+					},
+				});
+			}
+
+			await tx.productImage.createMany({
+				data: data.images
+					.filter((img) => !img.id)
+					.map((img) => ({
+						productId,
+						url: img.url,
+						fileName: img.fileName,
+						isPrimary: img.isPrimary,
+					})),
+			});
+
 			await tx.product.update({
 				where: { id: productId },
 				data: {
 					title: data.title,
 					description: data.description,
 					price: data.price,
-					imageUrl: data.imageUrl,
+					imageUrl:
+						data.images.find((img) => img.isPrimary)?.url ||
+						data.images[0].url ||
+						data.imageUrl,
 					originalStoreLink: data.originalStoreLink,
 				},
 			});

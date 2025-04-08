@@ -28,6 +28,7 @@ export default async function EditProductPage(
 		include: {
 			categories: true,
 			subcategories: true,
+			images: true,
 		},
 	});
 
@@ -89,6 +90,12 @@ export default async function EditProductPage(
 		price: product.price,
 		imageUrl: product.imageUrl,
 		originalStoreLink: product.originalStoreLink,
+		images: product.images.map((image) => ({
+			id: image.id,
+			url: image.url,
+			fileName: image.fileName || "",
+			isPrimary: image.isPrimary,
+		})),
 		categoryTypes: product.categories.map((pc) => pc.categoryType),
 		subcategoryIds: product.subcategories.map(
 			(ps) => ps.subcategoryId,
