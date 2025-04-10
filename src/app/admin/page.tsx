@@ -14,6 +14,7 @@ export default async function AdminPage() {
 			orderBy: { reportCount: "desc" },
 			include: {
 				createdBy: true,
+				images: true,
 			},
 		}),
 	]);
@@ -30,7 +31,7 @@ export default async function AdminPage() {
 	const formattedProducts = reportedProducts.map((product) => ({
 		id: product.id,
 		title: product.title,
-		imageUrl: product.imageUrl,
+		imageUrl: product.images.find((img) => img.isPrimary)?.url,
 		isReported: product.isReported,
 		reportCount: product.reportCount,
 		createdBy: product.createdBy.name,

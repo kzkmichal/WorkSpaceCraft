@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { SubCategoryProps } from "./types";
 import { Container } from "@/components/common/molecules";
+import { ProductImageFragment } from "@/graphql/generated/graphql";
 
 export const SubCategory = ({
 	name,
@@ -9,6 +10,10 @@ export const SubCategory = ({
 	products,
 	fullSlug,
 }: SubCategoryProps) => {
+	const setProductImage = (
+		images?: (ProductImageFragment | undefined)[],
+	) => images?.find((image) => image?.isPrimary)?.url || undefined;
+
 	return (
 		<Container paddingY={"2xl"}>
 			<div className="mx-auto">
@@ -33,10 +38,10 @@ export const SubCategory = ({
 								>
 									<div className="flex flex-col gap-2" key={index}>
 										<div className="relative mb-2 aspect-video rounded-md bg-muted">
-											{product?.imageUrl && (
+											{product?.images && (
 												<Image
 													objectFit="cover"
-													src={product?.imageUrl}
+													src={setProductImage(product?.images) || ""}
 													alt={product?.title}
 													fill
 													className="absolute h-full w-full rounded-md"

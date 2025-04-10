@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import {
 	useForm,
 	FormProvider,
@@ -27,7 +26,6 @@ import {
 	HookFormTextarea,
 	SubmitButton,
 } from "@/components/common/molecules/Form";
-import { isValidUrl } from "@/components/utils/helpers";
 
 export function ProductForm({
 	categories,
@@ -48,7 +46,6 @@ export function ProductForm({
 			title: product?.title || "",
 			description: product?.description || "",
 			price: product?.price || 0,
-			imageUrl: product?.imageUrl || "",
 			originalStoreLink: product?.originalStoreLink || "",
 			categoryTypes: product?.categoryTypes || [],
 			subcategoryIds: product?.subcategoryIds || [],
@@ -66,9 +63,6 @@ export function ProductForm({
 	} = form;
 
 	const selectedCategories = watch("categoryTypes") || [];
-	const imageUrl = watch("imageUrl");
-
-	const showImagePreview = imageUrl && isValidUrl(imageUrl);
 
 	const onSubmit: SubmitHandler<ProductFormValues> = async (data) => {
 		try {
@@ -166,28 +160,6 @@ export function ProductForm({
 					type="number"
 					placeholder="0.00"
 				/>
-
-				<HookFormField<ProductFormValues>
-					name="imageUrl"
-					label="URL of the product image"
-					type="url"
-					placeholder="https://example.com/image.jpg"
-				/>
-
-				{showImagePreview && (
-					<div className="mt-2">
-						<p className="mb-1 text-sm text-gray-500">Preview:</p>
-						<div className="relative h-32 w-32 overflow-hidden rounded-md border">
-							<Image
-								src={imageUrl}
-								alt="Product Image"
-								fill
-								sizes="128px"
-								className="object-cover"
-							/>
-						</div>
-					</div>
-				)}
 
 				<div className="space-y-2">
 					<label className="block text-sm font-medium text-gray-700">

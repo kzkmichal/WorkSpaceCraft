@@ -3,7 +3,6 @@ type Product {
 	title: String!
 	description: String!
 	price: Float!
-	imageUrl: String!
 	originalStoreLink: String!
 	categories: [CategoryType!]!
 	subcategories: [Subcategory]

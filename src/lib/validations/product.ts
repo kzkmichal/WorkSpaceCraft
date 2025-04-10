@@ -23,10 +23,6 @@ export const productSchema = z.object({
 	price: z
 		.number({ invalid_type_error: "Price must be a number" })
 		.positive({ message: "Price must be greater than 0" }),
-	imageUrl: z
-		.string()
-		.min(1, { message: "Image URL is required" })
-		.url({ message: "Invalid image URL" }),
 	originalStoreLink: z
 		.string()
 		.min(1, { message: "Original store link is required" })

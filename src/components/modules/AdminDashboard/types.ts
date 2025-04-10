@@ -9,14 +9,15 @@ export type RecentUserProps = Pick<
 	"name" | "email" | "image" | "role" | "id" | "createdAt"
 >;
 
-export type ReportedPRoductsProps = Pick<
+export type ReportedProductsProps = Pick<
 	ProductFieldsFragment,
-	"title" | "imageUrl" | "reportCount" | "id"
+	"title" | "reportCount" | "id"
 > & {
 	createdBy: string;
+	imageUrl?: string;
 };
 
 export type AdminDashboardProps = BaseProps & {
 	recentUsers: RecentUserProps[];
-	reportedProducts: ReportedPRoductsProps[];
+	reportedProducts: ReportedProductsProps[];
 };

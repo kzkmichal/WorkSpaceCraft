@@ -154,7 +154,6 @@ type Product {
 	id: ID!
 	title: String!
 	description: String!
-	imageUrl: String!
 	originalStoreLink: String
 	price: Float!
 	category: String!
@@ -167,7 +166,6 @@ type Product {
 input CreateProductInput {
 	title: String!
 	description: String!
-	imageUrl: String!
 	originalStoreLink: String
 	price: Float!
 	category: String!
@@ -178,7 +176,6 @@ input UpdateProductInput {
 	id: ID!
 	title: String
 	description: String
-	imageUrl: String
 	originalStoreLink: String
 	price: Float
 	category: String

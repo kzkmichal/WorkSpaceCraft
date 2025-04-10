@@ -2,7 +2,6 @@ input CreateProductInput {
 	title: String!
 	description: String!
 	price: Float!
-	imageUrl: String!
 	originalStoreLink: String!
 	categoryTypes: [CategoryType!]!
 	subcategoryIds: [ID!]
@@ -13,7 +12,6 @@ input UpdateProductInput {
 	title: String
 	description: String
 	price: Float
-	imageUrl: String
 	originalStoreLink: String
 	categoryTypes: [CategoryType!]
 	subcategoryIds: [ID!]

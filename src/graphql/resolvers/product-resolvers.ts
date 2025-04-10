@@ -1,5 +1,10 @@
 import { GraphQLError } from "graphql";
-import { Product, Subcategory, User } from "@prisma/client";
+import {
+	Product,
+	ProductImage,
+	Subcategory,
+	User,
+} from "@prisma/client";
 import type { Resolvers } from "../generated/graphql";
 import { formatDates, formatSubcategory, formatUser } from "./utils";
 import { CategoryType } from "@/constant/categories";
@@ -9,6 +14,7 @@ const formatProduct = (
 		categories?: { categoryType: CategoryType }[];
 		createdBy: User;
 		subcategories?: { subcategory: Subcategory }[];
+		images?: ProductImage[];
 	},
 ) => ({
 	...product,
@@ -23,6 +29,10 @@ const formatProduct = (
 	reportReason: product.reportReason ?? undefined,
 	moderatedBy: product.moderatedBy ?? undefined,
 	moderatedAt: product.moderatedAt?.toISOString(),
+	images: product.images?.map((image) => ({
+		...image,
+		fileName: image.fileName ?? undefined,
+	})),
 });
 
 export const resolvers: Resolvers = {
@@ -35,6 +45,7 @@ export const resolvers: Resolvers = {
 					include: {
 						createdBy: true,
 						categories: true,
+						images: true,
 						subcategories: {
 							include: {
 								subcategory: true,
@@ -60,6 +71,7 @@ export const resolvers: Resolvers = {
 					include: {
 						createdBy: true,
 						categories: true,
+						images: true,
 						subcategories: {
 							include: {
 								subcategory: true,

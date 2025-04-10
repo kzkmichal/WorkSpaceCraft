@@ -18,7 +18,6 @@ fragment ProductFields on Product {
 	id
 	title
 	description
-	imageUrl
 	price
 	originalStoreLink
 	createdAt

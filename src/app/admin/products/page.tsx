@@ -25,6 +25,7 @@ export default async function AdminProductsPage(
 			: { createdAt: "desc" },
 		include: {
 			createdBy: true,
+			images: true,
 		},
 	});
 
@@ -32,7 +33,7 @@ export default async function AdminProductsPage(
 		id: product.id,
 		title: product.title,
 		price: product.price,
-		imageUrl: product.imageUrl,
+		imageUrl: product.images.find((img) => img.isPrimary)?.url,
 		isReported: product.isReported,
 		createdAt: product.createdAt.toISOString(),
 		createdBy: product.createdBy.name,

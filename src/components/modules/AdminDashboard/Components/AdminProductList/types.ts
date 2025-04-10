@@ -3,7 +3,7 @@ import { BaseProps } from "@/components/utils/types";
 type ProductProps = {
 	id: string;
 	title: string;
-	imageUrl: string;
+	imageUrl?: string;
 	createdAt: string;
 	price: number;
 	createdBy: string;

@@ -4,7 +4,7 @@ type ProductProps = {
 	id: string;
 	title: string;
 	price: number;
-	imageUrl: string;
+	imageUrl?: string;
 	categories: string[];
 	subcategories?: string[];
 	isReported: boolean;
