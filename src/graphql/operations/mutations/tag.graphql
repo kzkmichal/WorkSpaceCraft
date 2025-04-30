@@ -1,0 +1,17 @@
+mutation AddTagToProduct($productId: ID!, $tagInput: TagInput!) {
+	addTagToProduct(productId: $productId, tagInput: $tagInput) {
+		...ProductFields
+		tags {
+			...TagFields
+		}
+	}
+}
+
+mutation RemoveTagFromProduct($productId: ID!, $tagId: ID!) {
+	removeTagFromProduct(productId: $productId, tagId: $tagId) {
+		...ProductFields
+		tags {
+			...TagFields
+		}
+	}
+}

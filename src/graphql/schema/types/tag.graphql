@@ -1,0 +1,8 @@
+type Tag {
+	id: ID!
+	name: String!
+	slug: String!
+	products: [Product!]
+	createdAt: String!
+	updatedAt: String!
+}

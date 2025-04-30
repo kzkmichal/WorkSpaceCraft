@@ -1,0 +1,23 @@
+query Tags {
+	tags {
+		...TagFields
+	}
+}
+
+query PopularTags($limit: Int) {
+	popularTags(limit: $limit) {
+		...TagFields
+	}
+}
+
+query Tag($slug: String!) {
+	tag(slug: $slug) {
+		...TagFields
+	}
+}
+
+query ProductsByTag($tagSlug: String!, $limit: Int, $offset: Int) {
+	productsByTag(tagSlug: $tagSlug, limit: $limit, offset: $offset) {
+		...ProductFields
+	}
+}

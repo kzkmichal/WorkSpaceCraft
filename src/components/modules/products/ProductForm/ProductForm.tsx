@@ -25,7 +25,9 @@ import {
 	HookFormField,
 	HookFormTextarea,
 	SubmitButton,
+	TagInput,
 } from "@/components/common/molecules/Form";
+import { useTags } from "@/hooks/useTags";
 
 export function ProductForm({
 	categories,
@@ -33,6 +35,7 @@ export function ProductForm({
 	isEditing = false,
 }: ProductFormProps) {
 	const router = useRouter();
+	const { tags: existingTags } = useTags();
 
 	const initialImages: ProductImage[] =
 		product?.images?.map((img) => ({
@@ -50,6 +53,7 @@ export function ProductForm({
 			categoryTypes: product?.categoryTypes || [],
 			subcategoryIds: product?.subcategoryIds || [],
 			images: initialImages,
+			tags: product?.tags || existingTags || [],
 		},
 	});
 
@@ -183,7 +187,12 @@ export function ProductForm({
 					type="url"
 					placeholder="https://example.com/original-product-link"
 				/>
-
+				<TagInput
+					name="tags"
+					label="Tags"
+					existingTags={existingTags}
+					placeholder="Search or add tags..."
+				/>
 				<div className="space-y-2">
 					<label className="block text-sm font-medium text-gray-700">
 						Product categories
@@ -210,7 +219,6 @@ export function ProductForm({
 						</p>
 					)}
 				</div>
-
 				{selectedCategories.length > 0 && (
 					<div className="space-y-2">
 						<label className="block text-sm font-medium text-gray-700"></label>

@@ -1,9 +1,11 @@
 import { InMemoryCache, FieldFunctionOptions } from "@apollo/client";
-import type { Product } from "@/graphql/generated/graphql";
+import type { Product, Tag } from "@/graphql/generated/graphql";
 
 interface ProductQueryArgs {
 	offset?: number;
 	limit?: number;
+	categoryType?: string;
+	tagSlug?: string;
 }
 
 export const cache = new InMemoryCache({
@@ -11,7 +13,7 @@ export const cache = new InMemoryCache({
 		Query: {
 			fields: {
 				products: {
-					keyArgs: false,
+					keyArgs: ["categoryType", "tagSlugs"],
 					merge(
 						existing: readonly Product[] | undefined,
 						incoming: readonly Product[],
@@ -27,17 +29,28 @@ export const cache = new InMemoryCache({
 						return merged;
 					},
 				},
+				popularTags: {
+					keyArgs: ["limit"],
+				},
 			},
 		},
 		Product: {
 			keyFields: ["id"],
 			fields: {
+				tags: {
+					merge(_existing = [], incoming) {
+						return incoming as Tag[];
+					},
+				},
 				formattedPrice: {
 					read(price: number | null) {
 						return price ? `$${price.toFixed(2)}` : null;
 					},
 				},
 			},
+		},
+		Tag: {
+			keyFields: ["id"],
 		},
 	},
 });

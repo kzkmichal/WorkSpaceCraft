@@ -9,6 +9,7 @@ import {
 export async function getProducts(
 	limit = 12,
 	offset = 0,
+	tagSlugs?: string[],
 ): Promise<ProductFieldsFragment[]> {
 	try {
 		const client = await getClient();
@@ -17,7 +18,12 @@ export async function getProducts(
 			ProductsQueryVariables
 		>({
 			query: ProductsDocument,
-			variables: { limit, offset },
+			variables: {
+				limit,
+				offset,
+				tagSlugs:
+					tagSlugs && tagSlugs.length > 0 ? tagSlugs : undefined,
+			},
 		});
 
 		return data.products;

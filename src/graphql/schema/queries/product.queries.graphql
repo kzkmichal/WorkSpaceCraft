@@ -4,6 +4,7 @@ type Query {
 		offset: Int
 		categoryType: CategoryType
 		subcategoryFullSlug: String
+		tagSlugs: [String!]
 	): [Product!]!
 	product(id: ID!): Product
 	myProducts: [Product!]!

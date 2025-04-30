@@ -1,10 +1,16 @@
 import { z } from "zod";
 
 export const productImageSchema = z.object({
-	id: z.string().optional(), // Used for existing images
+	id: z.string().optional(),
 	url: z.string().url({ message: "Invalid image URL" }),
 	fileName: z.string().optional(),
 	isPrimary: z.boolean(),
+});
+
+export const tagSchema = z.object({
+	id: z.string().optional(),
+	name: z.string(),
+	slug: z.string().optional(),
 });
 
 export const productSchema = z.object({
@@ -34,7 +40,9 @@ export const productSchema = z.object({
 	images: z.array(productImageSchema).min(1, {
 		message: "At least one image is required",
 	}),
+	tags: z.array(tagSchema).optional(),
 });
 
+export type TagType = z.infer<typeof tagSchema>;
 export type ProductImage = z.infer<typeof productImageSchema>;
 export type ProductFormValues = z.infer<typeof productSchema>;

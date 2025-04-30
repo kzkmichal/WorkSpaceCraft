@@ -2,10 +2,14 @@ import { SearchBar } from "@/components/common/molecules/SearchBar";
 import { FilterOptions } from "@/components/common/molecules/FilterOptions";
 import { ProductList } from "@/components/modules/products/ProductList";
 import { getProducts } from "@/hooks/getProducts";
+import { getPopularTags } from "@/hooks/getPopularTags";
+import { FilterSidebar } from "@/components/modules/products/FilterSidebar";
+import { Container } from "@/components/common/molecules";
 
-type ProductPageProps = {
+type ProductsPageProps = {
 	searchParams: Promise<{
-		[key: string]: string | string[] | undefined;
+		page?: string;
+		tags?: string;
 	}>;
 };
 
@@ -22,21 +26,24 @@ export async function generateMetadata() {
 
 export default async function ProductsPage({
 	searchParams,
-}: ProductPageProps) {
+}: ProductsPageProps) {
 	const params = await searchParams;
 
 	const page = Number(params.page) || 1;
 	const limit = 12;
 	const offset = (page - 1) * limit;
 
-	const products = await getProducts(limit, offset);
+	const tagSlugs = params.tags ? params.tags.split(",") : undefined;
+	const products = await getProducts(limit, offset, tagSlugs);
+	const popularTags = await getPopularTags(20);
 
 	return (
-		<div>
+		<Container>
 			<h1 className="mb-6 text-3xl font-bold">Products</h1>
 			<SearchBar />
 			<FilterOptions />
+			<FilterSidebar popularTags={popularTags} />
 			<ProductList products={products} />
-		</div>
+		</Container>
 	);
 }

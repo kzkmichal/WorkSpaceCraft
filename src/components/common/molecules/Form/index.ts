@@ -4,7 +4,7 @@ import { SubmitButton } from "./FormSubmit";
 import { HookFormCheckboxGroup } from "./FormCheckbox";
 import { HookFormTextarea } from "./FormTextarea";
 import { HookFormField } from "./FormField";
-
+import { TagInput } from "./TagInput";
 export {
 	FormError,
 	FormSuccess,
@@ -12,4 +12,5 @@ export {
 	HookFormCheckboxGroup,
 	HookFormTextarea,
 	HookFormField,
+	TagInput,
 };

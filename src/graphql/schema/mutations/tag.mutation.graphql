@@ -1,0 +1,4 @@
+extend type Mutation {
+	addTagToProduct(productId: ID!, tagInput: TagInput!): Product!
+	removeTagFromProduct(productId: ID!, tagId: ID!): Product!
+}

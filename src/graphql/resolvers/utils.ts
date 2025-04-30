@@ -3,6 +3,7 @@ import {
 	Product,
 	Subcategory,
 	User,
+	Tag,
 } from "@prisma/client";
 
 export const formatDates = <
@@ -49,4 +50,19 @@ export const formatUser = (user: User) => ({
 	image: user.image ?? undefined,
 	role: user.role as "USER" | "ADMIN",
 	bio: user.bio ?? undefined,
+});
+
+export const formatTag = (
+	tag: Tag & {
+		products?: { product: Product }[];
+	},
+) => ({
+	id: tag.id,
+	name: tag.name,
+	slug: tag.slug,
+	createdAt: tag.createdAt.toISOString(),
+	updatedAt: tag.updatedAt.toISOString(),
+	products: tag.products
+		? tag.products.map((pt) => formatProduct(pt.product))
+		: undefined,
 });
