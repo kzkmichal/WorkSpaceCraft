@@ -1,9 +1,10 @@
 "use client";
-import Link from "next/link";
+
 import Image from "next/image";
 import { BaseProps } from "@/components/utils/types";
 import { ProductFieldsFragment } from "@/graphql/generated/graphql";
 import { TagList } from "@/components/common/molecules/TagList";
+import { Link } from "@/components/common/atoms";
 
 export type ProductCardProps = BaseProps & ProductFieldsFragment;
 

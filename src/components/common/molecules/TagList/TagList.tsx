@@ -26,6 +26,7 @@ export const TagList = ({
 					<TagBadge
 						key={tagId || index}
 						tag={tag}
+						variant="primary"
 						onClick={onTagClick ? () => onTagClick(tag) : undefined}
 						isSelected={isSelected}
 						asLink={!onTagClick}

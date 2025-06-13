@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { TagsListViewProps } from "./types";
 import { Container, Stack } from "@/components/common/molecules";
 import { Input } from "@/components/ui/input";
@@ -54,12 +53,12 @@ export const TagsListView = ({
 				) : (
 					<div className="flex flex-wrap gap-3">
 						{sortedTags.map((tag) => (
-							<Link href={`/products/tags/${tag.slug}`} key={tag.id}>
-								<TagBadge
-									tag={tag}
-									data-testid={`${testId}-tag-${tag.id}`}
-								/>
-							</Link>
+							<TagBadge
+								tag={tag}
+								data-testid={`${testId}-tag-${tag.id}`}
+								key={tag.id}
+								variant="primary"
+							/>
 						))}
 					</div>
 				)}

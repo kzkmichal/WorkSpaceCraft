@@ -10,7 +10,7 @@ export const Profile = ({
 }: ProfileProps) => {
 	return (
 		<Container>
-			<div className="rounded-lg border p-6 shadow-lg">
+			<div className="border-accent bg-card rounded-lg border p-6 shadow-lg">
 				<h1 className="mb-6 text-2xl font-bold">Profile</h1>
 
 				<div className="space-y-4">

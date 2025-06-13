@@ -103,6 +103,12 @@
 			}
 		},
 		{
+			"files": ["**/*.storeis.ts", "**/*.stories.tsx"],
+			"rules": {
+				"import/no-default-export": "on"
+			}
+		},
+		{
 			"files": ["**/generated/**/*.ts"],
 			"rules": {
 				"@typescript-eslint/no-explicit-any": "off",

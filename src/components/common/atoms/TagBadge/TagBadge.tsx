@@ -8,7 +8,7 @@ export const TagBadge = ({
 	tag,
 	onClick,
 	isSelected = false,
-	variant = "default",
+	variant = "primary",
 	className,
 	"data-testid": testId = "tag-badge",
 	"data-cc": dataCc,
@@ -18,33 +18,18 @@ export const TagBadge = ({
 	const tagName = typeof tag === "string" ? tag : tag.name;
 	const tagSlug = typeof tag === "string" ? tag : tag.slug;
 
-	const badgeContent = (
+	return (
 		<Badge
 			id={id}
 			data-testid={testId}
 			data-cc={dataCc}
 			variant={variant}
-			className={cn(
-				"hover:bg-primary/80 cursor-pointer transition-all",
-				isSelected && "bg-primary-700 hover:bg-primary-800",
-				className,
-			)}
+			isSelected={isSelected}
+			className={cn("cursor-pointer transition-all", className)}
 			onClick={onClick}
+			url={asLink ? `/products/tags/${tagSlug}` : undefined}
 		>
 			{tagName}
 		</Badge>
 	);
-
-	if (asLink && !onClick) {
-		return (
-			<Link
-				href={`/products/tags/${tagSlug}`}
-				data-testid={`${testId}-link`}
-			>
-				{badgeContent}
-			</Link>
-		);
-	}
-
-	return badgeContent;
 };
