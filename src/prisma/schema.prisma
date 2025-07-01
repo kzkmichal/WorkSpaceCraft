@@ -203,3 +203,16 @@ model VerificationToken {
 
   @@id([identifier, token])
 }
+
+model SearchAnalytics {
+  id            Int      @id @default(autoincrement())
+  query         String // Search query text
+  resultCount   Int?     @default(0) @map("result_count") // Number of results
+  userId        String?  @map("user_id") // Optional user ID
+  searchContext String?  @default("unknown") @map("search_context") // Where search happened
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([query])
+  @@index([createdAt(sort: Desc)])
+  @@map("SearchAnalytics")
+}

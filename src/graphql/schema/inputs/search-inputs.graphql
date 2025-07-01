@@ -1,0 +1,18 @@
+# enum ProductSortOption {
+# 	NEWEST # Newest first
+# 	OLDEST # Oldest first
+# 	PRICE_LOW_TO_HIGH # Price: low to high
+# 	PRICE_HIGH_TO_LOW # Price: high to low
+# 	MOST_POPULAR # Most popular/viewed
+# 	HIGHEST_RATED # Highest rated first
+# 	MOST_REVIEWED # Most reviews first
+# 	RELEVANCE # Best match for search query
+# }
+
+input ProductSearchInput {
+	query: String!
+	category: CategoryType
+	subcategory: String
+	limit: Int
+	offset: Int
+}

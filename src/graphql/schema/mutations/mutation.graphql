@@ -1,0 +1,8 @@
+# extend type Mutation {
+# 	trackSearch(input: SearchAnalyticsInput!): Boolean!
+# 	trackSuggestionClick(
+# 		suggestionId: String!
+# 		query: String!
+# 		userId: String
+# 	): Boolean!
+# }
