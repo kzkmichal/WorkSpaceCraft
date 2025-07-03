@@ -27,7 +27,7 @@ import {
 	SubmitButton,
 	TagInput,
 } from "@/components/common/molecules/Form";
-import { useTags } from "@/hooks/useTags";
+import { useTags } from "@/hooks/tags/useTags";
 
 export function ProductForm({
 	categories,

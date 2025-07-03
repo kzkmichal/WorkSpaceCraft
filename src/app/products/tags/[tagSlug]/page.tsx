@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { getTag } from "@/hooks/getTag";
+import { getTag } from "@/hooks/tags/getTag";
 import { TagProductsView } from "@/components/modules/Tag/TagProductsView";
 
 type TagPageProps = {
