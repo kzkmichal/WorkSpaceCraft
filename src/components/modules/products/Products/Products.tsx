@@ -37,7 +37,12 @@ export const Products = ({
 	const limit = 12;
 	const offset = (page - 1) * limit;
 
-	const shouldUseSearch = searchQuery || category || subcategory;
+	const shouldUseSearch = !!(
+		searchQuery ||
+		category ||
+		subcategory ||
+		(tagSlugs && tagSlugs.length > 0)
+	);
 
 	const {
 		data: searchData,
@@ -50,6 +55,7 @@ export const Products = ({
 			category,
 			subcategory,
 			limit,
+			tags: tagSlugs,
 			offset,
 		},
 		skip: !shouldUseSearch,
@@ -122,19 +128,18 @@ export const Products = ({
 		);
 	};
 
-	// useEffect(() => {
-	// 	if (shouldUseSearch) {
-	// 		refetchSearch();
-	// 	}
-	// }, [
-	// 	searchQuery,
-	// 	category,
-	// 	subcategory,
-	// 	page,
-	// 	tagSlugs,
-	// 	shouldUseSearch,
-	// 	refetchSearch,
-	// ]);
+	useEffect(() => {
+		if (shouldUseSearch) {
+			refetchSearch();
+		}
+	}, [
+		searchQuery,
+		category,
+		subcategory,
+		page,
+		JSON.stringify(tagSlugs || []),
+		shouldUseSearch,
+	]);
 
 	return (
 		<Container className="space-y-6">

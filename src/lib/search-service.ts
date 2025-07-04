@@ -90,6 +90,7 @@ export class SearchService {
 			query,
 			category,
 			subcategory,
+			tags,
 			limit = 20,
 			offset = 0,
 		} = params;
@@ -100,6 +101,7 @@ export class SearchService {
 				query,
 				category,
 				subcategory,
+				tags,
 			});
 
 			const products = await this.prisma.product.findMany({

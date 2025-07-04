@@ -70,6 +70,22 @@ export class SearchQueryBuilder {
 		};
 	}
 
+	static buildTagsFilter(tagsSlug: string[]) {
+		if (tagsSlug.length === 0) return undefined;
+
+		return {
+			tags: {
+				some: {
+					tag: {
+						slug: {
+							in: tagsSlug,
+						},
+					},
+				},
+			},
+		};
+	}
+
 	/**
 	 * Build complete search where clause
 	 */
@@ -77,6 +93,7 @@ export class SearchQueryBuilder {
 		query?: string;
 		category?: CategoryType;
 		subcategory?: string;
+		tags?: string[];
 	}) {
 		const conditions = [];
 
@@ -105,6 +122,13 @@ export class SearchQueryBuilder {
 			);
 			if (subcategoryFilter) {
 				conditions.push(subcategoryFilter);
+			}
+		}
+
+		if (params.tags && params.tags.length > 0) {
+			const tagsFilter = this.buildTagsFilter(params.tags);
+			if (tagsFilter) {
+				conditions.push(tagsFilter);
 			}
 		}
 
@@ -190,6 +214,7 @@ export type SearchParams = {
 	query?: string;
 	category?: CategoryType;
 	subcategory?: string;
+	tags?: string[];
 	limit?: number;
 	offset?: number;
 };

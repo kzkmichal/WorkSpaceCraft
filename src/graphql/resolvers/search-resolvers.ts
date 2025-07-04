@@ -33,7 +33,7 @@ export const resolvers: Resolvers = {
 
 		searchProducts: async (
 			_,
-			{ query, limit, offset, category, subcategory },
+			{ query, limit, offset, category, subcategory, tags },
 		) => {
 			try {
 				const searchService = getSearchService();
@@ -44,6 +44,7 @@ export const resolvers: Resolvers = {
 					offset,
 					category,
 					subcategory,
+					tags,
 				});
 
 				return products.map((product) => ({

@@ -4,6 +4,7 @@ extend type Query {
 		query: String!
 		category: CategoryType
 		subcategory: String
+		tags: [String!]
 		limit: Int
 		offset: Int
 	): [Product!]!

@@ -301,6 +301,7 @@ export type QuerySearchProductsArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   query: Scalars['String']['input'];
   subcategory?: InputMaybe<Scalars['String']['input']>;
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 
@@ -936,6 +937,7 @@ export type SearchProductsQueryVariables = Exact<{
   query: Scalars['String']['input'];
   category?: InputMaybe<CategoryType>;
   subcategory?: InputMaybe<Scalars['String']['input']>;
+  tags?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -2040,11 +2042,12 @@ export type SearchSuggestionsLazyQueryHookResult = ReturnType<typeof useSearchSu
 export type SearchSuggestionsSuspenseQueryHookResult = ReturnType<typeof useSearchSuggestionsSuspenseQuery>;
 export type SearchSuggestionsQueryResult = Apollo.QueryResult<SearchSuggestionsQuery, SearchSuggestionsQueryVariables>;
 export const SearchProductsDocument = gql`
-    query SearchProducts($query: String!, $category: CategoryType, $subcategory: String, $limit: Int, $offset: Int) {
+    query SearchProducts($query: String!, $category: CategoryType, $subcategory: String, $tags: [String!], $limit: Int, $offset: Int) {
   searchProducts(
     query: $query
     category: $category
     subcategory: $subcategory
+    tags: $tags
     limit: $limit
     offset: $offset
   ) {
@@ -2068,6 +2071,7 @@ export const SearchProductsDocument = gql`
  *      query: // value for 'query'
  *      category: // value for 'category'
  *      subcategory: // value for 'subcategory'
+ *      tags: // value for 'tags'
  *      limit: // value for 'limit'
  *      offset: // value for 'offset'
  *   },

@@ -8,6 +8,7 @@ query SearchProducts(
 	$query: String!
 	$category: CategoryType
 	$subcategory: String
+	$tags: [String!]
 	$limit: Int
 	$offset: Int
 ) {
@@ -15,6 +16,7 @@ query SearchProducts(
 		query: $query
 		category: $category
 		subcategory: $subcategory
+		tags: $tags
 		limit: $limit
 		offset: $offset
 	) {
