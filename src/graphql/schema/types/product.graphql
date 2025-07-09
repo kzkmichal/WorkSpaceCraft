@@ -14,4 +14,12 @@ type Product {
 	reportReason: String
 	createdAt: String!
 	updatedAt: String!
+	images: [ProductImage]
+}
+
+type ProductImage {
+	id: ID!
+	url: String
+	fileName: String
+	isPrimary: Boolean
 }

@@ -52,6 +52,20 @@ model Product {
   reportReason      String?
   moderatedBy       String?
   moderatedAt       DateTime?
+  images            ProductImage[]
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  fileName  String?
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
 }
 
 model ProductToSubcategory {

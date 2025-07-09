@@ -2,10 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useForm, FormProvider } from "react-hook-form";
+import {
+	useForm,
+	FormProvider,
+	SubmitHandler,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProductFormProps } from "./types";
+import { ImageUpload } from "./components/ImageUpload";
 import {
+	ProductImage,
 	productSchema,
 	type ProductFormValues,
 } from "@/lib/validations/product";
@@ -30,6 +36,12 @@ export function ProductForm({
 }: ProductFormProps) {
 	const router = useRouter();
 
+	const initialImages: ProductImage[] =
+		product?.images?.map((img) => ({
+			...img,
+			isPrimary: img.isPrimary === undefined ? false : img.isPrimary,
+		})) || [];
+
 	const form = useForm<ProductFormValues>({
 		resolver: zodResolver(productSchema),
 		defaultValues: {
@@ -40,6 +52,7 @@ export function ProductForm({
 			originalStoreLink: product?.originalStoreLink || "",
 			categoryTypes: product?.categoryTypes || [],
 			subcategoryIds: product?.subcategoryIds || [],
+			images: initialImages,
 		},
 	});
 
@@ -57,7 +70,7 @@ export function ProductForm({
 
 	const showImagePreview = imageUrl && isValidUrl(imageUrl);
 
-	const onSubmit = async (data: ProductFormValues) => {
+	const onSubmit: SubmitHandler<ProductFormValues> = async (data) => {
 		try {
 			let result: ProductResult;
 
@@ -116,6 +129,10 @@ export function ProductForm({
 		});
 	};
 
+	const handleImagesChange = (images: ProductImage[]) => {
+		setValue("images", images, { shouldValidate: true });
+	};
+
 	return (
 		<FormProvider {...form}>
 			<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -171,6 +188,22 @@ export function ProductForm({
 						</div>
 					</div>
 				)}
+
+				<div className="space-y-2">
+					<label className="block text-sm font-medium text-gray-700">
+						Product Images
+					</label>
+					<ImageUpload
+						images={watch("images") || []}
+						onChange={handleImagesChange}
+						maxImages={5}
+					/>
+					{errors.images && (
+						<p className="mt-1 text-sm text-red-600">
+							{errors.images.message as string}
+						</p>
+					)}
+				</div>
 
 				<HookFormField<ProductFormValues>
 					name="originalStoreLink"

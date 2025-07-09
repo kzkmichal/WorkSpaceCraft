@@ -7,6 +7,13 @@ fragment User on User {
 	role
 }
 
+fragment ProductImage on ProductImage {
+	id
+	url
+	fileName
+	isPrimary
+}
+
 fragment ProductFields on Product {
 	id
 	title
@@ -28,5 +35,8 @@ fragment ProductFields on Product {
 		slug
 		fullSlug
 		categoryType
+	}
+	images {
+		...ProductImage
 	}
 }
