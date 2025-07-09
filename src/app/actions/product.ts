@@ -33,10 +33,6 @@ export async function createProduct(
 				title: data.title,
 				description: data.description,
 				price: data.price,
-				imageUrl:
-					data.images.find((img) => img.isPrimary)?.url ||
-					data.images[0].url ||
-					data.imageUrl,
 				images: {
 					create: data.images.map((image) => ({
 						url: image.url,
@@ -181,10 +177,6 @@ export async function updateProduct(
 					title: data.title,
 					description: data.description,
 					price: data.price,
-					imageUrl:
-						data.images.find((img) => img.isPrimary)?.url ||
-						data.images[0].url ||
-						data.imageUrl,
 					originalStoreLink: data.originalStoreLink,
 				},
 			});

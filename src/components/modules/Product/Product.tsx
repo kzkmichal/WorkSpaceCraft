@@ -5,21 +5,25 @@ import { Container } from "@/components/common/molecules";
 export const Product = ({
 	title,
 	description,
-	imageUrl,
+	images,
 	price,
 }: ProductProps) => {
+	const imageUrl = images?.find((image) => image?.isPrimary)?.url;
+
 	return (
 		<Container>
 			<div className="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
 				<div className="mx-auto max-w-md shrink-0 lg:max-w-lg">
 					<div className="relative mb-2 aspect-video size-full overflow-hidden rounded-md bg-muted">
-						<Image
-							src={imageUrl}
-							alt={title}
-							layout="fill"
-							objectFit="cover"
-							objectPosition="center"
-						/>
+						{imageUrl && (
+							<Image
+								src={imageUrl}
+								alt={title}
+								layout="fill"
+								objectFit="cover"
+								objectPosition="center"
+							/>
+						)}
 					</div>
 				</div>
 

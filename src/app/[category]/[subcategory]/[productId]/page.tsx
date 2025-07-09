@@ -30,16 +30,16 @@ export async function generateMetadata(props: ProductPageProps) {
 		openGraph: {
 			title: `${product.title} | WorkSpaceCraft`,
 			description: product.description || "Product description",
-			images: product.imageUrl
-				? [
-						{
-							url: product.imageUrl,
-							width: 800,
-							height: 600,
-							alt: product.title,
-						},
-					]
-				: [],
+			// images: product.imageUrl
+			// 	? [
+			// 			{
+			// 				url: product.imageUrl,
+			// 				width: 800,
+			// 				height: 600,
+			// 				alt: product.title,
+			// 			},
+			// 		]
+			// 	: [],
 		},
 		alternates: {
 			canonical: `/products/${category}/${subcategory}/${productId}`,

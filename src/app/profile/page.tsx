@@ -31,6 +31,7 @@ export default async function ProfilePage() {
 		orderBy: { createdAt: "desc" },
 		include: {
 			categories: true,
+			images: true,
 			subcategories: {
 				include: {
 					subcategory: true,
@@ -43,7 +44,7 @@ export default async function ProfilePage() {
 		id: product.id,
 		title: product.title,
 		price: product.price,
-		imageUrl: product.imageUrl,
+		imageUrl: product.images.find((img) => img.isPrimary)?.url,
 		isReported: product.isReported,
 		reportCount: product.reportCount || 0,
 		categories: product.categories.map((pc) => pc.categoryType),
