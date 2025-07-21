@@ -25,6 +25,7 @@ export function useProducts(
 				tagSlugs && tagSlugs.length > 0 ? tagSlugs : undefined,
 		},
 		notifyOnNetworkStatusChange: true,
+		fetchPolicy: "no-cache",
 	});
 
 	const handleError = useGraphQLError({

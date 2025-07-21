@@ -1,0 +1,11 @@
+extend type Query {
+	searchSuggestions(query: String!, limit: Int): [SearchSuggestion!]!
+	searchProducts(
+		query: String!
+		category: CategoryType
+		subcategory: String
+		tags: [String!]
+		limit: Int
+		offset: Int
+	): [Product!]!
+}

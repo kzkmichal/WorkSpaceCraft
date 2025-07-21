@@ -1,0 +1,25 @@
+query SearchSuggestions($query: String!, $limit: Int) {
+	searchSuggestions(query: $query, limit: $limit) {
+		...SearchSuggestionFields
+	}
+}
+
+query SearchProducts(
+	$query: String!
+	$category: CategoryType
+	$subcategory: String
+	$tags: [String!]
+	$limit: Int
+	$offset: Int
+) {
+	searchProducts(
+		query: $query
+		category: $category
+		subcategory: $subcategory
+		tags: $tags
+		limit: $limit
+		offset: $offset
+	) {
+		...ProductFields
+	}
+}

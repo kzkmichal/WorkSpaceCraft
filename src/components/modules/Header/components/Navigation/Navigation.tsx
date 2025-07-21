@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { Container } from "@/components/common/molecules";
 import { BaseProps } from "@/components/utils/types";
 import { logout } from "@/app/actions/auth";
+import { GlobalSearch } from "@/components/modules/Search";
 
 export type NavigationProps = BaseProps;
 
@@ -148,7 +149,7 @@ export const Navigation = ({
 						>
 							WorkSpaceCraft
 						</a>
-
+						<GlobalSearch />
 						{/* Desktop Navigation */}
 						<div className="hidden items-center space-x-8 md:flex">
 							<button

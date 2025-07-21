@@ -206,6 +206,14 @@ export type ProductImage = {
   url?: Maybe<Scalars['String']['output']>;
 };
 
+export type ProductSearchInput = {
+  category?: InputMaybe<CategoryType>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  query: Scalars['String']['input'];
+  subcategory?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type Query = {
   allUsers: Array<User>;
   categories: Array<CategoryInfo>;
@@ -219,6 +227,8 @@ export type Query = {
   products: Array<Product>;
   productsByTag: Array<Product>;
   reportedProducts: Array<Product>;
+  searchProducts: Array<Product>;
+  searchSuggestions: Array<SearchSuggestion>;
   session?: Maybe<Session>;
   subcategories: Array<Subcategory>;
   subcategory?: Maybe<Subcategory>;
@@ -285,6 +295,22 @@ export type QueryReportedProductsArgs = {
 };
 
 
+export type QuerySearchProductsArgs = {
+  category?: InputMaybe<CategoryType>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  query: Scalars['String']['input'];
+  subcategory?: InputMaybe<Scalars['String']['input']>;
+  tags?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+
+export type QuerySearchSuggestionsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  query: Scalars['String']['input'];
+};
+
+
 export type QuerySubcategoriesArgs = {
   categoryType?: InputMaybe<CategoryType>;
 };
@@ -317,6 +343,21 @@ export type Review = {
 export type Role =
   | 'ADMIN'
   | 'USER';
+
+export type SearchSuggestion = {
+  badge?: Maybe<Scalars['String']['output']>;
+  imageUrl?: Maybe<Scalars['String']['output']>;
+  subtitle?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
+  type: SearchSuggestionType;
+  url: Scalars['String']['output'];
+};
+
+export type SearchSuggestionType =
+  | 'CATEGORY'
+  | 'PRODUCT'
+  | 'SEARCH_QUERY'
+  | 'TAG';
 
 export type Session = {
   expires?: Maybe<Scalars['String']['output']>;
@@ -468,9 +509,12 @@ export type ResolversTypes = {
   Mutation: ResolverTypeWrapper<{}>;
   Product: ResolverTypeWrapper<Product>;
   ProductImage: ResolverTypeWrapper<ProductImage>;
+  ProductSearchInput: ProductSearchInput;
   Query: ResolverTypeWrapper<{}>;
   Review: ResolverTypeWrapper<Review>;
   Role: Role;
+  SearchSuggestion: ResolverTypeWrapper<SearchSuggestion>;
+  SearchSuggestionType: SearchSuggestionType;
   Session: ResolverTypeWrapper<Session>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Subcategory: ResolverTypeWrapper<Subcategory>;
@@ -497,8 +541,10 @@ export type ResolversParentTypes = {
   Mutation: {};
   Product: Product;
   ProductImage: ProductImage;
+  ProductSearchInput: ProductSearchInput;
   Query: {};
   Review: Review;
+  SearchSuggestion: SearchSuggestion;
   Session: Session;
   String: Scalars['String']['output'];
   Subcategory: Subcategory;
@@ -593,6 +639,8 @@ export type QueryResolvers<ContextType = ApolloContext, ParentType extends Resol
   products?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType, Partial<QueryProductsArgs>>;
   productsByTag?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<QueryProductsByTagArgs, 'tagSlug'>>;
   reportedProducts?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType, Partial<QueryReportedProductsArgs>>;
+  searchProducts?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<QuerySearchProductsArgs, 'query'>>;
+  searchSuggestions?: Resolver<Array<ResolversTypes['SearchSuggestion']>, ParentType, ContextType, RequireFields<QuerySearchSuggestionsArgs, 'query'>>;
   session?: Resolver<Maybe<ResolversTypes['Session']>, ParentType, ContextType>;
   subcategories?: Resolver<Array<ResolversTypes['Subcategory']>, ParentType, ContextType, Partial<QuerySubcategoriesArgs>>;
   subcategory?: Resolver<Maybe<ResolversTypes['Subcategory']>, ParentType, ContextType, RequireFields<QuerySubcategoryArgs, 'fullSlug'>>;
@@ -610,6 +658,16 @@ export type ReviewResolvers<ContextType = ApolloContext, ParentType extends Reso
   rating?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SearchSuggestionResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['SearchSuggestion'] = ResolversParentTypes['SearchSuggestion']> = {
+  badge?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  imageUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  subtitle?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['SearchSuggestionType'], ParentType, ContextType>;
+  url?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -666,6 +724,7 @@ export type Resolvers<ContextType = ApolloContext> = {
   ProductImage?: ProductImageResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Review?: ReviewResolvers<ContextType>;
+  SearchSuggestion?: SearchSuggestionResolvers<ContextType>;
   Session?: SessionResolvers<ContextType>;
   Subcategory?: SubcategoryResolvers<ContextType>;
   Tag?: TagResolvers<ContextType>;
@@ -686,6 +745,8 @@ export type UserFragment = { id: string, name?: string | undefined, email: strin
 export type ProductImageFragment = { id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined };
 
 export type ProductFieldsFragment = { id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined };
+
+export type SearchSuggestionFieldsFragment = { type: SearchSuggestionType, title: string, subtitle?: string | undefined, url: string, imageUrl?: string | undefined, badge?: string | undefined };
 
 export type SubcategoryFieldsFragment = { id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined } | undefined> | undefined };
 
@@ -864,6 +925,26 @@ export type MyProductsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MyProductsQuery = { myProducts: Array<{ id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined }> };
 
+export type SearchSuggestionsQueryVariables = Exact<{
+  query: Scalars['String']['input'];
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type SearchSuggestionsQuery = { searchSuggestions: Array<{ type: SearchSuggestionType, title: string, subtitle?: string | undefined, url: string, imageUrl?: string | undefined, badge?: string | undefined }> };
+
+export type SearchProductsQueryVariables = Exact<{
+  query: Scalars['String']['input'];
+  category?: InputMaybe<CategoryType>;
+  subcategory?: InputMaybe<Scalars['String']['input']>;
+  tags?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type SearchProductsQuery = { searchProducts: Array<{ id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined }> };
+
 export type SubcategoriesQueryVariables = Exact<{
   categoryType: CategoryType;
 }>;
@@ -1025,6 +1106,16 @@ export const CategoryFieldsFragmentDoc = gql`
 }
     ${ProductFieldsFragmentDoc}
 ${SubcategoryFieldsFragmentDoc}`;
+export const SearchSuggestionFieldsFragmentDoc = gql`
+    fragment SearchSuggestionFields on SearchSuggestion {
+  type
+  title
+  subtitle
+  url
+  imageUrl
+  badge
+}
+    `;
 export const UpdateUserProfileDocument = gql`
     mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
   updateUserProfile(input: $input) {
@@ -1909,6 +2000,99 @@ export type MyProductsQueryHookResult = ReturnType<typeof useMyProductsQuery>;
 export type MyProductsLazyQueryHookResult = ReturnType<typeof useMyProductsLazyQuery>;
 export type MyProductsSuspenseQueryHookResult = ReturnType<typeof useMyProductsSuspenseQuery>;
 export type MyProductsQueryResult = Apollo.QueryResult<MyProductsQuery, MyProductsQueryVariables>;
+export const SearchSuggestionsDocument = gql`
+    query SearchSuggestions($query: String!, $limit: Int) {
+  searchSuggestions(query: $query, limit: $limit) {
+    ...SearchSuggestionFields
+  }
+}
+    ${SearchSuggestionFieldsFragmentDoc}`;
+
+/**
+ * __useSearchSuggestionsQuery__
+ *
+ * To run a query within a React component, call `useSearchSuggestionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchSuggestionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchSuggestionsQuery({
+ *   variables: {
+ *      query: // value for 'query'
+ *      limit: // value for 'limit'
+ *   },
+ * });
+ */
+export function useSearchSuggestionsQuery(baseOptions: Apollo.QueryHookOptions<SearchSuggestionsQuery, SearchSuggestionsQueryVariables> & ({ variables: SearchSuggestionsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchSuggestionsQuery, SearchSuggestionsQueryVariables>(SearchSuggestionsDocument, options);
+      }
+export function useSearchSuggestionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchSuggestionsQuery, SearchSuggestionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchSuggestionsQuery, SearchSuggestionsQueryVariables>(SearchSuggestionsDocument, options);
+        }
+export function useSearchSuggestionsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchSuggestionsQuery, SearchSuggestionsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SearchSuggestionsQuery, SearchSuggestionsQueryVariables>(SearchSuggestionsDocument, options);
+        }
+export type SearchSuggestionsQueryHookResult = ReturnType<typeof useSearchSuggestionsQuery>;
+export type SearchSuggestionsLazyQueryHookResult = ReturnType<typeof useSearchSuggestionsLazyQuery>;
+export type SearchSuggestionsSuspenseQueryHookResult = ReturnType<typeof useSearchSuggestionsSuspenseQuery>;
+export type SearchSuggestionsQueryResult = Apollo.QueryResult<SearchSuggestionsQuery, SearchSuggestionsQueryVariables>;
+export const SearchProductsDocument = gql`
+    query SearchProducts($query: String!, $category: CategoryType, $subcategory: String, $tags: [String!], $limit: Int, $offset: Int) {
+  searchProducts(
+    query: $query
+    category: $category
+    subcategory: $subcategory
+    tags: $tags
+    limit: $limit
+    offset: $offset
+  ) {
+    ...ProductFields
+  }
+}
+    ${ProductFieldsFragmentDoc}`;
+
+/**
+ * __useSearchProductsQuery__
+ *
+ * To run a query within a React component, call `useSearchProductsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSearchProductsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSearchProductsQuery({
+ *   variables: {
+ *      query: // value for 'query'
+ *      category: // value for 'category'
+ *      subcategory: // value for 'subcategory'
+ *      tags: // value for 'tags'
+ *      limit: // value for 'limit'
+ *      offset: // value for 'offset'
+ *   },
+ * });
+ */
+export function useSearchProductsQuery(baseOptions: Apollo.QueryHookOptions<SearchProductsQuery, SearchProductsQueryVariables> & ({ variables: SearchProductsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SearchProductsQuery, SearchProductsQueryVariables>(SearchProductsDocument, options);
+      }
+export function useSearchProductsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SearchProductsQuery, SearchProductsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SearchProductsQuery, SearchProductsQueryVariables>(SearchProductsDocument, options);
+        }
+export function useSearchProductsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SearchProductsQuery, SearchProductsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SearchProductsQuery, SearchProductsQueryVariables>(SearchProductsDocument, options);
+        }
+export type SearchProductsQueryHookResult = ReturnType<typeof useSearchProductsQuery>;
+export type SearchProductsLazyQueryHookResult = ReturnType<typeof useSearchProductsLazyQuery>;
+export type SearchProductsSuspenseQueryHookResult = ReturnType<typeof useSearchProductsSuspenseQuery>;
+export type SearchProductsQueryResult = Apollo.QueryResult<SearchProductsQuery, SearchProductsQueryVariables>;
 export const SubcategoriesDocument = gql`
     query Subcategories($categoryType: CategoryType!) {
   subcategories(categoryType: $categoryType) {

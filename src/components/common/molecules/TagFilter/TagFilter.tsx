@@ -96,7 +96,7 @@ export const TagFilter = ({
 					placeholder="Search tags..."
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					className="border-input w-full rounded-md border px-3 py-2 text-sm"
+					className="w-full rounded-md border border-input px-3 py-2 text-sm"
 				/>
 				{searchQuery && (
 					<button
@@ -109,14 +109,14 @@ export const TagFilter = ({
 			</div>
 
 			<ScrollArea className={`max-h-[${maxHeight}]`}>
-				<div className="space-y-1">
+				<div className="flex space-y-1">
 					{filteredTags.map((tag) => {
 						const isSelected = selectedTagSlugs.includes(tag.slug);
 						return (
 							<div
 								key={tag.id}
 								className={cn(
-									"hover:bg-accent flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5",
+									"flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5",
 									isSelected && "bg-accent",
 								)}
 								onClick={() => toggleTag(tag.slug)}
@@ -129,14 +129,14 @@ export const TagFilter = ({
 									/>
 								</div>
 								{isSelected && (
-									<Check className="text-primary h-4 w-4" />
+									<Check className="h-4 w-4 text-primary" />
 								)}
 							</div>
 						);
 					})}
 
 					{filteredTags.length === 0 && (
-						<div className="text-muted-foreground py-2 text-center text-sm">
+						<div className="py-2 text-center text-sm text-muted-foreground">
 							No tags found
 						</div>
 					)}

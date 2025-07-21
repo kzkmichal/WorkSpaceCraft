@@ -1,0 +1,22 @@
+enum SearchSuggestionType {
+	PRODUCT
+	CATEGORY
+	SEARCH_QUERY
+	TAG
+}
+
+type SearchSuggestion {
+	type: SearchSuggestionType!
+	title: String!
+	subtitle: String
+	url: String!
+	imageUrl: String
+	badge: String
+}
+
+# type PopularSearchQuery {
+# 	query: String!
+# 	count: Int!
+# 	category: CategoryType
+# 	avgResultCount: Float
+# }

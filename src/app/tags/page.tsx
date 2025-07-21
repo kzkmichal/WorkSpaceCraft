@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getTags } from "@/hooks/getTags";
+import { getTags } from "@/hooks/tags/getTags";
 import { TagsListView } from "@/components/modules/Tag/TagListView";
 
 export const metadata: Metadata = {

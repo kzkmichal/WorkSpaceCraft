@@ -23,7 +23,7 @@ export function usePopularTags(limit = 20) {
 	});
 
 	return {
-		tags: data?.popularTags || [],
+		popularTags: data?.popularTags || [],
 		loading,
 		error,
 	};

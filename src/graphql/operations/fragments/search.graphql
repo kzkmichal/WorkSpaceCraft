@@ -1,0 +1,8 @@
+fragment SearchSuggestionFields on SearchSuggestion {
+	type
+	title
+	subtitle
+	url
+	imageUrl
+	badge
+}
