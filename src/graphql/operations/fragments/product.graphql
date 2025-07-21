@@ -38,4 +38,7 @@ fragment ProductFields on Product {
 	images {
 		...ProductImage
 	}
+	tags {
+		...TagFields
+	}
 }

@@ -1,12 +1,14 @@
 import Image from "next/image";
 import { ProductProps } from "./types";
 import { Container } from "@/components/common/molecules";
+import { TagList } from "@/components/common/molecules/TagList";
 
 export const Product = ({
 	title,
 	description,
 	images,
 	price,
+	tags,
 }: ProductProps) => {
 	const imageUrl = images?.find((image) => image?.isPrimary)?.url;
 
@@ -28,6 +30,12 @@ export const Product = ({
 				</div>
 
 				<div className="mt-6 sm:mt-8 lg:mt-0">
+					{tags && tags.length > 0 && (
+						<div className="mt-3">
+							<TagList tags={tags} />
+						</div>
+					)}
+
 					<h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
 						{title}
 					</h1>

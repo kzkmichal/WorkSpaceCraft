@@ -5,6 +5,7 @@ import { CategoryType } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma/prisma";
 import { ProductFormValues } from "@/lib/validations/product";
+import { processProductTags } from "@/lib/tag-service";
 
 export type ProductResult = {
 	success: boolean;
@@ -21,40 +22,68 @@ export async function createProduct(
 		return { success: false, error: "You must be logged in" };
 	}
 
+	const {
+		tags,
+		images,
+		categoryTypes,
+		subcategoryIds,
+		title,
+		description,
+		originalStoreLink,
+		price,
+	} = data;
+
 	try {
-		const primaryImage = data.images.find((image) => image.isPrimary);
+		const finalTagIds = await processProductTags(tags || []);
+
+		const primaryImage = images.find((image) => image.isPrimary);
 
 		if (!primaryImage) {
-			data.images[0].isPrimary = true;
+			images[0].isPrimary = true;
 		}
 
 		const product = await prisma.product.create({
 			data: {
-				title: data.title,
-				description: data.description,
-				price: data.price,
+				title: title,
+				description: description,
+				price: price,
 				images: {
-					create: data.images.map((image) => ({
+					create: images.map((image) => ({
 						url: image.url,
 						fileName: image.fileName,
 						isPrimary: image.isPrimary,
 					})),
 				},
-				originalStoreLink: data.originalStoreLink,
+				originalStoreLink: originalStoreLink,
+				tags:
+					finalTagIds.length > 0
+						? {
+								create: finalTagIds.map((tagId) => ({
+									tag: { connect: { id: tagId } },
+								})),
+							}
+						: undefined,
 				userId: session.user.id as string,
 				categories: {
-					create: data.categoryTypes.map((categoryType) => ({
+					create: categoryTypes.map((categoryType) => ({
 						categoryType: categoryType as CategoryType,
 					})),
 				},
 				subcategories:
-					data.subcategoryIds && data.subcategoryIds.length > 0
+					subcategoryIds && subcategoryIds.length > 0
 						? {
-								create: data.subcategoryIds.map((subcategoryId) => ({
+								create: subcategoryIds.map((subcategoryId) => ({
 									subcategoryId,
 								})),
 							}
 						: undefined,
+			},
+			include: {
+				tags: {
+					include: {
+						tag: true,
+					},
+				},
 			},
 		});
 
@@ -83,6 +112,17 @@ export async function updateProduct(
 ): Promise<ProductResult> {
 	const session = await auth();
 
+	const {
+		tags,
+		images,
+		categoryTypes,
+		subcategoryIds,
+		title,
+		description,
+		originalStoreLink,
+		price,
+	} = data;
+
 	if (!session) {
 		return { success: false, error: "You must be logged in" };
 	}
@@ -106,13 +146,14 @@ export async function updateProduct(
 			};
 		}
 
-		const primaryImage = data.images.find((image) => image.isPrimary);
+		const primaryImage = images.find((image) => image.isPrimary);
 
 		if (!primaryImage) {
-			data.images[0].isPrimary = true;
+			images[0].isPrimary = true;
 		}
+		const finalTags = await processProductTags(tags || []);
 
-		const keepImageIds = data.images
+		const keepImageIds = images
 			.filter((img) => img.id)
 			.map((img) => img.id as string);
 
@@ -121,9 +162,9 @@ export async function updateProduct(
 				where: { productId },
 			});
 
-			if (data.categoryTypes.length > 0) {
+			if (categoryTypes.length > 0) {
 				await tx.productToCategory.createMany({
-					data: data.categoryTypes.map((categoryType) => ({
+					data: categoryTypes.map((categoryType) => ({
 						productId,
 						categoryType: categoryType as CategoryType,
 					})),
@@ -134,9 +175,9 @@ export async function updateProduct(
 				where: { productId },
 			});
 
-			if (data.subcategoryIds && data.subcategoryIds.length > 0) {
+			if (subcategoryIds && subcategoryIds.length > 0) {
 				await tx.productToSubcategory.createMany({
-					data: data.subcategoryIds.map((subcategoryId) => ({
+					data: subcategoryIds.map((subcategoryId) => ({
 						productId,
 						subcategoryId,
 					})),
@@ -150,7 +191,7 @@ export async function updateProduct(
 				},
 			});
 
-			for (const img of data.images.filter((img) => img.id)) {
+			for (const img of images.filter((img) => img.id)) {
 				await tx.productImage.update({
 					where: { id: img.id },
 					data: {
@@ -160,8 +201,21 @@ export async function updateProduct(
 				});
 			}
 
+			await tx.productToTag.deleteMany({
+				where: { productId },
+			});
+
+			if (finalTags.length > 0) {
+				await tx.productToTag.createMany({
+					data: finalTags.map((tagId) => ({
+						productId,
+						tagId,
+					})),
+				});
+			}
+
 			await tx.productImage.createMany({
-				data: data.images
+				data: images
 					.filter((img) => !img.id)
 					.map((img) => ({
 						productId,
@@ -174,10 +228,10 @@ export async function updateProduct(
 			await tx.product.update({
 				where: { id: productId },
 				data: {
-					title: data.title,
-					description: data.description,
-					price: data.price,
-					originalStoreLink: data.originalStoreLink,
+					title: title,
+					description: description,
+					price: price,
+					originalStoreLink: originalStoreLink,
 				},
 			});
 		});

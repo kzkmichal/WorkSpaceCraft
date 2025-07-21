@@ -1,0 +1,10 @@
+extend type Query {
+	tags: [Tag!]
+	popularTags(limit: Int): [Tag!]!
+	tag(slug: String!): Tag
+	productsByTag(
+		tagSlug: String!
+		limit: Int
+		offset: Int
+	): [Product!]!
+}

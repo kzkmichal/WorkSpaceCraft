@@ -1,455 +1,568 @@
 import { GraphQLError } from "graphql";
-import {
-	Product,
-	ProductImage,
-	Subcategory,
-	User,
-} from "@prisma/client";
-import type { Resolvers } from "../generated/graphql";
-import { formatDates, formatSubcategory, formatUser } from "./utils";
-import { CategoryType } from "@/constant/categories";
+import { CategoryType } from "@prisma/client";
+import { User } from "next-auth";
 
-const formatProduct = (
-	product: Product & {
-		categories?: { categoryType: CategoryType }[];
-		createdBy: User;
-		subcategories?: { subcategory: Subcategory }[];
-		images?: ProductImage[];
-	},
-) => ({
-	...product,
-	...formatDates(product),
-	categories: product.categories?.map((pc) => pc.categoryType) || [],
-	createdBy: formatUser(product.createdBy),
-	subcategories:
-		product.subcategories?.map((ps) =>
-			formatSubcategory(ps.subcategory),
-		) || [],
+import type {
+	Resolvers,
+	CreateProductInput,
+	UpdateProductInput,
+} from "../generated/graphql";
+import { formatUser } from "./utils";
+import { prisma } from "@/lib/prisma/prisma";
+import { generateSlug, normalizeTagName } from "@/utils/tag-utils";
 
-	reportReason: product.reportReason ?? undefined,
-	moderatedBy: product.moderatedBy ?? undefined,
-	moderatedAt: product.moderatedAt?.toISOString(),
-	images: product.images?.map((image) => ({
-		...image,
-		fileName: image.fileName ?? undefined,
-	})),
-});
+async function processProductTags(
+	tagIds: string[] = [],
+	newTags: string[] = [],
+): Promise<string[]> {
+	const processedTagIds = [...tagIds];
 
-export const resolvers: Resolvers = {
-	Query: {
-		products: async (_, { limit = 10, offset = 0 }, { prisma }) => {
-			try {
-				const products = await prisma.product.findMany({
-					take: limit,
-					skip: offset,
-					include: {
-						createdBy: true,
-						categories: true,
-						images: true,
-						subcategories: {
-							include: {
-								subcategory: true,
-							},
-						},
-						reviews: true,
+	if (newTags.length > 0) {
+		const createdTagIds = await Promise.all(
+			newTags.map(async (tagName: string) => {
+				const normalizedName = normalizeTagName(tagName);
+				const slug = generateSlug(normalizedName);
+
+				let tag = await prisma.tag.findFirst({
+					where: {
+						OR: [{ name: normalizedName }, { slug }],
 					},
 				});
 
-				return products.map(formatProduct);
-			} catch (error) {
-				console.error("Failed to fetch products:", error);
-				throw new GraphQLError("Failed to fetch products", {
-					extensions: { code: "DATABASE_ERROR" },
-				});
-			}
-		},
-
-		product: async (_, { id }, { prisma }) => {
-			try {
-				const product = await prisma.product.findUnique({
-					where: { id },
-					include: {
-						createdBy: true,
-						categories: true,
-						images: true,
-						subcategories: {
-							include: {
-								subcategory: true,
-							},
-						},
-						reviews: true,
-					},
-				});
-
-				if (!product) {
-					throw new GraphQLError("Product not found", {
-						extensions: { code: "NOT_FOUND" },
+				if (!tag) {
+					tag = await prisma.tag.create({
+						data: { name: normalizedName, slug },
 					});
 				}
 
-				return formatProduct(product);
-			} catch (error) {
-				if (error instanceof GraphQLError) throw error;
-				throw new GraphQLError("Failed to fetch product", {
-					extensions: { code: "DATABASE_ERROR" },
+				return tag.id;
+			}),
+		);
+
+		processedTagIds.push(...createdTagIds);
+	}
+
+	return [...new Set(processedTagIds)];
+}
+
+async function getProducts(
+	limit = 10,
+	offset = 0,
+	categoryType?: CategoryType,
+	tagSlugs?: string[],
+) {
+	try {
+		const where: {
+			categories?: { some: { categoryType: CategoryType } };
+			tags?: { some: { tagId: { in: string[] } } };
+		} = {};
+
+		if (categoryType) {
+			where.categories = {
+				some: { categoryType },
+			};
+		}
+
+		if (tagSlugs && tagSlugs?.length > 0) {
+			const tags = await prisma.tag.findMany({
+				where: { slug: { in: tagSlugs } },
+			});
+
+			if (!tags || tags.length === 0) {
+				throw new GraphQLError("Tag not found", {
+					extensions: { code: "NOT_FOUND" },
 				});
 			}
-		},
-		// reportedProducts: async (
-		// 	_,
-		// 	{ limit = 10, offset = 0 },
-		// 	{ user, prisma },
-		// ) => {
-		// 	if (!user || user.role !== "ADMIN") {
-		// 		throw new GraphQLError("Not authorized", {
-		// 			extensions: { code: "FORBIDDEN" },
-		// 		});
-		// 	}
-		// 	const products = await prisma.product.findMany({
-		// 		where: { isReported: true },
-		// 		take: limit,
-		// 		skip: offset,
-		// 		orderBy: { reportCount: "desc" },
-		// 		include: {
-		// 			createdBy: true,
-		// 			categories: true,
-		// 			subcategories: {
-		// 				include: {
-		// 					subcategory: true,
-		// 				},
-		// 			},
-		// 		},
-		// 	});
-
-		// 	return products.map(formatProduct);
-		// },
-		myProducts: async (_, __, { user, prisma }) => {
-			if (!user) {
-				throw new GraphQLError("You must be logged in", {
-					extensions: { code: "UNAUTHORIZED" },
-				});
+			if (tags.length > 0) {
+				const tagIds = tags.map((tag) => tag.id);
+				where.tags = {
+					some: { tagId: { in: tagIds } },
+				};
 			}
+		}
 
-			const products = await prisma.product.findMany({
-				where: {
-					userId: user.id,
+		const products = await prisma.product.findMany({
+			where,
+			take: limit,
+			skip: offset,
+			include: {
+				createdBy: true,
+				categories: true,
+				images: true,
+				subcategories: {
+					include: {
+						subcategory: true,
+					},
 				},
+				tags: {
+					include: {
+						tag: true,
+					},
+				},
+				// reviews: true,
+			},
+		});
+
+		return products.map((product) => ({
+			...product,
+			reportReason: product.reportReason || undefined,
+			createdAt: product.createdAt.toISOString(),
+			updatedAt: product.updatedAt.toISOString(),
+			createdBy: formatUser(product.createdBy),
+			categories: product.categories.map((pc) => pc.categoryType),
+			subcategories: product.subcategories.map((ps) => ({
+				...ps.subcategory,
+				description: ps.subcategory.description || undefined,
+				createdAt: ps.subcategory.createdAt.toISOString(),
+				updatedAt: ps.subcategory.updatedAt.toISOString(),
+			})),
+			images: product.images.map((image) => ({
+				...image,
+				fileName: image.fileName || undefined,
+				createdAt: image.createdAt.toISOString(),
+				updatedAt: image.updatedAt.toISOString(),
+			})),
+			tags: product.tags.map((pt) => ({
+				...pt.tag,
+				createdAt: pt.tag.createdAt.toISOString(),
+				updatedAt: pt.tag.updatedAt.toISOString(),
+			})),
+		}));
+	} catch (error) {
+		console.error("Failed to fetch products:", error);
+		if (error instanceof GraphQLError) throw error;
+		throw new GraphQLError("Failed to fetch products", {
+			extensions: { code: "DATABASE_ERROR" },
+		});
+	}
+}
+
+async function getProduct(id: string) {
+	try {
+		const product = await prisma.product.findUnique({
+			where: { id },
+			include: {
+				createdBy: true,
+				categories: true,
+				images: true,
+				subcategories: {
+					include: {
+						subcategory: true,
+					},
+				},
+				tags: {
+					include: {
+						tag: true,
+					},
+				},
+				// reviews: true,
+			},
+		});
+
+		if (!product) {
+			throw new GraphQLError("Product not found", {
+				extensions: { code: "NOT_FOUND" },
+			});
+		}
+
+		return {
+			...product,
+			reportReason: product.reportReason || undefined,
+			createdAt: product.createdAt.toISOString(),
+			updatedAt: product.updatedAt.toISOString(),
+			createdBy: formatUser(product.createdBy),
+			images: product.images.map((image) => ({
+				...image,
+				fileName: image.fileName || undefined,
+				createdAt: image.createdAt.toISOString(),
+				updatedAt: image.updatedAt.toISOString(),
+			})),
+			categories: product.categories.map((pc) => pc.categoryType),
+			subcategories: product.subcategories.map((ps) => ({
+				...ps.subcategory,
+				description: ps.subcategory.description || undefined,
+				createdAt: ps.subcategory.createdAt.toISOString(),
+				updatedAt: ps.subcategory.updatedAt.toISOString(),
+			})),
+			tags: product.tags.map((pt) => ({
+				...pt.tag,
+				createdAt: pt.tag.createdAt.toISOString(),
+				updatedAt: pt.tag.updatedAt.toISOString(),
+			})),
+		};
+	} catch (error) {
+		if (error instanceof GraphQLError) throw error;
+		console.error("Failed to fetch product:", error);
+		throw new GraphQLError("Failed to fetch product", {
+			extensions: { code: "DATABASE_ERROR" },
+		});
+	}
+}
+
+async function getMyProducts(user?: { id: string }) {
+	if (!user) {
+		throw new GraphQLError("You must be logged in", {
+			extensions: { code: "UNAUTHORIZED" },
+		});
+	}
+
+	try {
+		const products = await prisma.product.findMany({
+			where: {
+				userId: user.id,
+			},
+			include: {
+				createdBy: true,
+				categories: true,
+				images: true,
+				subcategories: {
+					include: {
+						subcategory: true,
+					},
+				},
+				tags: {
+					include: {
+						tag: true,
+					},
+				},
+				// reviews: true,
+			},
+			orderBy: { createdAt: "desc" },
+		});
+
+		return products.map((product) => ({
+			...product,
+			reportReason: product.reportReason || undefined,
+			createdAt: product.createdAt.toISOString(),
+			updatedAt: product.updatedAt.toISOString(),
+			createdBy: formatUser(product.createdBy),
+			images: product.images.map((image) => ({
+				...image,
+				fileName: image.fileName || undefined,
+				createdAt: image.createdAt.toISOString(),
+				updatedAt: image.updatedAt.toISOString(),
+			})),
+			categories: product.categories.map((pc) => pc.categoryType),
+			subcategories: product.subcategories.map((ps) => ({
+				...ps.subcategory,
+				description: ps.subcategory.description || undefined,
+				createdAt: ps.subcategory.createdAt.toISOString(),
+				updatedAt: ps.subcategory.updatedAt.toISOString(),
+			})),
+			tags: product.tags.map((pt) => ({
+				...pt.tag,
+				createdAt: pt.tag.createdAt.toISOString(),
+				updatedAt: pt.tag.updatedAt.toISOString(),
+			})),
+		}));
+	} catch (error) {
+		console.error("Failed to fetch user products:", error);
+		throw new GraphQLError("Failed to fetch user products", {
+			extensions: { code: "DATABASE_ERROR" },
+		});
+	}
+}
+
+async function createProduct(input: CreateProductInput, user?: User) {
+	if (!user) {
+		throw new GraphQLError("You must be logged in", {
+			extensions: { code: "UNAUTHORIZED" },
+		});
+	}
+
+	try {
+		const {
+			tagIds,
+			newTags,
+			categoryTypes,
+			subcategoryIds,
+			...productData
+		} = input;
+
+		const finalTagIds = await processProductTags(
+			tagIds || [],
+			newTags || [],
+		);
+
+		const product = await prisma.product.create({
+			data: {
+				...productData,
+				createdBy: {
+					connect: { id: user.id },
+				},
+				categories: categoryTypes?.length
+					? {
+							create: categoryTypes.map((categoryType) => ({
+								categoryType: categoryType as CategoryType,
+							})),
+						}
+					: undefined,
+				subcategories: subcategoryIds?.length
+					? {
+							create: subcategoryIds.map((subcategoryId) => ({
+								subcategory: {
+									connect: { id: subcategoryId },
+								},
+							})),
+						}
+					: undefined,
+				tags: finalTagIds.length
+					? {
+							create: finalTagIds.map((tagId) => ({
+								tag: {
+									connect: { id: tagId },
+								},
+							})),
+						}
+					: undefined,
+			},
+			include: {
+				createdBy: true,
+				categories: true,
+				images: true,
+				subcategories: {
+					include: {
+						subcategory: true,
+					},
+				},
+				tags: {
+					include: {
+						tag: true,
+					},
+				},
+			},
+		});
+
+		return {
+			...product,
+			reportReason: product.reportReason || undefined,
+			createdAt: product.createdAt.toISOString(),
+			updatedAt: product.updatedAt.toISOString(),
+			createdBy: formatUser(product.createdBy),
+			images: product.images.map((image) => ({
+				...image,
+				fileName: image.fileName || undefined,
+				createdAt: image.createdAt.toISOString(),
+				updatedAt: image.updatedAt.toISOString(),
+			})),
+			categories: product.categories.map((pc) => pc.categoryType),
+			subcategories: product.subcategories.map((ps) => ({
+				...ps.subcategory,
+				description: ps.subcategory.description || undefined,
+				createdAt: ps.subcategory.createdAt.toISOString(),
+				updatedAt: ps.subcategory.updatedAt.toISOString(),
+			})),
+			tags: product.tags.map((pt) => ({
+				...pt.tag,
+				createdAt: pt.tag.createdAt.toISOString(),
+				updatedAt: pt.tag.updatedAt.toISOString(),
+			})),
+		};
+	} catch (error) {
+		console.error("Failed to create product:", error);
+		throw new GraphQLError("Failed to create product", {
+			extensions: { code: "DATABASE_ERROR" },
+		});
+	}
+}
+
+async function updateProduct(input: UpdateProductInput, user?: User) {
+	if (!user) {
+		throw new GraphQLError("You must be logged in", {
+			extensions: { code: "UNAUTHORIZED" },
+		});
+	}
+
+	try {
+		const {
+			id,
+			tagIds,
+			newTags,
+			categoryTypes,
+			subcategoryIds,
+			...updateData
+		} = input;
+
+		const existingProduct = await prisma.product.findUnique({
+			where: { id },
+		});
+
+		if (!existingProduct) {
+			throw new GraphQLError("Product not found", {
+				extensions: { code: "NOT_FOUND" },
+			});
+		}
+
+		if (existingProduct.userId !== user.id && user.role !== "ADMIN") {
+			throw new GraphQLError(
+				"You can only update your own products",
+				{
+					extensions: { code: "FORBIDDEN" },
+				},
+			);
+		}
+
+		const updatedProduct = await prisma.$transaction(async (tx) => {
+			if (categoryTypes) {
+				await tx.productToCategory.deleteMany({
+					where: { productId: id },
+				});
+
+				if (categoryTypes.length > 0) {
+					await tx.productToCategory.createMany({
+						data: categoryTypes.map((categoryType) => ({
+							productId: id,
+							categoryType: categoryType as CategoryType,
+						})),
+					});
+				}
+			}
+
+			if (subcategoryIds) {
+				await tx.productToSubcategory.deleteMany({
+					where: { productId: id },
+				});
+
+				if (subcategoryIds.length > 0) {
+					await tx.productToSubcategory.createMany({
+						data: subcategoryIds.map((subcategoryId) => ({
+							productId: id,
+							subcategoryId,
+						})),
+					});
+				}
+			}
+
+			if (tagIds || newTags) {
+				const finalTagIds = await processProductTags(
+					tagIds || [],
+					newTags || [],
+				);
+
+				await tx.productToTag.deleteMany({
+					where: { productId: id },
+				});
+
+				if (finalTagIds.length > 0) {
+					await tx.productToTag.createMany({
+						data: finalTagIds.map((tagId) => ({
+							productId: id,
+							tagId,
+						})),
+					});
+				}
+			}
+
+			return tx.product.update({
+				where: { id },
+				data: updateData,
 				include: {
 					createdBy: true,
 					categories: true,
+					images: true,
 					subcategories: {
 						include: {
 							subcategory: true,
 						},
 					},
-					reviews: true,
+					tags: {
+						include: {
+							tag: true,
+						},
+					},
 				},
-				orderBy: { createdAt: "desc" },
 			});
+		});
 
-			return products.map(formatProduct);
-		},
+		return {
+			...updatedProduct,
+			reportReason: updatedProduct.reportReason || undefined,
+			createdAt: updatedProduct.createdAt.toISOString(),
+			updatedAt: updatedProduct.updatedAt.toISOString(),
+			createdBy: formatUser(updatedProduct.createdBy),
+			images: updatedProduct.images.map((image) => ({
+				...image,
+				fileName: image.fileName || undefined,
+				createdAt: image.createdAt.toISOString(),
+				updatedAt: image.updatedAt.toISOString(),
+			})),
+			categories: updatedProduct.categories.map(
+				(pc) => pc.categoryType,
+			),
+			subcategories: updatedProduct.subcategories.map((ps) => ({
+				...ps.subcategory,
+				description: ps.subcategory.description || undefined,
+				createdAt: ps.subcategory.createdAt.toISOString(),
+				updatedAt: ps.subcategory.updatedAt.toISOString(),
+			})),
+			tags: updatedProduct.tags.map((pt) => ({
+				...pt.tag,
+				createdAt: pt.tag.createdAt.toISOString(),
+				updatedAt: pt.tag.updatedAt.toISOString(),
+			})),
+		};
+	} catch (error) {
+		if (error instanceof GraphQLError) throw error;
+		console.error("Failed to update updatedProduct:", error);
+		throw new GraphQLError("Failed to update product", {
+			extensions: { code: "DATABASE_ERROR" },
+		});
+	}
+}
+
+async function deleteProduct(id: string, user?: User) {
+	if (!user) {
+		throw new GraphQLError("You must be logged in", {
+			extensions: { code: "UNAUTHORIZED" },
+		});
+	}
+
+	try {
+		const product = await prisma.product.findUnique({
+			where: { id },
+		});
+
+		if (!product) {
+			throw new GraphQLError("Product not found", {
+				extensions: { code: "NOT_FOUND" },
+			});
+		}
+
+		if (product.userId !== user.id && user.role !== "ADMIN") {
+			throw new GraphQLError(
+				"You can only delete your own products",
+				{
+					extensions: { code: "FORBIDDEN" },
+				},
+			);
+		}
+
+		await prisma.product.delete({
+			where: { id },
+		});
+
+		return true;
+	} catch (error) {
+		if (error instanceof GraphQLError) throw error;
+		console.error("Failed to delete product:", error);
+		throw new GraphQLError("Failed to delete product", {
+			extensions: { code: "DATABASE_ERROR" },
+		});
+	}
+}
+
+export const resolvers: Resolvers = {
+	Query: {
+		products: (_, { limit, offset, categoryType, tagSlugs }) =>
+			getProducts(limit, offset, categoryType, tagSlugs),
+		product: (_, { id }) => getProduct(id),
+		myProducts: (_, __, { user }) => getMyProducts(user),
 	},
-
 	Mutation: {
-		createProduct: async (_, { input }, { user, prisma }) => {
-			if (!user) {
-				throw new GraphQLError(
-					"You must be logged in to create a product",
-					{
-						extensions: { code: "UNAUTHORIZED" },
-					},
-				);
-			}
-
-			try {
-				const { categoryTypes, subcategoryIds, ...productData } =
-					input;
-
-				const product = await prisma.product.create({
-					data: {
-						...productData,
-						createdBy: {
-							connect: { id: user.id },
-						},
-						categories: {
-							create: categoryTypes.map((categoryType) => ({
-								categoryType,
-							})),
-						},
-						subcategories: {
-							create: subcategoryIds?.map((subcategoryId) => ({
-								subcategory: {
-									connect: { id: subcategoryId },
-								},
-							})),
-						},
-					},
-					include: {
-						createdBy: true,
-						categories: true,
-						subcategories: {
-							include: {
-								subcategory: true,
-							},
-						},
-						reviews: true,
-					},
-				});
-
-				return formatProduct(product);
-			} catch (error) {
-				console.error("Failed to create product:", error);
-				throw new GraphQLError("Failed to create product", {
-					extensions: { code: "DATABASE_ERROR" },
-				});
-			}
-		},
-
-		updateProduct: async (_, { input }, { user, prisma }) => {
-			if (!user) {
-				throw new GraphQLError(
-					"You must be logged in to update a product",
-					{
-						extensions: { code: "UNAUTHORIZED" },
-					},
-				);
-			}
-
-			try {
-				const { id, categoryTypes, subcategoryIds, ...updateData } =
-					input;
-
-				const existingProduct = await prisma.product.findUnique({
-					where: { id },
-				});
-
-				if (!existingProduct) {
-					throw new GraphQLError("Product not found", {
-						extensions: { code: "NOT_FOUND" },
-					});
-				}
-
-				if (existingProduct.userId !== user.id) {
-					throw new GraphQLError(
-						"You can only update your own products",
-						{
-							extensions: { code: "FORBIDDEN" },
-						},
-					);
-				}
-
-				const updatedProduct = await prisma.$transaction(
-					async (tx) => {
-						if (categoryTypes) {
-							await tx.productToCategory.deleteMany({
-								where: { productId: id },
-							});
-
-							if (categoryTypes.length > 0) {
-								await tx.productToCategory.createMany({
-									data: categoryTypes.map((categoryType) => ({
-										productId: id,
-										categoryType,
-									})),
-								});
-							}
-						}
-
-						if (subcategoryIds) {
-							await tx.productToSubcategory.deleteMany({
-								where: { productId: id },
-							});
-
-							if (subcategoryIds.length > 0) {
-								await tx.productToSubcategory.createMany({
-									data: subcategoryIds.map((subcategoryId) => ({
-										productId: id,
-										subcategoryId,
-									})),
-								});
-							}
-						}
-
-						return tx.product.update({
-							where: { id },
-							data: updateData,
-							include: {
-								createdBy: true,
-								categories: true,
-								subcategories: {
-									include: {
-										subcategory: true,
-									},
-								},
-								reviews: true,
-							},
-						});
-					},
-				);
-
-				return formatProduct(updatedProduct);
-			} catch (error) {
-				if (error instanceof GraphQLError) throw error;
-				console.error("Failed to update product:", error);
-				throw new GraphQLError("Failed to update product", {
-					extensions: { code: "DATABASE_ERROR" },
-				});
-			}
-		},
-
-		deleteProduct: async (_, { id }, { user, prisma }) => {
-			if (!user) {
-				throw new GraphQLError(
-					"You must be logged in to delete a product",
-					{
-						extensions: { code: "UNAUTHORIZED" },
-					},
-				);
-			}
-
-			try {
-				const product = await prisma.product.findUnique({
-					where: { id },
-				});
-
-				if (!product) {
-					throw new GraphQLError("Product not found", {
-						extensions: { code: "NOT_FOUND" },
-					});
-				}
-
-				if (product.userId !== user.id) {
-					throw new GraphQLError(
-						"You can only delete your own products",
-						{
-							extensions: { code: "FORBIDDEN" },
-						},
-					);
-				}
-
-				await prisma.product.delete({
-					where: { id },
-				});
-
-				return true;
-			} catch (error) {
-				if (error instanceof GraphQLError) throw error;
-				throw new GraphQLError("Failed to delete product", {
-					extensions: { code: "DATABASE_ERROR" },
-				});
-			}
-		},
-
-		reportProduct: async (
-			_,
-			{ productId, reason },
-			{ user, prisma },
-		) => {
-			if (!user) {
-				throw new GraphQLError(
-					"You must be logged in to report a product",
-					{
-						extensions: { code: "UNAUTHORIZED" },
-					},
-				);
-			}
-			try {
-				const product = await prisma.product.findUnique({
-					where: { id: productId },
-				});
-
-				if (!product) {
-					throw new GraphQLError("Product not found", {
-						extensions: { code: "NOT_FOUND" },
-					});
-				}
-
-				const updatedProduct = await prisma.product.update({
-					where: { id: productId },
-					data: {
-						isReported: true,
-						reportCount: { increment: 1 },
-						reportReason: reason,
-					},
-					include: {
-						createdBy: true,
-						categories: true,
-						subcategories: {
-							include: {
-								subcategory: true,
-							},
-						},
-					},
-				});
-
-				return formatProduct(updatedProduct);
-			} catch (error) {
-				console.error("Failed to report product:", error);
-				throw new GraphQLError("Failed to report product", {
-					extensions: { code: "DATABASE_ERROR" },
-				});
-			}
-		},
-
-		// moderateProduct: async (
-		// 	_,
-		// 	{ productId, action, reason },
-		// 	{ user, prisma },
-		// ) => {
-		// 	if (!user || user.role !== "ADMIN") {
-		// 		throw new GraphQLError("Not authorized", {
-		// 			extensions: { code: "FORBIDDEN" },
-		// 		});
-		// 	}
-
-		// 	const product = await prisma.product.findUnique({
-		// 		where: { id: productId },
-		// 	});
-
-		// 	if (!product) {
-		// 		throw new GraphQLError("Product not found", {
-		// 			extensions: { code: "NOT_FOUND" },
-		// 		});
-		// 	}
-
-		// 	let updateData;
-
-		// 	if (action === "APPROVE") {
-		// 		updateData = {
-		// 			moderatedBy: user.id,
-		// 			moderatedAt: new Date(),
-		// 			isReported: false,
-		// 			reportCount: 0,
-		// 			reportReason: null,
-		// 		};
-		// 	} else if (action === "REMOVE") {
-		// 		updateData = {
-		// 			moderatedBy: user.id,
-		// 			moderatedAt: new Date(),
-		// 			isReported: false,
-		// 			isDeleted: true,
-		// 		};
-		// 	}
-
-		// 	const updatedProduct = await prisma.product.update({
-		// 		where: { id: productId },
-		// 		data: {
-		// 			...updateData,
-		// 			reportReason: reason,
-		// 		},
-		// 		include: {
-		// 			createdBy: true,
-		// 			categories: true,
-		// 			subcategories: {
-		// 				include: {
-		// 					subcategory: true,
-		// 				},
-		// 			},
-		// 		},
-		// 	});
-
-		// 	return formatProduct(updatedProduct);
-		// },
+		createProduct: (_, { input }, { user }) =>
+			createProduct(input, user),
+		updateProduct: (_, { input }, { user }) =>
+			updateProduct(input, user),
+		deleteProduct: (_, { id }, { user }) => deleteProduct(id, user),
 	},
 };

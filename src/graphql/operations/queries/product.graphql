@@ -1,5 +1,5 @@
-query Products($limit: Int, $offset: Int) {
-	products(limit: $limit, offset: $offset) {
+query Products($limit: Int, $offset: Int, $tagSlugs: [String!]) {
+	products(limit: $limit, offset: $offset, tagSlugs: $tagSlugs) {
 		...ProductFields
 	}
 }
@@ -10,7 +10,7 @@ query Product($id: ID!) {
 	}
 }
 
-query ReportedProducts($limit: Int, $offset: Int) {
+query ReportedProducts($limit: Int, $offset: Int, $tagSlug: String) {
 	reportedProducts(limit: $limit, offset: $offset) {
 		...ProductFields
 	}

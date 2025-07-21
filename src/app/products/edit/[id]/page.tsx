@@ -29,6 +29,11 @@ export default async function EditProductPage(
 			categories: true,
 			subcategories: true,
 			images: true,
+			tags: {
+				include: {
+					tag: true,
+				},
+			},
 		},
 	});
 
@@ -94,6 +99,11 @@ export default async function EditProductPage(
 			url: image.url,
 			fileName: image.fileName || "",
 			isPrimary: image.isPrimary,
+		})),
+		tags: product.tags.map((tag) => ({
+			id: tag.tag.id,
+			name: tag.tag.name,
+			slug: tag.tag.slug,
 		})),
 		categoryTypes: product.categories.map((pc) => pc.categoryType),
 		subcategoryIds: product.subcategories.map(

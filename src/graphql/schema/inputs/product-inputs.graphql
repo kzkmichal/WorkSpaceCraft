@@ -5,6 +5,8 @@ input CreateProductInput {
 	originalStoreLink: String!
 	categoryTypes: [CategoryType!]!
 	subcategoryIds: [ID!]
+	tagIds: [ID!]
+	newTags: [String!]
 }
 
 input UpdateProductInput {
@@ -15,4 +17,6 @@ input UpdateProductInput {
 	originalStoreLink: String
 	categoryTypes: [CategoryType!]
 	subcategoryIds: [ID!]
+	tagIds: [ID!]
+	newTags: [String!]
 }

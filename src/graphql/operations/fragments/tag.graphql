@@ -1,0 +1,7 @@
+fragment TagFields on Tag {
+	id
+	name
+	slug
+	createdAt
+	updatedAt
+}

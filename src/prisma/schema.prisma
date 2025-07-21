@@ -33,6 +33,27 @@ model Subcategory {
   @@unique([categoryType, slug])
 }
 
+model Tag {
+  id        String         @id @default(cuid())
+  name      String         @unique
+  slug      String         @unique
+  products  ProductToTag[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model ProductToTag {
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId     String
+  createdAt DateTime @default(now())
+
+  @@id([productId, tagId])
+  @@index([tagId])
+  @@index([productId])
+}
+
 model Product {
   id                String                 @id @default(cuid())
   title             String
@@ -52,6 +73,7 @@ model Product {
   moderatedBy       String?
   moderatedAt       DateTime?
   images            ProductImage[]
+  tags              ProductToTag[]
 }
 
 model ProductImage {
