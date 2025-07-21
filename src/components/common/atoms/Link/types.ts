@@ -1,12 +1,23 @@
 import { ComponentPropsWithoutRef } from "react";
 import { LinkProps as NextLinkProps } from "next/link";
+import { BaseProps } from "@/components/utils/types";
 
-export type LinkProps = Omit<
-	ComponentPropsWithoutRef<"a">,
-	keyof NextLinkProps
-> &
+type LinkVariantType =
+	| "default"
+	| "ghost"
+	| "primary"
+	| "secondary"
+	| "outline"
+	| "accent"
+	| "destructive"
+	| "link";
+
+export type LinkProps = BaseProps &
+	Omit<ComponentPropsWithoutRef<"a">, keyof NextLinkProps> &
 	NextLinkProps & {
-		variant?: "default" | "ghost" | "underline";
+		variant?: LinkVariantType;
 		disabled?: boolean;
 		external?: boolean;
+		linkWrapper?: boolean;
+		size?: "sm" | "default" | "lg";
 	};

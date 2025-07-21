@@ -1,15 +1,17 @@
 import NextLink from "next/link";
 import { LinkProps } from "./types";
-import { variants } from "./const";
 import { cn } from "@/components/utils/helpers";
+import { buttonVariants } from "@/components/ui/button";
 
 export const Link = ({
 	href,
 	children,
 	className,
-	variant = "default",
+	variant,
 	disabled = false,
 	external = false,
+	size = "default",
+	"data-testid": testId = "link",
 	...props
 }: LinkProps) => {
 	const linkProps = external
@@ -22,11 +24,10 @@ export const Link = ({
 	return (
 		<NextLink
 			href={href}
+			data-testid={testId}
 			className={cn(
-				"transition-colors",
-				variants[variant],
 				disabled && "pointer-events-none opacity-50",
-				className,
+				variant && buttonVariants({ variant, size, className }),
 			)}
 			{...linkProps}
 			{...props}

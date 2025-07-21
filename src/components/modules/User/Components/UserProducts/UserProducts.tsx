@@ -2,11 +2,15 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { UserProductsProps } from "./types";
 import { deleteProduct } from "@/app/actions/product";
+import { Link } from "@/components/common/atoms";
+import { Button } from "@/components/ui/button";
 
-export function UserProducts({ products }: UserProductsProps) {
+export const UserProducts = ({
+	products,
+	"data-testid": testId = "user-products",
+}: UserProductsProps) => {
 	const [isDeleting, setIsDeleting] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
@@ -56,11 +60,15 @@ export function UserProducts({ products }: UserProductsProps) {
 				</div>
 			)}
 
-			<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+			<div
+				className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+				data-testid={testId}
+			>
 				{products.map((product) => (
 					<div
 						key={product.id}
-						className="overflow-hidden rounded-lg border shadow-sm transition-shadow hover:shadow-md"
+						className="overflow-hidden rounded-lg border border-accent bg-card shadow-sm transition-shadow hover:shadow-md"
+						data-testid={`${testId}-${product.id}`}
 					>
 						<div className="relative h-48 w-full">
 							{product.imageUrl && (
@@ -102,22 +110,25 @@ export function UserProducts({ products }: UserProductsProps) {
 							<div className="mt-4 flex space-x-2">
 								<Link
 									href={`/products/edit/${product.id}`}
-									className="rounded bg-blue-100 px-3 py-1 text-blue-700 hover:bg-blue-200"
+									variant="secondary"
+									size="sm"
 								>
 									Edit
 								</Link>
-								<button
+								<Button
 									onClick={() => handleDelete(product.id)}
 									disabled={isDeleting === product.id}
-									className="rounded bg-red-100 px-3 py-1 text-red-700 hover:bg-red-200 disabled:opacity-50"
+									variant="destructive"
+									size="sm"
 								>
 									{isDeleting === product.id
 										? "Deleting..."
 										: "Delete"}
-								</button>
+								</Button>
 								<Link
 									href={`/products/${product.id}`}
-									className="rounded bg-gray-100 px-3 py-1 text-gray-700 hover:bg-gray-200"
+									variant="primary"
+									size="sm"
 								>
 									View
 								</Link>
@@ -128,4 +139,4 @@ export function UserProducts({ products }: UserProductsProps) {
 			</div>
 		</div>
 	);
-}
+};

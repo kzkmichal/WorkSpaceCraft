@@ -5,7 +5,7 @@ import { Button as ShadcnButton } from "@/components/ui/button";
 export const Button = ({
 	children,
 	className,
-	variant = "default",
+	variant = "primary",
 	size = "default",
 	isLoading,
 	disabled,

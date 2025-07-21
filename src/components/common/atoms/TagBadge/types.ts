@@ -6,10 +6,18 @@ export type Tag = {
 	slug: string;
 };
 
+export type TagBadgeVariantType =
+	| "default"
+	| "secondary"
+	| "outline"
+	| "destructive"
+	| "primary"
+	| "accent";
+
 export type TagBadgeProps = BaseProps & {
 	tag: Tag | string;
 	onClick?: () => void;
 	isSelected?: boolean;
-	variant?: "default" | "secondary" | "outline" | "destructive";
+	variant?: TagBadgeVariantType;
 	asLink?: boolean;
 };

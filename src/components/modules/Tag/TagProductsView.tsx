@@ -45,7 +45,7 @@ export const TagProductsView = ({
 			<Stack direction="column" spacing={6}>
 				<div>
 					<h1 className="text-3xl font-bold">
-						Products tagged with `${tag.name}`
+						Products tagged with: {tag.name}
 					</h1>
 					<p className="mt-2 text-gray-600">
 						Browse all products with this tag
