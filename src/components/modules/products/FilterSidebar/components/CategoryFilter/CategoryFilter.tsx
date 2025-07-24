@@ -5,9 +5,9 @@ import {
 	useCategoriesWithStatsQuery,
 } from "@/graphql/generated/graphql";
 import { Loader2 } from "lucide-react";
-import { SearchParamsKeys } from "../../../Products/types";
-import { CategoryFilterProps } from "./types";
+import { SearchParamsKeys } from "../../../types";
 import { useFilterParams } from "../../hooks/useFilterParams";
+import { CategoryFilterProps } from "./types";
 
 export const CategoryFilter = ({
 	"data-testid": testId = "category-filter",

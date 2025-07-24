@@ -3,7 +3,7 @@
 import { ProductSortOption } from "@/graphql/generated/graphql";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { SearchParamsKeys } from "@/components/modules/products/Products";
+import { SearchParamsKeys } from "@/components/modules/Products";
 import { SortFilterProps } from "./types";
 import { Button } from "@/components/common/atoms";
 import { useFilterParams } from "../../hooks/useFilterParams";

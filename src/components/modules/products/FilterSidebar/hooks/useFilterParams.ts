@@ -4,7 +4,7 @@ import {
 	usePathname,
 } from "next/navigation";
 import { CategoryType } from "@/graphql/generated/graphql";
-import { SearchParamsKeys } from "@/components/modules/products/Products";
+import { SearchParamsKeys } from "@/components/modules/Products/types";
 
 export const useFilterParams = () => {
 	const router = useRouter();

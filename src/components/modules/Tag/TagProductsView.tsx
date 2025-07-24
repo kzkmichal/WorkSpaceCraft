@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { TagProductsViewProps } from "./types";
 import { useProductsByTagQuery } from "@/graphql/generated/graphql";
-import { ProductList } from "@/components/modules/products/ProductList";
+import { ProductList } from "@/components/modules/Products/ProductList";
 import { Container, Stack } from "@/components/common/molecules";
 // import { LoadingSpinner } from "@/components/common/atoms/LoadingSpinner";
 import { Button } from "@/components/ui/button";

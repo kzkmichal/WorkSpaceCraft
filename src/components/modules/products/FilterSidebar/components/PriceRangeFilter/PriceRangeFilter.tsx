@@ -1,6 +1,6 @@
 "use client";
 
-import { SearchParamsKeys } from "@/components/modules/products/Products";
+import { SearchParamsKeys } from "@/components/modules/Products";
 import { useState, useEffect } from "react";
 import { usePriceRangeForFiltersQuery } from "@/graphql/generated/graphql";
 import { Loader2 } from "lucide-react";

@@ -1,4 +1,4 @@
-import { SetupList } from "@/components/modules/setups/SetupList";
+import { SetupList } from "@/components/modules/Setups/SetupList";
 
 export default async function SetupsPage() {
 	return (

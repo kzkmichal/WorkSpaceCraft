@@ -2,7 +2,7 @@
 
 import { useSubcategoriesWithStatsQuery } from "@/graphql/generated/graphql";
 import { Loader2 } from "lucide-react";
-import { SearchParamsKeys } from "@/components/modules/products/Products";
+import { SearchParamsKeys } from "@/components/modules/Products";
 import { SubcategoryFilterProps } from "./types";
 import { useFilterParams } from "../../hooks/useFilterParams";
 

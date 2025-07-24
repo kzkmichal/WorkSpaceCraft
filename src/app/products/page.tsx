@@ -2,7 +2,7 @@ import { getPopularTags } from "@/hooks/tags/getPopularTags";
 import { Container } from "@/components/common/molecules";
 import { ProductListLoading } from "@/components/modules/Search";
 import { Suspense } from "react";
-import { Products } from "@/components/modules/products/Products/Products";
+import { Products } from "@/components/modules/Products/Products";
 
 type ProductsPageProps = {
 	searchParams: Promise<{

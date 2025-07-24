@@ -13,10 +13,10 @@ import {
 	SearchEmpty,
 	SearchError,
 	SearchLoading,
-} from "../../Search";
-import { FilterSidebar } from "../FilterSidebar";
+} from "../Search";
+import { FilterSidebar } from "./FilterSidebar";
 import { useEffect } from "react";
-import { ProductList } from "../ProductList";
+import { ProductList } from "./ProductList";
 import { usePopularTags } from "@/hooks/tags/useTags";
 
 export const Products = ({
