@@ -1,5 +1,3 @@
-// Database helper functions for search functionality
-
 import { PrismaClient, CategoryType } from "@prisma/client";
 
 /**
@@ -135,6 +133,54 @@ export class SearchQueryBuilder {
 		// Combine with AND logic
 		return conditions.length > 0 ? { AND: conditions } : {};
 	}
+
+	static buildPriceFilter(minPrice?: number, maxPrice?: number) {
+		const conditions = [];
+
+		if (minPrice !== undefined) {
+			conditions.push({ price: { gte: minPrice } });
+		}
+		if (maxPrice !== undefined) {
+			conditions.push({ price: { lte: maxPrice } });
+		}
+
+		return conditions.length > 0 ? { AND: conditions } : undefined;
+	}
+
+	static buildRatingFilter(minRating?: number) {
+		if (minRating === undefined) return undefined;
+
+		return {
+			reviews: {
+				some: {
+					rating: {
+						gte: minRating,
+					},
+				},
+			},
+		};
+	}
+
+	static buildSort(sortBy?: string) {
+		switch (sortBy) {
+			case sortOptions.PRICE_LOW_TO_HIGH:
+				return [{ price: "asc" as const }];
+			case sortOptions.PRICE_HIGH_TO_LOW:
+				return [{ price: "desc" as const }];
+			case sortOptions.NEWEST:
+				return [{ createdAt: "desc" as const }];
+			case sortOptions.OLDEST:
+				return [{ createdAt: "asc" as const }];
+			case sortOptions.MOST_POPULAR:
+				return [{ createdAt: "desc" as const }];
+			case sortOptions.HIGHEST_RATED:
+				return [{ createdAt: "desc" as const }];
+			case sortOptions.MOST_REVIEWED:
+				return [{ createdAt: "desc" as const }];
+			default:
+				return [{ createdAt: "desc" as const }];
+		}
+	}
 }
 
 /**
@@ -264,3 +310,13 @@ export type TagSearchResult = {
 	slug: string;
 	productCount: number;
 };
+
+export enum sortOptions {
+	PRICE_LOW_TO_HIGH = "PRICE_LOW_TO_HIGH",
+	PRICE_HIGH_TO_LOW = "PRICE_HIGH_TO_LOW",
+	NEWEST = "NEWEST",
+	OLDEST = "OLDEST",
+	MOST_POPULAR = "MOST_POPULAR",
+	HIGHEST_RATED = "HIGHEST_RATED",
+	MOST_REVIEWED = "MOST_REVIEWED",
+}

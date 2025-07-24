@@ -8,4 +8,5 @@ type Query {
 		subcategoryId: ID
 	): [Product!]!
 	categorySubcategories(type: CategoryType!): [Subcategory!]!
+	categoriesWithStats: [CategoryWithStats!]!
 }

@@ -1,5 +1,5 @@
-query Products($limit: Int, $offset: Int, $tagSlugs: [String!]) {
-	products(limit: $limit, offset: $offset, tagSlugs: $tagSlugs) {
+query Products($input: ProductsQueryInput!) {
+	products(input: $input) {
 		...ProductFields
 	}
 }
@@ -19,5 +19,18 @@ query ReportedProducts($limit: Int, $offset: Int, $tagSlug: String) {
 query MyProducts {
 	myProducts {
 		...ProductFields
+	}
+}
+
+query PriceRangeForFilters(
+	$categoryType: CategoryType
+	$subcategorySlug: String
+) {
+	priceRangeForFilters(
+		categoryType: $categoryType
+		subcategorySlug: $subcategorySlug
+	) {
+		min
+		max
 	}
 }

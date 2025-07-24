@@ -1,15 +1,16 @@
 import { GraphQLError } from "graphql";
 import { CategoryType } from "@prisma/client";
 import { User } from "next-auth";
-
 import type {
 	Resolvers,
 	CreateProductInput,
 	UpdateProductInput,
+	ProductsQueryInput,
 } from "../generated/graphql";
 import { formatUser } from "./utils";
 import { prisma } from "@/lib/prisma/prisma";
 import { generateSlug, normalizeTagName } from "@/utils/tag-utils";
+import { getProductService } from "@/lib/services/productService/product-service-factory";
 
 async function processProductTags(
 	tagIds: string[] = [],
@@ -45,62 +46,12 @@ async function processProductTags(
 	return [...new Set(processedTagIds)];
 }
 
-async function getProducts(
-	limit = 10,
-	offset = 0,
-	categoryType?: CategoryType,
-	tagSlugs?: string[],
-) {
+async function getProducts(input: ProductsQueryInput) {
 	try {
-		const where: {
-			categories?: { some: { categoryType: CategoryType } };
-			tags?: { some: { tagId: { in: string[] } } };
-		} = {};
+		const productService = getProductService();
 
-		if (categoryType) {
-			where.categories = {
-				some: { categoryType },
-			};
-		}
-
-		if (tagSlugs && tagSlugs?.length > 0) {
-			const tags = await prisma.tag.findMany({
-				where: { slug: { in: tagSlugs } },
-			});
-
-			if (!tags || tags.length === 0) {
-				throw new GraphQLError("Tag not found", {
-					extensions: { code: "NOT_FOUND" },
-				});
-			}
-			if (tags.length > 0) {
-				const tagIds = tags.map((tag) => tag.id);
-				where.tags = {
-					some: { tagId: { in: tagIds } },
-				};
-			}
-		}
-
-		const products = await prisma.product.findMany({
-			where,
-			take: limit,
-			skip: offset,
-			include: {
-				createdBy: true,
-				categories: true,
-				images: true,
-				subcategories: {
-					include: {
-						subcategory: true,
-					},
-				},
-				tags: {
-					include: {
-						tag: true,
-					},
-				},
-				// reviews: true,
-			},
+		const products = await productService.getProducts({
+			...input,
 		});
 
 		return products.map((product) => ({
@@ -551,12 +502,25 @@ async function deleteProduct(id: string, user?: User) {
 	}
 }
 
+async function getPriceRange(
+	categoryType?: CategoryType,
+	subcategorySlug?: string,
+) {
+	const productService = getProductService();
+	const priceRange = await productService.getPriceRange(
+		categoryType,
+		subcategorySlug,
+	);
+	return priceRange;
+}
+
 export const resolvers: Resolvers = {
 	Query: {
-		products: (_, { limit, offset, categoryType, tagSlugs }) =>
-			getProducts(limit, offset, categoryType, tagSlugs),
+		products: (_, { input }) => getProducts({ ...input }),
 		product: (_, { id }) => getProduct(id),
 		myProducts: (_, __, { user }) => getMyProducts(user),
+		priceRangeForFilters: (_, { categoryType, subcategorySlug }) =>
+			getPriceRange(categoryType, subcategorySlug),
 	},
 	Mutation: {
 		createProduct: (_, { input }, { user }) =>

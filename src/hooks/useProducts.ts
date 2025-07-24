@@ -7,26 +7,40 @@ import { useLoadingState } from "./useLoadingState";
 import {
 	useProductsQuery,
 	CategoryType,
+	ProductSortOption,
 } from "@/graphql/generated/graphql";
 
 export function useProducts(
 	initialLimit = 10,
 	categoryType?: CategoryType,
 	tagSlugs?: string[],
+	searchQuery?: string,
+	subcategory?: string,
+	sortBy?: string,
+	minPrice?: number,
+	maxPrice?: number,
 ) {
 	const { withLoading } = useLoadingState();
 
-	const { data, loading, error, fetchMore } = useProductsQuery({
-		variables: {
-			limit: initialLimit,
-			offset: 0,
-			// categoryType,
-			tagSlugs:
-				tagSlugs && tagSlugs.length > 0 ? tagSlugs : undefined,
-		},
-		notifyOnNetworkStatusChange: true,
-		fetchPolicy: "no-cache",
-	});
+	const { data, loading, error, fetchMore, refetch } =
+		useProductsQuery({
+			variables: {
+				input: {
+					limit: initialLimit,
+					offset: 0,
+					categoryType,
+					tagSlugs:
+						tagSlugs && tagSlugs.length > 0 ? tagSlugs : undefined,
+					search: searchQuery,
+					subcategorySlug: subcategory,
+					minPrice,
+					maxPrice,
+					sortBy: sortBy as ProductSortOption,
+				},
+			},
+			notifyOnNetworkStatusChange: true,
+			fetchPolicy: "no-cache",
+		});
 
 	const handleError = useGraphQLError({
 		onUnauthorized: () => {
@@ -46,10 +60,12 @@ export function useProducts(
 			try {
 				await fetchMore({
 					variables: {
-						offset: data.products.length,
-						limit: initialLimit,
-						categoryType,
-						tagSlugs,
+						input: {
+							offset: data.products.length,
+							limit: initialLimit,
+							categoryType,
+							tagSlugs,
+						},
 					},
 				});
 			} catch (error) {
@@ -74,5 +90,7 @@ export function useProducts(
 		loading,
 		loadMore,
 		hasMore: data?.products.length === initialLimit,
+		error: error || undefined,
+		refetch,
 	};
 }

@@ -31,3 +31,18 @@ query CategorySubcategories($type: CategoryType!) {
 		...SubcategoryFields
 	}
 }
+
+query CategoriesWithStats {
+	categoriesWithStats {
+		type
+		productCount
+		slug
+		name
+		subcategories {
+			id
+			slug
+			name
+			productCount
+		}
+	}
+}

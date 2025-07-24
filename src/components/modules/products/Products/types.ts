@@ -7,6 +7,9 @@ export enum SearchParamsKeys {
 	SEARCH = "search",
 	CATEGORY = "category",
 	SUBCATEGORY = "subcategory",
+	SORT_BY = "sortBy",
+	MIN_PRICE = "minPrice",
+	MAX_PRICE = "maxPrice",
 }
 
 export type ProductsProps = BaseProps & {

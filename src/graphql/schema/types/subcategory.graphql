@@ -9,3 +9,11 @@ type Subcategory {
 	createdAt: String!
 	updatedAt: String!
 }
+
+type SubcategoryWithStats {
+	id: ID!
+	name: String!
+	slug: String!
+	productCount: Int!
+	priceRange: PriceRange
+}

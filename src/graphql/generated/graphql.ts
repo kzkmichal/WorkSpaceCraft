@@ -42,6 +42,14 @@ export type CategoryType =
   | 'OFFICE'
   | 'REMOTE';
 
+export type CategoryWithStats = {
+  name: Scalars['String']['output'];
+  productCount: Scalars['Int']['output'];
+  slug: Scalars['String']['output'];
+  subcategories?: Maybe<Array<SubcategoryWithStats>>;
+  type: CategoryType;
+};
+
 export type ChangePasswordInput = {
   currentPassword: Scalars['String']['input'];
   newPassword: Scalars['String']['input'];
@@ -180,6 +188,11 @@ export type MutationUpdateUserRoleArgs = {
   userId: Scalars['ID']['input'];
 };
 
+export type PriceRange = {
+  max?: Maybe<Scalars['Float']['output']>;
+  min?: Maybe<Scalars['Float']['output']>;
+};
+
 export type Product = {
   categories: Array<CategoryType>;
   createdAt: Scalars['String']['output'];
@@ -214,15 +227,39 @@ export type ProductSearchInput = {
   subcategory?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type ProductSortOption =
+  | 'HIGHEST_RATED'
+  | 'MOST_POPULAR'
+  | 'MOST_REVIEWED'
+  | 'NEWEST'
+  | 'OLDEST'
+  | 'PRICE_HIGH_TO_LOW'
+  | 'PRICE_LOW_TO_HIGH';
+
+export type ProductsQueryInput = {
+  categoryType?: InputMaybe<CategoryType>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  maxPrice?: InputMaybe<Scalars['Float']['input']>;
+  minPrice?: InputMaybe<Scalars['Float']['input']>;
+  minRating?: InputMaybe<Scalars['Float']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<ProductSortOption>;
+  subcategorySlug?: InputMaybe<Scalars['String']['input']>;
+  tagSlugs?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
 export type Query = {
   allUsers: Array<User>;
   categories: Array<CategoryInfo>;
+  categoriesWithStats: Array<CategoryWithStats>;
   categoryByType: CategoryInfo;
   categoryProducts: Array<Product>;
   categorySubcategories: Array<Subcategory>;
   me?: Maybe<User>;
   myProducts: Array<Product>;
   popularTags: Array<Tag>;
+  priceRangeForFilters?: Maybe<PriceRange>;
   product?: Maybe<Product>;
   products: Array<Product>;
   productsByTag: Array<Product>;
@@ -231,6 +268,7 @@ export type Query = {
   searchSuggestions: Array<SearchSuggestion>;
   session?: Maybe<Session>;
   subcategories: Array<Subcategory>;
+  subcategoriesWithStats: Array<SubcategoryWithStats>;
   subcategory?: Maybe<Subcategory>;
   tag?: Maybe<Tag>;
   tags?: Maybe<Array<Tag>>;
@@ -268,17 +306,19 @@ export type QueryPopularTagsArgs = {
 };
 
 
+export type QueryPriceRangeForFiltersArgs = {
+  categoryType?: InputMaybe<CategoryType>;
+  subcategorySlug?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type QueryProductArgs = {
   id: Scalars['ID']['input'];
 };
 
 
 export type QueryProductsArgs = {
-  categoryType?: InputMaybe<CategoryType>;
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  subcategoryFullSlug?: InputMaybe<Scalars['String']['input']>;
-  tagSlugs?: InputMaybe<Array<Scalars['String']['input']>>;
+  input?: InputMaybe<ProductsQueryInput>;
 };
 
 
@@ -313,6 +353,11 @@ export type QuerySearchSuggestionsArgs = {
 
 export type QuerySubcategoriesArgs = {
   categoryType?: InputMaybe<CategoryType>;
+};
+
+
+export type QuerySubcategoriesWithStatsArgs = {
+  categoryType: CategoryType;
 };
 
 
@@ -374,6 +419,14 @@ export type Subcategory = {
   products?: Maybe<Array<Maybe<Product>>>;
   slug: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
+};
+
+export type SubcategoryWithStats = {
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  priceRange?: Maybe<PriceRange>;
+  productCount: Scalars['Int']['output'];
+  slug: Scalars['String']['output'];
 };
 
 export type Tag = {
@@ -499,6 +552,7 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   CategoryInfo: ResolverTypeWrapper<CategoryInfo>;
   CategoryType: CategoryType;
+  CategoryWithStats: ResolverTypeWrapper<CategoryWithStats>;
   ChangePasswordInput: ChangePasswordInput;
   CreateProductInput: CreateProductInput;
   CreateSubcategoryInput: CreateSubcategoryInput;
@@ -507,9 +561,12 @@ export type ResolversTypes = {
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
+  PriceRange: ResolverTypeWrapper<PriceRange>;
   Product: ResolverTypeWrapper<Product>;
   ProductImage: ResolverTypeWrapper<ProductImage>;
   ProductSearchInput: ProductSearchInput;
+  ProductSortOption: ProductSortOption;
+  ProductsQueryInput: ProductsQueryInput;
   Query: ResolverTypeWrapper<{}>;
   Review: ResolverTypeWrapper<Review>;
   Role: Role;
@@ -518,6 +575,7 @@ export type ResolversTypes = {
   Session: ResolverTypeWrapper<Session>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Subcategory: ResolverTypeWrapper<Subcategory>;
+  SubcategoryWithStats: ResolverTypeWrapper<SubcategoryWithStats>;
   Tag: ResolverTypeWrapper<Tag>;
   TagInput: TagInput;
   UpdateProductInput: UpdateProductInput;
@@ -531,6 +589,7 @@ export type ResolversParentTypes = {
   AuthResult: AuthResult;
   Boolean: Scalars['Boolean']['output'];
   CategoryInfo: CategoryInfo;
+  CategoryWithStats: CategoryWithStats;
   ChangePasswordInput: ChangePasswordInput;
   CreateProductInput: CreateProductInput;
   CreateSubcategoryInput: CreateSubcategoryInput;
@@ -539,15 +598,18 @@ export type ResolversParentTypes = {
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
   Mutation: {};
+  PriceRange: PriceRange;
   Product: Product;
   ProductImage: ProductImage;
   ProductSearchInput: ProductSearchInput;
+  ProductsQueryInput: ProductsQueryInput;
   Query: {};
   Review: Review;
   SearchSuggestion: SearchSuggestion;
   Session: Session;
   String: Scalars['String']['output'];
   Subcategory: Subcategory;
+  SubcategoryWithStats: SubcategoryWithStats;
   Tag: Tag;
   TagInput: TagInput;
   UpdateProductInput: UpdateProductInput;
@@ -574,6 +636,15 @@ export type CategoryInfoResolvers<ContextType = ApolloContext, ParentType extend
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type CategoryWithStatsResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['CategoryWithStats'] = ResolversParentTypes['CategoryWithStats']> = {
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  productCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  subcategories?: Resolver<Maybe<Array<ResolversTypes['SubcategoryWithStats']>>, ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['CategoryType'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
   name: 'DateTime';
 }
@@ -596,6 +667,12 @@ export type MutationResolvers<ContextType = ApolloContext, ParentType extends Re
   updateSubcategory?: Resolver<ResolversTypes['Subcategory'], ParentType, ContextType, RequireFields<MutationUpdateSubcategoryArgs, 'input'>>;
   updateUserProfile?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateUserProfileArgs, 'input'>>;
   updateUserRole?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateUserRoleArgs, 'role' | 'userId'>>;
+};
+
+export type PriceRangeResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['PriceRange'] = ResolversParentTypes['PriceRange']> = {
+  max?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  min?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ProductResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['Product'] = ResolversParentTypes['Product']> = {
@@ -629,12 +706,14 @@ export type ProductImageResolvers<ContextType = ApolloContext, ParentType extend
 export type QueryResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   allUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, Partial<QueryAllUsersArgs>>;
   categories?: Resolver<Array<ResolversTypes['CategoryInfo']>, ParentType, ContextType>;
+  categoriesWithStats?: Resolver<Array<ResolversTypes['CategoryWithStats']>, ParentType, ContextType>;
   categoryByType?: Resolver<ResolversTypes['CategoryInfo'], ParentType, ContextType, RequireFields<QueryCategoryByTypeArgs, 'type'>>;
   categoryProducts?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<QueryCategoryProductsArgs, 'type'>>;
   categorySubcategories?: Resolver<Array<ResolversTypes['Subcategory']>, ParentType, ContextType, RequireFields<QueryCategorySubcategoriesArgs, 'type'>>;
   me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   myProducts?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType>;
   popularTags?: Resolver<Array<ResolversTypes['Tag']>, ParentType, ContextType, Partial<QueryPopularTagsArgs>>;
+  priceRangeForFilters?: Resolver<Maybe<ResolversTypes['PriceRange']>, ParentType, ContextType, Partial<QueryPriceRangeForFiltersArgs>>;
   product?: Resolver<Maybe<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<QueryProductArgs, 'id'>>;
   products?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType, Partial<QueryProductsArgs>>;
   productsByTag?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<QueryProductsByTagArgs, 'tagSlug'>>;
@@ -643,6 +722,7 @@ export type QueryResolvers<ContextType = ApolloContext, ParentType extends Resol
   searchSuggestions?: Resolver<Array<ResolversTypes['SearchSuggestion']>, ParentType, ContextType, RequireFields<QuerySearchSuggestionsArgs, 'query'>>;
   session?: Resolver<Maybe<ResolversTypes['Session']>, ParentType, ContextType>;
   subcategories?: Resolver<Array<ResolversTypes['Subcategory']>, ParentType, ContextType, Partial<QuerySubcategoriesArgs>>;
+  subcategoriesWithStats?: Resolver<Array<ResolversTypes['SubcategoryWithStats']>, ParentType, ContextType, RequireFields<QuerySubcategoriesWithStatsArgs, 'categoryType'>>;
   subcategory?: Resolver<Maybe<ResolversTypes['Subcategory']>, ParentType, ContextType, RequireFields<QuerySubcategoryArgs, 'fullSlug'>>;
   tag?: Resolver<Maybe<ResolversTypes['Tag']>, ParentType, ContextType, RequireFields<QueryTagArgs, 'slug'>>;
   tags?: Resolver<Maybe<Array<ResolversTypes['Tag']>>, ParentType, ContextType>;
@@ -690,6 +770,15 @@ export type SubcategoryResolvers<ContextType = ApolloContext, ParentType extends
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type SubcategoryWithStatsResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['SubcategoryWithStats'] = ResolversParentTypes['SubcategoryWithStats']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  priceRange?: Resolver<Maybe<ResolversTypes['PriceRange']>, ParentType, ContextType>;
+  productCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type TagResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['Tag'] = ResolversParentTypes['Tag']> = {
   createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -718,8 +807,10 @@ export type UserResolvers<ContextType = ApolloContext, ParentType extends Resolv
 export type Resolvers<ContextType = ApolloContext> = {
   AuthResult?: AuthResultResolvers<ContextType>;
   CategoryInfo?: CategoryInfoResolvers<ContextType>;
+  CategoryWithStats?: CategoryWithStatsResolvers<ContextType>;
   DateTime?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;
+  PriceRange?: PriceRangeResolvers<ContextType>;
   Product?: ProductResolvers<ContextType>;
   ProductImage?: ProductImageResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
@@ -727,6 +818,7 @@ export type Resolvers<ContextType = ApolloContext> = {
   SearchSuggestion?: SearchSuggestionResolvers<ContextType>;
   Session?: SessionResolvers<ContextType>;
   Subcategory?: SubcategoryResolvers<ContextType>;
+  SubcategoryWithStats?: SubcategoryWithStatsResolvers<ContextType>;
   Tag?: TagResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
 };
@@ -895,10 +987,13 @@ export type CategorySubcategoriesQueryVariables = Exact<{
 
 export type CategorySubcategoriesQuery = { categorySubcategories: Array<{ id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined } | undefined> | undefined }> };
 
+export type CategoriesWithStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CategoriesWithStatsQuery = { categoriesWithStats: Array<{ type: CategoryType, productCount: number, slug: string, name: string, subcategories?: Array<{ id: string, slug: string, name: string, productCount: number }> | undefined }> };
+
 export type ProductsQueryVariables = Exact<{
-  limit?: InputMaybe<Scalars['Int']['input']>;
-  offset?: InputMaybe<Scalars['Int']['input']>;
-  tagSlugs?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+  input: ProductsQueryInput;
 }>;
 
 
@@ -924,6 +1019,14 @@ export type MyProductsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type MyProductsQuery = { myProducts: Array<{ id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined }> };
+
+export type PriceRangeForFiltersQueryVariables = Exact<{
+  categoryType?: InputMaybe<CategoryType>;
+  subcategorySlug?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PriceRangeForFiltersQuery = { priceRangeForFilters?: { min?: number | undefined, max?: number | undefined } | undefined };
 
 export type SearchSuggestionsQueryVariables = Exact<{
   query: Scalars['String']['input'];
@@ -958,6 +1061,13 @@ export type SubcategoryQueryVariables = Exact<{
 
 
 export type SubcategoryQuery = { subcategory?: { id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined } | undefined> | undefined } | undefined };
+
+export type SubcategoriesWithStatsQueryVariables = Exact<{
+  categoryType: CategoryType;
+}>;
+
+
+export type SubcategoriesWithStatsQuery = { subcategoriesWithStats: Array<{ id: string, name: string, slug: string, productCount: number }> };
 
 export type TagsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1837,9 +1947,57 @@ export type CategorySubcategoriesQueryHookResult = ReturnType<typeof useCategory
 export type CategorySubcategoriesLazyQueryHookResult = ReturnType<typeof useCategorySubcategoriesLazyQuery>;
 export type CategorySubcategoriesSuspenseQueryHookResult = ReturnType<typeof useCategorySubcategoriesSuspenseQuery>;
 export type CategorySubcategoriesQueryResult = Apollo.QueryResult<CategorySubcategoriesQuery, CategorySubcategoriesQueryVariables>;
+export const CategoriesWithStatsDocument = gql`
+    query CategoriesWithStats {
+  categoriesWithStats {
+    type
+    productCount
+    slug
+    name
+    subcategories {
+      id
+      slug
+      name
+      productCount
+    }
+  }
+}
+    `;
+
+/**
+ * __useCategoriesWithStatsQuery__
+ *
+ * To run a query within a React component, call `useCategoriesWithStatsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCategoriesWithStatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCategoriesWithStatsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCategoriesWithStatsQuery(baseOptions?: Apollo.QueryHookOptions<CategoriesWithStatsQuery, CategoriesWithStatsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CategoriesWithStatsQuery, CategoriesWithStatsQueryVariables>(CategoriesWithStatsDocument, options);
+      }
+export function useCategoriesWithStatsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CategoriesWithStatsQuery, CategoriesWithStatsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CategoriesWithStatsQuery, CategoriesWithStatsQueryVariables>(CategoriesWithStatsDocument, options);
+        }
+export function useCategoriesWithStatsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<CategoriesWithStatsQuery, CategoriesWithStatsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CategoriesWithStatsQuery, CategoriesWithStatsQueryVariables>(CategoriesWithStatsDocument, options);
+        }
+export type CategoriesWithStatsQueryHookResult = ReturnType<typeof useCategoriesWithStatsQuery>;
+export type CategoriesWithStatsLazyQueryHookResult = ReturnType<typeof useCategoriesWithStatsLazyQuery>;
+export type CategoriesWithStatsSuspenseQueryHookResult = ReturnType<typeof useCategoriesWithStatsSuspenseQuery>;
+export type CategoriesWithStatsQueryResult = Apollo.QueryResult<CategoriesWithStatsQuery, CategoriesWithStatsQueryVariables>;
 export const ProductsDocument = gql`
-    query Products($limit: Int, $offset: Int, $tagSlugs: [String!]) {
-  products(limit: $limit, offset: $offset, tagSlugs: $tagSlugs) {
+    query Products($input: ProductsQueryInput!) {
+  products(input: $input) {
     ...ProductFields
   }
 }
@@ -1857,13 +2015,11 @@ export const ProductsDocument = gql`
  * @example
  * const { data, loading, error } = useProductsQuery({
  *   variables: {
- *      limit: // value for 'limit'
- *      offset: // value for 'offset'
- *      tagSlugs: // value for 'tagSlugs'
+ *      input: // value for 'input'
  *   },
  * });
  */
-export function useProductsQuery(baseOptions?: Apollo.QueryHookOptions<ProductsQuery, ProductsQueryVariables>) {
+export function useProductsQuery(baseOptions: Apollo.QueryHookOptions<ProductsQuery, ProductsQueryVariables> & ({ variables: ProductsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<ProductsQuery, ProductsQueryVariables>(ProductsDocument, options);
       }
@@ -2000,6 +2156,51 @@ export type MyProductsQueryHookResult = ReturnType<typeof useMyProductsQuery>;
 export type MyProductsLazyQueryHookResult = ReturnType<typeof useMyProductsLazyQuery>;
 export type MyProductsSuspenseQueryHookResult = ReturnType<typeof useMyProductsSuspenseQuery>;
 export type MyProductsQueryResult = Apollo.QueryResult<MyProductsQuery, MyProductsQueryVariables>;
+export const PriceRangeForFiltersDocument = gql`
+    query PriceRangeForFilters($categoryType: CategoryType, $subcategorySlug: String) {
+  priceRangeForFilters(
+    categoryType: $categoryType
+    subcategorySlug: $subcategorySlug
+  ) {
+    min
+    max
+  }
+}
+    `;
+
+/**
+ * __usePriceRangeForFiltersQuery__
+ *
+ * To run a query within a React component, call `usePriceRangeForFiltersQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePriceRangeForFiltersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePriceRangeForFiltersQuery({
+ *   variables: {
+ *      categoryType: // value for 'categoryType'
+ *      subcategorySlug: // value for 'subcategorySlug'
+ *   },
+ * });
+ */
+export function usePriceRangeForFiltersQuery(baseOptions?: Apollo.QueryHookOptions<PriceRangeForFiltersQuery, PriceRangeForFiltersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PriceRangeForFiltersQuery, PriceRangeForFiltersQueryVariables>(PriceRangeForFiltersDocument, options);
+      }
+export function usePriceRangeForFiltersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PriceRangeForFiltersQuery, PriceRangeForFiltersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PriceRangeForFiltersQuery, PriceRangeForFiltersQueryVariables>(PriceRangeForFiltersDocument, options);
+        }
+export function usePriceRangeForFiltersSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PriceRangeForFiltersQuery, PriceRangeForFiltersQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PriceRangeForFiltersQuery, PriceRangeForFiltersQueryVariables>(PriceRangeForFiltersDocument, options);
+        }
+export type PriceRangeForFiltersQueryHookResult = ReturnType<typeof usePriceRangeForFiltersQuery>;
+export type PriceRangeForFiltersLazyQueryHookResult = ReturnType<typeof usePriceRangeForFiltersLazyQuery>;
+export type PriceRangeForFiltersSuspenseQueryHookResult = ReturnType<typeof usePriceRangeForFiltersSuspenseQuery>;
+export type PriceRangeForFiltersQueryResult = Apollo.QueryResult<PriceRangeForFiltersQuery, PriceRangeForFiltersQueryVariables>;
 export const SearchSuggestionsDocument = gql`
     query SearchSuggestions($query: String!, $limit: Int) {
   searchSuggestions(query: $query, limit: $limit) {
@@ -2173,6 +2374,49 @@ export type SubcategoryQueryHookResult = ReturnType<typeof useSubcategoryQuery>;
 export type SubcategoryLazyQueryHookResult = ReturnType<typeof useSubcategoryLazyQuery>;
 export type SubcategorySuspenseQueryHookResult = ReturnType<typeof useSubcategorySuspenseQuery>;
 export type SubcategoryQueryResult = Apollo.QueryResult<SubcategoryQuery, SubcategoryQueryVariables>;
+export const SubcategoriesWithStatsDocument = gql`
+    query SubcategoriesWithStats($categoryType: CategoryType!) {
+  subcategoriesWithStats(categoryType: $categoryType) {
+    id
+    name
+    slug
+    productCount
+  }
+}
+    `;
+
+/**
+ * __useSubcategoriesWithStatsQuery__
+ *
+ * To run a query within a React component, call `useSubcategoriesWithStatsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSubcategoriesWithStatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubcategoriesWithStatsQuery({
+ *   variables: {
+ *      categoryType: // value for 'categoryType'
+ *   },
+ * });
+ */
+export function useSubcategoriesWithStatsQuery(baseOptions: Apollo.QueryHookOptions<SubcategoriesWithStatsQuery, SubcategoriesWithStatsQueryVariables> & ({ variables: SubcategoriesWithStatsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SubcategoriesWithStatsQuery, SubcategoriesWithStatsQueryVariables>(SubcategoriesWithStatsDocument, options);
+      }
+export function useSubcategoriesWithStatsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SubcategoriesWithStatsQuery, SubcategoriesWithStatsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SubcategoriesWithStatsQuery, SubcategoriesWithStatsQueryVariables>(SubcategoriesWithStatsDocument, options);
+        }
+export function useSubcategoriesWithStatsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SubcategoriesWithStatsQuery, SubcategoriesWithStatsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SubcategoriesWithStatsQuery, SubcategoriesWithStatsQueryVariables>(SubcategoriesWithStatsDocument, options);
+        }
+export type SubcategoriesWithStatsQueryHookResult = ReturnType<typeof useSubcategoriesWithStatsQuery>;
+export type SubcategoriesWithStatsLazyQueryHookResult = ReturnType<typeof useSubcategoriesWithStatsLazyQuery>;
+export type SubcategoriesWithStatsSuspenseQueryHookResult = ReturnType<typeof useSubcategoriesWithStatsSuspenseQuery>;
+export type SubcategoriesWithStatsQueryResult = Apollo.QueryResult<SubcategoriesWithStatsQuery, SubcategoriesWithStatsQueryVariables>;
 export const TagsDocument = gql`
     query Tags {
   tags {
