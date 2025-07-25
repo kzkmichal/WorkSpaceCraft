@@ -10,6 +10,7 @@ export type ButtonVariant =
 	| "destructive"
 	| "accent"
 	| "link";
+
 export type ButtonSize = "sm" | "default" | "lg" | "icon";
 
 export type SharedButtonProps = BaseProps & {

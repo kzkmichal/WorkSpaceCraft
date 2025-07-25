@@ -1,4 +1,4 @@
-import { ArticleCard } from "@/components/modules/articles/ArticleCard/ArticleCard";
+import { ArticleCard } from "@/components/modules/Articles/ArticleCard/ArticleCard";
 import { BaseProps } from "@/components/utils/types";
 
 export type ArticleListProps = BaseProps;

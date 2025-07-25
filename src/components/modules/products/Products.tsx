@@ -13,10 +13,10 @@ import {
 	SearchEmpty,
 	SearchError,
 	SearchLoading,
-} from "../../Search";
-import { FilterSidebar } from "../FilterSidebar";
+} from "../Search";
+import { FilterSidebar } from "./FilterSidebar";
 import { useEffect } from "react";
-import { ProductList } from "../ProductList";
+import { ProductList } from "./ProductList";
 import { usePopularTags } from "@/hooks/tags/useTags";
 
 export const Products = ({
@@ -28,53 +28,47 @@ export const Products = ({
 	const searchQuery = searchParams.get(SearchParamsKeys.SEARCH) || "";
 	const tagSlugs =
 		searchParams.get(SearchParamsKeys.TAGS)?.split(",") || undefined;
-	const category = searchParams.get(SearchParamsKeys.CATEGORY) as
-		| CategoryType
-		| undefined;
+	const category = searchParams
+		.get(SearchParamsKeys.CATEGORY)
+		?.toUpperCase() as CategoryType | undefined;
 	const subcategory =
 		searchParams.get(SearchParamsKeys.SUBCATEGORY) || undefined;
 	const page = Number(searchParams.get(SearchParamsKeys.PAGE)) || 1;
+	const sortBy =
+		searchParams.get(SearchParamsKeys.SORT_BY) || undefined;
 	const limit = 12;
+	const minPrice =
+		parseFloat(searchParams.get(SearchParamsKeys.MIN_PRICE) || "0") ||
+		undefined;
+	const maxPrice =
+		parseFloat(searchParams.get(SearchParamsKeys.MAX_PRICE) || "0") ||
+		undefined;
 	const offset = (page - 1) * limit;
 
-	const shouldUseSearch = !!(
-		searchQuery ||
-		category ||
-		subcategory ||
-		(tagSlugs && tagSlugs.length > 0)
-	);
-
 	const {
-		data: searchData,
-		loading: searchLoading,
-		error: searchError,
-		refetch: refetchSearch,
-	} = useSearchProductsQuery({
-		variables: {
-			query: searchQuery || "",
-			category,
-			subcategory,
-			limit,
-			tags: tagSlugs,
-			offset,
-		},
-		skip: !shouldUseSearch,
-		fetchPolicy: "cache-and-network",
-		errorPolicy: "all",
-	});
-
-	const { products: browseProducts, loading: browseLoading } =
-		useProducts(limit, category, tagSlugs);
+		products: browseProducts,
+		loading: browseLoading,
+		error: browseError,
+		refetch,
+	} = useProducts(
+		limit,
+		// offset,
+		category,
+		tagSlugs,
+		searchQuery,
+		subcategory,
+		sortBy,
+		minPrice,
+		maxPrice,
+	);
 
 	const { popularTags, loading: tagsLoading } = usePopularTags(20);
 	const finalPopularTags =
 		popularTags.length > 0 ? popularTags : initialPopularTags;
 
-	const products = shouldUseSearch
-		? searchData?.searchProducts || []
-		: browseProducts;
-	const loading = shouldUseSearch ? searchLoading : browseLoading;
-	const error = shouldUseSearch ? searchError : undefined;
+	const products = browseProducts;
+	const loading = browseLoading;
+	const error = browseError;
 
 	const hasResults = products.length > 0;
 	const hasFilters =
@@ -129,32 +123,33 @@ export const Products = ({
 	};
 
 	useEffect(() => {
-		if (shouldUseSearch) {
-			refetchSearch();
-		}
+		refetch();
 	}, [
 		searchQuery,
 		category,
 		subcategory,
 		page,
 		JSON.stringify(tagSlugs || []),
-		shouldUseSearch,
 	]);
 
 	return (
-		<Container className="space-y-6">
-			<ProductsSearch
-				className="max-w-lg"
-				placeholder="Search products..."
-			/>
-			<FilterOptions />
-			<Container className="flex gap-6" paddingX="none">
-				{!loading && finalPopularTags && (
-					<aside className="w-64 flex-shrink-0">
-						<FilterSidebar popularTags={finalPopularTags} />
-					</aside>
-				)}
-			</Container>
+		<Container
+			className="flex gap-4 space-y-6"
+			wrapperClassName="flex gap-4"
+		>
+			<div>
+				<ProductsSearch
+					className="max-w-lg"
+					placeholder="Search products..."
+				/>
+				<Container className="flex gap-6" paddingX="none">
+					{!loading && finalPopularTags && (
+						<aside className="w-64 flex-shrink-0">
+							<FilterSidebar popularTags={finalPopularTags} />
+						</aside>
+					)}
+				</Container>
+			</div>
 			<main className="flex-1">
 				{hasFilters && (
 					<div className="mb-6 flex flex-wrap gap-2">
@@ -206,11 +201,11 @@ export const Products = ({
 					<SearchError
 						title="Failed to load products"
 						description={error.message}
-						onRetry={() =>
-							shouldUseSearch
-								? refetchSearch()
-								: window.location.reload()
-						}
+						// onRetry={() =>
+						// 	shouldUseSearch
+						// 		? refetchSearch()
+						// 		: window.location.reload()
+						// }
 					/>
 				)}
 				{!loading && !error && !hasResults && (

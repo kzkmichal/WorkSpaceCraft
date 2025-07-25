@@ -5,6 +5,7 @@ import {
 	formatSubcategory,
 	formatUser,
 } from "./utils";
+import { getProductService } from "@/lib/services/productService/product-service-factory";
 
 type SubcategoryUpdateData = {
 	name?: string;
@@ -93,6 +94,14 @@ export const resolvers: Resolvers = {
 					extensions: { code: "DATABASE_ERROR" },
 				});
 			}
+		},
+
+		subcategoriesWithStats: async (_, { categoryType }) => {
+			const productService = getProductService();
+			const subcategoriesWithStats =
+				await productService.getSubcategoriesWithStats(categoryType);
+
+			return subcategoriesWithStats;
 		},
 	},
 

@@ -20,3 +20,16 @@ input UpdateProductInput {
 	tagIds: [ID!]
 	newTags: [String!]
 }
+
+input ProductsQueryInput {
+	limit: Int = 20
+	offset: Int = 0
+	categoryType: CategoryType
+	subcategorySlug: String
+	tagSlugs: [String!]
+	search: String
+	minPrice: Float
+	maxPrice: Float
+	minRating: Float
+	sortBy: ProductSortOption = NEWEST
+}

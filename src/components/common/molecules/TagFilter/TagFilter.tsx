@@ -74,22 +74,6 @@ export const TagFilter = ({
 			data-cc={dataCc}
 			className={cn("space-y-4", className)}
 		>
-			<div className="flex items-center justify-between">
-				<h3 className="text-lg font-semibold">Tags</h3>
-				{selectedTagSlugs.length > 0 && (
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={resetFilters}
-						className="h-8 px-2 text-xs"
-						data-testid={`${testId}-clear-button`}
-					>
-						<X className="mr-1 h-3 w-3" />
-						Clear
-					</Button>
-				)}
-			</div>
-
 			<div className="relative">
 				<input
 					type="text"
@@ -109,7 +93,7 @@ export const TagFilter = ({
 			</div>
 
 			<ScrollArea className={`max-h-[${maxHeight}]`}>
-				<div className="flex space-y-1">
+				<div className="flex flex-wrap space-y-1">
 					{filteredTags.map((tag) => {
 						const isSelected = selectedTagSlugs.includes(tag.slug);
 						return (
@@ -142,6 +126,19 @@ export const TagFilter = ({
 					)}
 				</div>
 			</ScrollArea>
+			<div className="flex items-center justify-between">
+				{selectedTagSlugs.length > 0 && (
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={resetFilters}
+						className="w-full text-xs"
+						data-testid={`${testId}-clear-button`}
+					>
+						Clear Tags
+					</Button>
+				)}
+			</div>
 		</div>
 	);
 };

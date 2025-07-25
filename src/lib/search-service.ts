@@ -61,8 +61,14 @@ export class SearchService {
 				...subcategories.map((subcategory) => ({
 					type: SuggestionProps.CATEGORY,
 					title: `${subcategory.categoryName} > ${subcategory.name}`,
-					subtitle: `${subcategory.productCount} products`,
-					url: `/products?category=${subcategory.categorySlug}&subcategory=${subcategory.slug}`,
+					subtitle:
+						subcategory.matchingProductsCount > 0
+							? `${subcategory.matchingProductsCount} products match "${query}"`
+							: `${subcategory.productCount} products`,
+					url:
+						subcategory.matchingProductsCount > 0
+							? `/products?category=${subcategory.categorySlug}&subcategory=${subcategory.slug}&search=${query}`
+							: `/products?category=${subcategory.categorySlug}&subcategory=${subcategory.slug}`,
 				})),
 			);
 			// 4. Add tag suggestions
@@ -207,34 +213,60 @@ export class SearchService {
 	 * Find subcategories matching search query
 	 */
 	private async findMatchingSubcategories(query: string) {
-		const subcategories = await this.prisma.subcategory.findMany({
-			where: {
-				name: {
-					contains: query,
-					mode: "insensitive",
-				},
-			},
-			include: {
-				products: true,
-			},
-		});
+		const subcategories = await this.prisma.subcategory.findMany();
 
-		// Add category info and product counts
-		const subcategoriesWithInfo = subcategories.map((sub) => {
-			const categoryInfo = this.getCategoryInfo(sub.categoryType);
-			return {
-				...sub,
-				categoryName: categoryInfo.name,
-				categorySlug: categoryInfo.slug,
-				productCount: sub.products.length,
-			};
-		});
+		const subcategoriesWithInfo = await Promise.all(
+			subcategories.map(async (sub) => {
+				const nameMatches = sub.name
+					.toLowerCase()
+					.includes(query.toLowerCase());
+
+				const matchingProductsCount = await this.prisma.product.count(
+					{
+						where: {
+							AND: [
+								{
+									subcategories: {
+										some: {
+											subcategoryId: sub.id,
+										},
+									},
+								},
+								SearchQueryBuilder.buildFullTextSearch(query) || {},
+							],
+						},
+					},
+				);
+
+				const totalProductCount = await this.prisma.product.count({
+					where: {
+						subcategories: {
+							some: {
+								subcategoryId: sub.id,
+							},
+						},
+					},
+				});
+
+				const categoryInfo = this.getCategoryInfo(sub.categoryType);
+
+				return {
+					...sub,
+					categoryName: categoryInfo.name,
+					categorySlug: categoryInfo.slug,
+					nameMatches,
+					matchingProductsCount,
+					productCount: totalProductCount,
+				};
+			}),
+		);
 
 		return subcategoriesWithInfo.filter(
-			(sub) => sub.productCount > 0,
+			(sub) =>
+				(sub.nameMatches && sub.productCount > 0) ||
+				sub.matchingProductsCount > 0,
 		);
 	}
-
 	/**
 	 * Find tags matching search query
 	 */

@@ -9,3 +9,12 @@ query Subcategory($fullSlug: String!) {
 		...SubcategoryFields
 	}
 }
+
+query SubcategoriesWithStats($categoryType: CategoryType!) {
+	subcategoriesWithStats(categoryType: $categoryType) {
+		id
+		name
+		slug
+		productCount
+	}
+}

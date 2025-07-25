@@ -13,3 +13,11 @@ type CategoryInfo {
 	products: [Product]
 	subcategories: [Subcategory]
 }
+
+type CategoryWithStats {
+	type: CategoryType!
+	name: String!
+	slug: String!
+	productCount: Int!
+	subcategories: [SubcategoryWithStats!]
+}

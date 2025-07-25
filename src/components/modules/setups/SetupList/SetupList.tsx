@@ -1,4 +1,4 @@
-import { SetupCard } from "@/components/modules/setups/SetupCard";
+import { SetupCard } from "@/components/modules/Setups/SetupCard";
 import { BaseProps } from "@/components/utils/types";
 
 export type SetupListProps = BaseProps;

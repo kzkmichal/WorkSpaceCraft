@@ -1,4 +1,4 @@
-import { ProductCard } from "@/components/modules/products/ProductCard";
+import { ProductCard } from "@/components/modules/Products/ProductCard";
 import { BaseProps } from "@/components/utils/types";
 import { ProductFieldsFragment } from "@/graphql/generated/graphql";
 

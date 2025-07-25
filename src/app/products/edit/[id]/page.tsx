@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { CategoryType } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma/prisma";
-import { ProductForm } from "@/components/modules/products/ProductForm";
+import { ProductForm } from "@/components/modules/Products/ProductForm";
 
 type EditProductPageProps = {
 	params: Promise<{ id: string }>;

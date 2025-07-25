@@ -23,3 +23,18 @@ type ProductImage {
 	fileName: String
 	isPrimary: Boolean
 }
+
+enum ProductSortOption {
+	PRICE_LOW_TO_HIGH
+	PRICE_HIGH_TO_LOW
+	NEWEST
+	OLDEST
+	MOST_POPULAR
+	HIGHEST_RATED
+	MOST_REVIEWED
+}
+
+type PriceRange {
+	min: Float
+	max: Float
+}

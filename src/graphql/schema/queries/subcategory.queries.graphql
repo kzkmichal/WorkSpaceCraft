@@ -1,4 +1,7 @@
 type Query {
 	subcategories(categoryType: CategoryType): [Subcategory!]!
 	subcategory(fullSlug: String!): Subcategory
+	subcategoriesWithStats(
+		categoryType: CategoryType!
+	): [SubcategoryWithStats!]!
 }

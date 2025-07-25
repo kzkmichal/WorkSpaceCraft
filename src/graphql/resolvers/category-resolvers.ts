@@ -6,6 +6,7 @@ import {
 	formatSubcategory,
 } from "./utils";
 import { categories, getCategoryByType } from "@/constant/categories";
+import { getProductService } from "@/lib/services/productService/product-service-factory";
 
 export const resolvers: Resolvers = {
 	Query: {
@@ -254,6 +255,13 @@ export const resolvers: Resolvers = {
 					},
 				);
 			}
+		},
+
+		categoriesWithStats: async (_) => {
+			const productService = getProductService();
+			const categoriesWithStats =
+				await productService.getCategoriesWithStats();
+			return categoriesWithStats;
 		},
 	},
 
