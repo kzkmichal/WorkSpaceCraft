@@ -69,7 +69,7 @@ function Badge({
 		destructive:
 			" hover:bg-destructive/80 dark:hover:bg-destructive/80",
 		outline:
-			"hover:bg-accent/80 dark:hover:bg-accent/80 dark:hover:border-accent hover:border-accent-foreground",
+			"hover:bg-accent dark:hover:bg-accent/80 dark:hover:border-accent hover:border-accent",
 	};
 
 	const badgeContent = (

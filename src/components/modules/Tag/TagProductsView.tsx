@@ -4,7 +4,7 @@ import { useState } from "react";
 import { TagProductsViewProps } from "./types";
 import { useProductsByTagQuery } from "@/graphql/generated/graphql";
 import { ProductList } from "@/components/modules/Products/ProductList";
-import { Container, Stack } from "@/components/common/molecules";
+import { Container } from "@/components/common/molecules";
 // import { LoadingSpinner } from "@/components/common/atoms/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 
@@ -42,49 +42,47 @@ export const TagProductsView = ({
 
 	return (
 		<Container data-testid={testId} as={"section"}>
-			<Stack direction="column" spacing={6}>
-				<div>
-					<h1 className="text-3xl font-bold">
-						Products tagged with: {tag.name}
-					</h1>
+			<div className="mb-6">
+				<h1 className="text-3xl font-bold">
+					Products tagged with: {tag.name}
+				</h1>
+				<p className="mt-2 text-gray-600">
+					Browse all products with this tag
+				</p>
+			</div>
+
+			{loading && products.length === 0 ? (
+				<div className="flex items-center justify-center py-12">
+					{/* <LoadingSpinner size="lg" /> */}
+				</div>
+			) : products.length === 0 ? (
+				<div className="rounded-lg border bg-gray-50 p-8 text-center">
+					<h2 className="text-lg font-medium">No products found</h2>
 					<p className="mt-2 text-gray-600">
-						Browse all products with this tag
+						There are no products with this tag yet.
 					</p>
 				</div>
+			) : (
+				<>
+					<ProductList
+						products={products}
+						data-testid={`${testId}-product-list`}
+					/>
 
-				{loading && products.length === 0 ? (
-					<div className="flex items-center justify-center py-12">
-						{/* <LoadingSpinner size="lg" /> */}
-					</div>
-				) : products.length === 0 ? (
-					<div className="rounded-lg border bg-gray-50 p-8 text-center">
-						<h2 className="text-lg font-medium">No products found</h2>
-						<p className="mt-2 text-gray-600">
-							There are no products with this tag yet.
-						</p>
-					</div>
-				) : (
-					<>
-						<ProductList
-							products={products}
-							data-testid={`${testId}-product-list`}
-						/>
-
-						{products.length >= limit && (
-							<div className="mt-6 flex justify-center">
-								<Button
-									onClick={handleLoadMore}
-									disabled={loading}
-									variant="outline"
-									data-testid={`${testId}-load-more`}
-								>
-									{loading ? "Loading..." : "Load More"}
-								</Button>
-							</div>
-						)}
-					</>
-				)}
-			</Stack>
+					{products.length >= limit && (
+						<div className="mt-6 flex justify-center">
+							<Button
+								onClick={handleLoadMore}
+								disabled={loading}
+								variant="outline"
+								data-testid={`${testId}-load-more`}
+							>
+								{loading ? "Loading..." : "Load More"}
+							</Button>
+						</div>
+					)}
+				</>
+			)}
 		</Container>
 	);
 };

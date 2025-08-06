@@ -32,7 +32,7 @@ export default async function ProductsPage({
 	const popularTags = await getPopularTags(20);
 
 	return (
-		<Container>
+		<Container data-testid="products-page">
 			<h1 className="mb-6 text-3xl font-bold">Products</h1>
 			<Suspense fallback={<ProductListLoading count={6} />}>
 				<Products
