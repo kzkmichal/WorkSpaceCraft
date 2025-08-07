@@ -22,6 +22,7 @@ import { usePopularTags } from "@/hooks/tags/useTags";
 export const Products = ({
 	initialParams,
 	initialPopularTags,
+	"data-testid": testId = "products",
 }: ProductsProps) => {
 	const searchParams = useSearchParams();
 
@@ -134,10 +135,12 @@ export const Products = ({
 
 	return (
 		<Container
-			className="flex gap-4 space-y-6"
-			wrapperClassName="flex gap-4"
+			wrapperClassName="flex flex-col lg:flex-row gap-6"
+			as={"section"}
+			paddingX="none"
+			paddingY="none"
 		>
-			<div>
+			<div className="flex flex-col rounded-lg border bg-white p-6">
 				<ProductsSearch
 					className="max-w-lg"
 					placeholder="Search products..."
@@ -150,7 +153,7 @@ export const Products = ({
 					)}
 				</Container>
 			</div>
-			<main className="flex-1">
+			<div className="flex-1 rounded-lg border bg-white p-6">
 				{hasFilters && (
 					<div className="mb-6 flex flex-wrap gap-2">
 						{searchQuery && (
@@ -234,7 +237,10 @@ export const Products = ({
 					/>
 				)}
 				{!loading && hasResults && (
-					<ProductList products={products} />
+					<ProductList
+						products={products}
+						data-testid={`${testId}-list`}
+					/>
 				)}
 				{!loading && hasResults && products.length >= limit && (
 					<div className="mt-8 flex justify-center">
@@ -246,7 +252,7 @@ export const Products = ({
 						</button>
 					</div>
 				)}
-			</main>
+			</div>
 		</Container>
 	);
 };

@@ -73,6 +73,7 @@ module.exports = {
 			fontFamily: {
 				serif: ["DM Serif Text", "serif"],
 				sans: ["Inter", "sans-serif"],
+				primary: ["Archivo", "sans-serif"],
 			},
 			fontSize: {
 				"2xs": [
