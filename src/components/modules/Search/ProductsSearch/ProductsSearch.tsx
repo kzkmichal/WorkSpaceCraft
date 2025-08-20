@@ -15,6 +15,7 @@ export const ProductsSearch = ({
 	placeholder = "Search in products...",
 	className,
 	autoFocus = false,
+	"data-testid": testId = "products-search",
 }: ProductsSearchProps) => {
 	const router = useRouter();
 	const pathname = usePathname();
@@ -94,17 +95,21 @@ export const ProductsSearch = ({
 		<form
 			onSubmit={handleSubmit}
 			className={cn("relative", className)}
+			data-testid={testId}
 		>
 			<div
 				className={cn(
-					"relative flex items-center rounded-lg border bg-white shadow-sm transition-all",
+					"relative flex items-center rounded-lg border bg-accent text-accent-foreground shadow-sm transition-all",
 					isFocused
 						? "border-primary ring-2 ring-primary/20"
 						: "border-border",
 					"hover:border-primary/60",
 				)}
 			>
-				<Search className="ml-3 h-4 w-4 text-muted-foreground" />
+				<Search
+					className="ml-3 h-4 w-4 text-muted-foreground"
+					data-testid={`${testId}-icon`}
+				/>
 				<input
 					ref={inputRef}
 					type="text"
@@ -114,11 +119,12 @@ export const ProductsSearch = ({
 					onBlur={() => setIsFocused(false)}
 					placeholder={placeholder}
 					className={cn(
-						"flex-1 border-0 bg-transparent px-3 py-2.5 text-sm outline-none",
+						"flex-1 border-0 bg-transparent px-3 py-2 text-sm outline-none",
 						"placeholder:text-muted-foreground",
 					)}
 					autoComplete="off"
 					spellCheck={false}
+					data-testid={`${testId}-input`}
 				/>
 				{query && (
 					<button
@@ -129,6 +135,7 @@ export const ProductsSearch = ({
 							"text-muted-foreground hover:text-foreground",
 						)}
 						aria-label="Clear search"
+						data-testid={`${testId}-clear-button`}
 					>
 						<X className="h-3 w-3" />
 					</button>

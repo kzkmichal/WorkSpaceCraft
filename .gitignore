@@ -4,6 +4,7 @@ coverage
 graph.md
 .prettierignore
 .next
+.DS_Store
 
 # Environment variables
 .env

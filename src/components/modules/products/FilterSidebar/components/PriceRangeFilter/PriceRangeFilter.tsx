@@ -6,6 +6,7 @@ import { usePriceRangeForFiltersQuery } from "@/graphql/generated/graphql";
 import { Loader2 } from "lucide-react";
 import { PriceRangeFilterProps } from "./types";
 import { useFilterParams } from "../../hooks/useFilterParams";
+import { Button } from "@/components/ui/button";
 
 export const PriceRangeFilter = ({
 	"data-testid": testId = "price-range-filter",
@@ -83,11 +84,17 @@ export const PriceRangeFilter = ({
 		);
 	}
 
+	const inputCx =
+		"mt-1 w-full rounded-lg border border-border bg-accent px-3 py-2 text-sm text-accent-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 hover:border-primary/60 shadow-sm transition-all";
+
 	return (
 		<div className="space-y-4" data-testid={testId}>
 			<div className="grid grid-cols-2 gap-2">
-				<div>
-					<label className="text-xs font-medium text-muted-foreground">
+				<div data-testid={`${testId}-min-price`}>
+					<label
+						className="text-xs font-medium text-muted-foreground"
+						data-testid={`${testId}-min-price-label`}
+					>
 						Min Price
 					</label>
 					<input
@@ -95,14 +102,18 @@ export const PriceRangeFilter = ({
 						placeholder={priceRange?.min?.toString() || "0"}
 						value={minPrice}
 						onChange={(e) => setMinPrice(e.target.value)}
-						className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+						className={inputCx}
 						min="0"
 						step="1"
+						data-testid={`${testId}-min-price-input`}
 					/>
 				</div>
 
-				<div>
-					<label className="text-xs font-medium text-muted-foreground">
+				<div data-testid={`${testId}-max-price`}>
+					<label
+						className="text-xs font-medium text-muted-foreground"
+						data-testid={`${testId}-max-price-label`}
+					>
 						Max Price
 					</label>
 					<input
@@ -110,27 +121,34 @@ export const PriceRangeFilter = ({
 						placeholder={priceRange?.max?.toString() || "1000"}
 						value={maxPrice}
 						onChange={(e) => setMaxPrice(e.target.value)}
-						className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+						className={inputCx}
 						min="0"
 						step="1"
+						data-testid={`${testId}-max-price-input`}
 					/>
 				</div>
 			</div>
 			{canApply && (
-				<button
+				<Button
+					variant="primary"
 					onClick={handleApplyPriceFilter}
-					className="w-full rounded-md bg-primary py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+					className="w-full"
+					size="sm"
+					data-testid={`${testId}-apply-button`}
 				>
 					Apply Price Range
-				</button>
+				</Button>
 			)}
 			{hasActivePriceFilter && (
-				<button
+				<Button
+					variant="outline"
 					onClick={clearPriceFilter}
-					className="w-full rounded-md border border-border py-2 text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+					className="w-full"
+					size="sm"
+					data-testid={`${testId}-clear-button`}
 				>
 					Clear Price Filter
-				</button>
+				</Button>
 			)}
 		</div>
 	);

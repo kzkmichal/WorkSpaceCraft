@@ -5,6 +5,8 @@ import { Loader2 } from "lucide-react";
 import { SearchParamsKeys } from "@/components/modules/Products";
 import { SubcategoryFilterProps } from "./types";
 import { useFilterParams } from "../../hooks/useFilterParams";
+import { RadioFilter } from "../shared/RadioFilter";
+import { RadioFilterOption } from "../shared/RadioFilter/types";
 
 export const SubcategoryFilter = ({
 	"data-testid": testId = "subcategory-filter",
@@ -27,7 +29,7 @@ export const SubcategoryFilter = ({
 		return (
 			<div
 				className="text-sm text-muted-foreground"
-				data-testid={testId}
+				data-testid={`${testId}-no-category`}
 			>
 				Select a category first
 			</div>
@@ -38,7 +40,7 @@ export const SubcategoryFilter = ({
 		return (
 			<div
 				className="flex items-center justify-center py-4"
-				data-testid={testId}
+				data-testid={`${testId}-loading`}
 			>
 				<Loader2 className="h-4 w-4 animate-spin" />
 				<span className="ml-2 text-sm text-muted-foreground">
@@ -52,7 +54,7 @@ export const SubcategoryFilter = ({
 		return (
 			<div
 				className="text-sm text-muted-foreground"
-				data-testid={testId}
+				data-testid={`${testId}-error`}
 			>
 				Failed to load subcategories
 			</div>
@@ -65,49 +67,29 @@ export const SubcategoryFilter = ({
 		return (
 			<div
 				className="text-sm text-muted-foreground"
-				data-testid={testId}
+				data-testid={`${testId}-no-subcategories`}
 			>
 				No subcategories available
 			</div>
 		);
 	}
 
+	const options: RadioFilterOption[] = subcategories.map(
+		(subcategory) => ({
+			value: subcategory.slug,
+			label: subcategory.name,
+			count: subcategory.productCount,
+		}),
+	);
+
 	return (
-		<div className="space-y-2" data-testid={testId}>
-			<label className="flex cursor-pointer items-center space-x-2 rounded p-2 transition-colors hover:bg-muted/50">
-				<input
-					type="radio"
-					name="subcategory"
-					checked={!filters.subcategory}
-					onChange={() => handleSubcategoryChange(undefined)}
-					className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
-				/>
-				<span className="text-sm font-medium">All Subcategories</span>
-			</label>
-			{subcategories.map((subcategory) => (
-				<label
-					key={subcategory.id}
-					className="flex cursor-pointer items-center justify-between rounded p-2 transition-colors hover:bg-muted/50"
-				>
-					<div className="flex items-center space-x-2">
-						<input
-							type="radio"
-							name="subcategory"
-							checked={filters.subcategory === subcategory.slug}
-							onChange={() =>
-								handleSubcategoryChange(subcategory.slug)
-							}
-							className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
-						/>
-						<span className="text-sm">{subcategory.name}</span>
-					</div>
-					<div className="flex flex-col items-end">
-						<span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
-							{subcategory.productCount}
-						</span>
-					</div>
-				</label>
-			))}
-		</div>
+		<RadioFilter
+			name="subcategory"
+			options={options}
+			value={filters.subcategory}
+			onChange={handleSubcategoryChange}
+			defaultLabel="All Subcategories"
+			data-testid={`${testId}-radio-filter`}
+		/>
 	);
 };

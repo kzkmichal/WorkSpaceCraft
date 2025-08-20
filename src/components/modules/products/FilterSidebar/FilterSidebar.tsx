@@ -4,6 +4,8 @@ import { CategoryFilter } from "./components/CategoryFilter";
 import { SubcategoryFilter } from "./components/SubcategoryFilter";
 import { PriceRangeFilter } from "./components/PriceRangeFilter";
 import { SortFilter } from "./components/SortFilter/SortFilter";
+import { FilterItem } from "./components/shared/FilterItem";
+import { cn } from "@/components/utils/helpers";
 
 export const FilterSidebar = ({
 	popularTags,
@@ -11,45 +13,45 @@ export const FilterSidebar = ({
 	"data-testid": testId = "filter-sidebar",
 }: FilterSidebarProps) => {
 	return (
-		<div className={className}>
-			<div className="space-y-6">
-				<div>
-					<h3 className="mb-3 text-sm font-medium text-gray-900">
-						Categories
-					</h3>
-					<CategoryFilter data-testid={`${testId}-category-filter`} />
-				</div>
-				<div>
-					<h3 className="mb-3 text-sm font-medium text-gray-900">
-						Subcategories
-					</h3>
-					<SubcategoryFilter
-						data-testid={`${testId}-subcategory-filter`}
-					/>
-				</div>
-				<div>
-					<h3 className="mb-3 text-sm font-medium text-gray-900">
-						Price Range
-					</h3>
-					<PriceRangeFilter data-testid={`${testId}-price-filter`} />
-				</div>
-				<div>
-					<h3 className="mb-3 text-sm font-medium text-gray-900">
-						Sort By
-					</h3>
-					<SortFilter data-testid={`${testId}-sort-filter`} />
-				</div>
-				<div>
-					<h3 className="mb-3 text-sm font-medium text-gray-900">
-						Tags
-					</h3>
-					<TagFilter
-						availableTags={popularTags}
-						maxHeight="300px"
-						data-testid={`${testId}-tag-filter`}
-					/>
-				</div>
-			</div>
-		</div>
+		<ul
+			className={cn("flex flex-col gap-4", className)}
+			data-testid={testId}
+		>
+			<FilterItem
+				name="Categories"
+				data-testid={`${testId}-filter-item`}
+			>
+				<CategoryFilter data-testid={`${testId}-category-filter`} />
+			</FilterItem>
+			<FilterItem
+				name="Subcategories"
+				data-testid={`${testId}-subcategory-filter`}
+			>
+				<SubcategoryFilter
+					data-testid={`${testId}-subcategory-filter`}
+				/>
+			</FilterItem>
+			<FilterItem
+				name="Price Range"
+				data-testid={`${testId}-price-range-filter`}
+			>
+				<PriceRangeFilter
+					data-testid={`${testId}-price-range-filter`}
+				/>
+			</FilterItem>
+			<FilterItem
+				name="Sort By"
+				data-testid={`${testId}-sort-filter`}
+			>
+				<SortFilter data-testid={`${testId}-sort-filter`} />
+			</FilterItem>
+			<FilterItem name="Tags" data-testid={`${testId}-tag-filter`}>
+				<TagFilter
+					availableTags={popularTags}
+					maxHeight="200px"
+					data-testid={`${testId}-tag-filter`}
+				/>
+			</FilterItem>
+		</ul>
 	);
 };
