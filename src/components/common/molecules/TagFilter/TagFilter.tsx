@@ -6,11 +6,11 @@ import {
 	useRouter,
 	usePathname,
 } from "next/navigation";
-import { Check, X } from "lucide-react";
+import { X } from "lucide-react";
 import { TagFilterProps } from "./types";
 import { TagBadge } from "@/components/common/atoms/TagBadge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/components/utils/helpers";
 
 export const TagFilter = ({
@@ -19,7 +19,7 @@ export const TagFilter = ({
 	"data-testid": testId = "tag-filter",
 	"data-cc": dataCc,
 	id,
-	maxHeight = "300px",
+	maxHeight = "200px",
 }: TagFilterProps) => {
 	const router = useRouter();
 	const pathname = usePathname();
@@ -67,11 +67,13 @@ export const TagFilter = ({
 		});
 	};
 
+	const inputCx =
+		"w-full rounded-lg border border-border bg-accent px-3 py-2 text-sm text-accent-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 hover:border-primary/60 shadow-sm transition-all";
+
 	return (
 		<div
 			id={id}
 			data-testid={testId}
-			data-cc={dataCc}
 			className={cn("space-y-4", className)}
 		>
 			<div className="relative">
@@ -80,51 +82,52 @@ export const TagFilter = ({
 					placeholder="Search tags..."
 					value={searchQuery}
 					onChange={(e) => setSearchQuery(e.target.value)}
-					className="w-full rounded-md border border-input px-3 py-2 text-sm"
+					className={inputCx}
+					data-testid={`${testId}-search-input`}
 				/>
 				{searchQuery && (
 					<button
 						onClick={() => setSearchQuery("")}
 						className="absolute right-2 top-1/2 -translate-y-1/2"
+						data-testid={`${testId}-clear-search`}
 					>
 						<X className="h-4 w-4 text-gray-400" />
 					</button>
 				)}
 			</div>
 
-			<ScrollArea className={`max-h-[${maxHeight}]`}>
-				<div className="flex flex-wrap space-y-1">
+			<ScrollArea
+				className={cn(
+					filteredTags.length > 20 ? `h-[${maxHeight}}]` : "h-auto",
+					"w-full rounded-lg border",
+				)}
+				data-testid={`${testId}-scroll-area`}
+			>
+				<div
+					className="flex flex-wrap gap-2 p-2"
+					data-testid={`${testId}-tag-list`}
+				>
 					{filteredTags.map((tag) => {
 						const isSelected = selectedTagSlugs.includes(tag.slug);
 						return (
-							<div
-								key={tag.id}
-								className={cn(
-									"flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5",
-									isSelected && "bg-accent",
-								)}
+							<TagBadge
+								key={tag.slug}
+								tag={tag}
 								onClick={() => toggleTag(tag.slug)}
-							>
-								<div className="flex items-center space-x-2">
-									<TagBadge
-										tag={tag}
-										asLink={false}
-										data-testid={`${testId}-tag-badge-${tag.slug}`}
-									/>
-								</div>
-								{isSelected && (
-									<Check className="h-4 w-4 text-primary" />
-								)}
-							</div>
+								isSelected={isSelected}
+								variant="secondary"
+								asLink={false}
+								data-testid={`${testId}-tag-badge-${tag.slug}`}
+							/>
 						);
 					})}
-
 					{filteredTags.length === 0 && (
 						<div className="py-2 text-center text-sm text-muted-foreground">
 							No tags found
 						</div>
 					)}
 				</div>
+				<ScrollBar orientation="vertical" />
 			</ScrollArea>
 			<div className="flex items-center justify-between">
 				{selectedTagSlugs.length > 0 && (
@@ -132,7 +135,7 @@ export const TagFilter = ({
 						variant="outline"
 						size="sm"
 						onClick={resetFilters}
-						className="w-full text-xs"
+						className="w-full"
 						data-testid={`${testId}-clear-button`}
 					>
 						Clear Tags

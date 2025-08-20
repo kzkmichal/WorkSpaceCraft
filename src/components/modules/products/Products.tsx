@@ -140,18 +140,16 @@ export const Products = ({
 			paddingX="none"
 			paddingY="none"
 		>
-			<div className="flex flex-col rounded-lg border bg-white p-6">
+			<div className="flex flex-col gap-3 rounded-lg border bg-white p-6">
 				<ProductsSearch
 					className="max-w-lg"
 					placeholder="Search products..."
 				/>
-				<Container className="flex gap-6" paddingX="none">
-					{!loading && finalPopularTags && (
-						<aside className="w-64 flex-shrink-0">
-							<FilterSidebar popularTags={finalPopularTags} />
-						</aside>
-					)}
-				</Container>
+				{!loading && finalPopularTags && (
+					<aside className="w-64 flex-shrink-0">
+						<FilterSidebar popularTags={finalPopularTags} />
+					</aside>
+				)}
 			</div>
 			<div className="flex-1 rounded-lg border bg-white p-6">
 				{hasFilters && (

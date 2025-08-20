@@ -1,19 +1,23 @@
 "use client";
 
 import { ProductSortOption } from "@/graphql/generated/graphql";
-import { ChevronDown } from "lucide-react";
-import { useState } from "react";
 import { SearchParamsKeys } from "@/components/modules/Products";
 import { SortFilterProps } from "./types";
-import { Button } from "@/components/common/atoms";
 import { useFilterParams } from "../../hooks/useFilterParams";
 import { SORT_OPTIONS } from "./const";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/components/utils/helpers";
 
 export const SortFilter = ({
 	"data-testid": testId = "sort-filter",
 }: SortFilterProps) => {
 	const { filters, updateFilter } = useFilterParams();
-	const [isOpen, setIsOpen] = useState(false);
 
 	const currentSort = filters.sortBy as ProductSortOption | undefined;
 
@@ -21,74 +25,44 @@ export const SortFilter = ({
 		SORT_OPTIONS.find((option) => option.value === currentSort)
 			?.label || "Newest First";
 
-	const handleSortChange = (sortOption: ProductSortOption) => {
+	const handleSortChange = (value: string) => {
+		const sortOption = value as ProductSortOption;
 		updateFilter({
 			[SearchParamsKeys.SORT_BY]:
 				sortOption === "NEWEST" ? undefined : sortOption,
 		});
-
-		setIsOpen(false);
-	};
-
-	const clearSortFilter = () => {
-		updateFilter({
-			[SearchParamsKeys.SORT_BY]: undefined,
-		});
 	};
 
 	return (
-		<div className="space-y-4" data-testid={testId}>
-			<div className="relative">
-				<button
-					onClick={() => setIsOpen(!isOpen)}
-					className="flex w-full items-center justify-between rounded-md border border-border px-3 py-2 text-sm transition-colors hover:bg-muted/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-				>
-					<span>{currentSortLabel}</span>
-					<ChevronDown
-						className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
-					/>
-				</button>
-
-				{isOpen && (
-					<div className="absolute left-0 right-0 top-full z-10 mt-1 rounded-md border border-border bg-white shadow-lg">
-						<div className="py-1">
-							{SORT_OPTIONS.map((option) => (
-								<button
-									key={option.value}
-									onClick={() => handleSortChange(option.value)}
-									className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-muted ${
-										currentSort === option.value ||
-										(!currentSort && option.value === "NEWEST")
-											? "bg-primary/10 font-medium text-primary"
-											: "text-foreground"
-									}`}
-								>
-									{option.label}
-								</button>
-							))}
-						</div>
-					</div>
+		<Select
+			value={currentSort || "NEWEST"}
+			onValueChange={handleSortChange}
+		>
+			<SelectTrigger
+				className={cn(
+					"h-auto w-full rounded-lg border border-border bg-accent text-sm text-accent-foreground shadow-sm transition-all placeholder:text-muted-foreground",
+					"hover:border-primary/60",
+					"focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-0",
+					"[&[data-state=open]]:border-primary [&[data-state=open]]:ring-2 [&[data-state=open]]:ring-primary/20",
 				)}
-
-				{isOpen && (
-					<div
-						className="z-5 fixed inset-0"
-						onClick={() => setIsOpen(false)}
-					/>
-				)}
-			</div>
-
-			{currentSort && currentSort !== "NEWEST" && (
-				<Button
-					onClick={clearSortFilter}
-					variant="outline"
-					size="sm"
-					className="w-full text-xs"
-					data-testid={`${testId}-clear-button`}
-				>
-					Reset to Default Sort
-				</Button>
-			)}
-		</div>
+				data-testid={`${testId}-trigger`}
+			>
+				<SelectValue
+					placeholder={currentSortLabel}
+					data-testid={`${testId}-value`}
+				/>
+			</SelectTrigger>
+			<SelectContent data-testid={`${testId}-dropdown-content`}>
+				{SORT_OPTIONS.map((option) => (
+					<SelectItem
+						key={option.value}
+						value={option.value}
+						data-testid={`${testId}-dropdown-item-${option.value}`}
+					>
+						{option.label}
+					</SelectItem>
+				))}
+			</SelectContent>
+		</Select>
 	);
 };

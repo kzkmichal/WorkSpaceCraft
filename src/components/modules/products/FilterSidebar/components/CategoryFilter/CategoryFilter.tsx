@@ -8,6 +8,8 @@ import { Loader2 } from "lucide-react";
 import { SearchParamsKeys } from "../../../types";
 import { useFilterParams } from "../../hooks/useFilterParams";
 import { CategoryFilterProps } from "./types";
+import { RadioFilter } from "../shared/RadioFilter";
+import { RadioFilterOption } from "../shared/RadioFilter/types";
 
 export const CategoryFilter = ({
 	"data-testid": testId = "category-filter",
@@ -18,9 +20,11 @@ export const CategoryFilter = ({
 		fetchPolicy: "cache-and-network",
 	});
 
-	const handleCategoryChange = (categoryType?: CategoryType) => {
+	const handleCategoryChange = (categoryType?: string) => {
 		updateFilter({
-			[SearchParamsKeys.CATEGORY]: categoryType,
+			[SearchParamsKeys.CATEGORY]: categoryType as
+				| CategoryType
+				| undefined,
 			[SearchParamsKeys.SUBCATEGORY]: undefined,
 		});
 	};
@@ -29,7 +33,7 @@ export const CategoryFilter = ({
 		return (
 			<div
 				className="flex items-center justify-center py-4"
-				data-testid={testId}
+				data-testid={`${testId}-loading`}
 			>
 				<Loader2 className="h-4 w-4 animate-spin" />
 				<span className="ml-2 text-sm text-muted-foreground">
@@ -43,7 +47,7 @@ export const CategoryFilter = ({
 		return (
 			<div
 				className="text-sm text-muted-foreground"
-				data-testid={testId}
+				data-testid={`${testId}-error`}
 			>
 				Failed to load categories
 			</div>
@@ -52,38 +56,20 @@ export const CategoryFilter = ({
 
 	const categories = data.categoriesWithStats;
 
+	const options: RadioFilterOption[] = categories.map((category) => ({
+		value: category.type,
+		label: category.name,
+		count: category.productCount,
+	}));
+
 	return (
-		<div className="space-y-2" data-testid={testId}>
-			<label className="flex cursor-pointer items-center space-x-2 rounded p-2 transition-colors hover:bg-muted/50">
-				<input
-					type="radio"
-					name="category"
-					checked={!filters.category}
-					onChange={() => handleCategoryChange(undefined)}
-					className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
-				/>
-				<span className="text-sm font-medium">All Categories</span>
-			</label>
-			{categories.map((category) => (
-				<label
-					key={category.type}
-					className="flex cursor-pointer items-center justify-between rounded p-2 transition-colors hover:bg-muted/50"
-				>
-					<div className="flex items-center space-x-2">
-						<input
-							type="radio"
-							name="category"
-							checked={filters.category === category.type}
-							onChange={() => handleCategoryChange(category.type)}
-							className="h-4 w-4 border-gray-300 text-primary focus:ring-primary"
-						/>
-						<span className="text-sm">{category.name}</span>
-					</div>
-					<span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
-						{category.productCount}
-					</span>
-				</label>
-			))}
-		</div>
+		<RadioFilter
+			name="category"
+			options={options}
+			value={filters.category}
+			onChange={handleCategoryChange}
+			defaultLabel="All Categories"
+			data-testid={`${testId}-radio-filter`}
+		/>
 	);
 };
