@@ -1,17 +1,16 @@
 "use client";
 
 import { useSubcategoriesWithStatsQuery } from "@/graphql/generated/graphql";
-import { Loader2 } from "lucide-react";
-import { SearchParamsKeys } from "@/components/modules/Products";
 import { SubcategoryFilterProps } from "./types";
-import { useFilterParams } from "../../hooks/useFilterParams";
 import { RadioFilter } from "../shared/RadioFilter";
-import { RadioFilterOption } from "../shared/RadioFilter/types";
+import { AsyncStateWrapper } from "../shared/AsyncStateWrapper";
+import { useFilterMode } from "../../hooks/useFilterMode";
 
 export const SubcategoryFilter = ({
+	mode = "instant",
 	"data-testid": testId = "subcategory-filter",
 }: SubcategoryFilterProps) => {
-	const { filters, updateFilter } = useFilterParams();
+	const { filters, updateFilter } = useFilterMode(mode);
 
 	const { data, loading, error } = useSubcategoriesWithStatsQuery({
 		variables: { categoryType: filters.category! },
@@ -19,10 +18,8 @@ export const SubcategoryFilter = ({
 		fetchPolicy: "cache-and-network",
 	});
 
-	const handleSubcategoryChange = (subcategorySlug?: string) => {
-		updateFilter({
-			[SearchParamsKeys.SUBCATEGORY]: subcategorySlug,
-		});
+	const handleSubcategoryChange = (value?: string) => {
+		updateFilter("subcategory", value);
 	};
 
 	if (!filters.category) {
@@ -36,60 +33,39 @@ export const SubcategoryFilter = ({
 		);
 	}
 
-	if (loading) {
-		return (
-			<div
-				className="flex items-center justify-center py-4"
-				data-testid={`${testId}-loading`}
-			>
-				<Loader2 className="h-4 w-4 animate-spin" />
-				<span className="ml-2 text-sm text-muted-foreground">
-					Loading subcategories...
-				</span>
-			</div>
-		);
-	}
-
-	if (error || !data?.subcategoriesWithStats) {
-		return (
-			<div
-				className="text-sm text-muted-foreground"
-				data-testid={`${testId}-error`}
-			>
-				Failed to load subcategories
-			</div>
-		);
-	}
-
-	const subcategories = data.subcategoriesWithStats;
-
-	if (subcategories.length === 0) {
-		return (
-			<div
-				className="text-sm text-muted-foreground"
-				data-testid={`${testId}-no-subcategories`}
-			>
-				No subcategories available
-			</div>
-		);
-	}
-
-	const options: RadioFilterOption[] = subcategories.map(
-		(subcategory) => ({
-			value: subcategory.slug,
-			label: subcategory.name,
-			count: subcategory.productCount,
-		}),
-	);
-
 	return (
-		<RadioFilter
-			name="subcategory"
-			options={options}
-			value={filters.subcategory}
-			onChange={handleSubcategoryChange}
-			defaultLabel="All Subcategories"
-			data-testid={`${testId}-radio-filter`}
-		/>
+		<AsyncStateWrapper
+			loading={loading}
+			error={error}
+			data={data?.subcategoriesWithStats}
+			loadingMessage="Loading subcategories..."
+			errorMessage="Failed to load subcategories"
+			data-testid={testId}
+		>
+			{data?.subcategoriesWithStats &&
+				(data.subcategoriesWithStats.length === 0 ? (
+					<div
+						className="text-sm text-muted-foreground"
+						data-testid={`${testId}-no-subcategories`}
+					>
+						No subcategories available
+					</div>
+				) : (
+					<RadioFilter
+						name="subcategory"
+						options={data.subcategoriesWithStats.map(
+							(subcategory) => ({
+								value: subcategory.slug,
+								label: subcategory.name,
+								count: subcategory.productCount,
+							}),
+						)}
+						value={filters.subcategory}
+						onChange={handleSubcategoryChange}
+						defaultLabel="All Subcategories"
+						data-testid={`${testId}-radio-filter`}
+					/>
+				))}
+		</AsyncStateWrapper>
 	);
 };

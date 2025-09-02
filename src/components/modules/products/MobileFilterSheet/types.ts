@@ -1,9 +1,8 @@
 import { BaseProps } from "@/components/utils/types";
 import { TagFieldsFragment } from "@/graphql/generated/graphql";
+import { ModeType } from "../FilterSidebar";
 
-export type ModeType = "staged" | "instant";
-
-export type FilterSidebarProps = BaseProps & {
-	popularTags: TagFieldsFragment[];
+export type MobileFilterSheetProps = BaseProps & {
 	mode?: ModeType;
+	popularTags: TagFieldsFragment[];
 };

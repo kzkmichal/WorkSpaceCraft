@@ -9,6 +9,7 @@ import { cn } from "@/components/utils/helpers";
 
 export const FilterSidebar = ({
 	popularTags,
+	mode = "staged",
 	className,
 	"data-testid": testId = "filter-sidebar",
 }: FilterSidebarProps) => {
@@ -21,7 +22,10 @@ export const FilterSidebar = ({
 				name="Categories"
 				data-testid={`${testId}-filter-item`}
 			>
-				<CategoryFilter data-testid={`${testId}-category-filter`} />
+				<CategoryFilter
+					data-testid={`${testId}-category-filter`}
+					mode={mode}
+				/>
 			</FilterItem>
 			<FilterItem
 				name="Subcategories"
@@ -29,6 +33,7 @@ export const FilterSidebar = ({
 			>
 				<SubcategoryFilter
 					data-testid={`${testId}-subcategory-filter`}
+					mode={mode}
 				/>
 			</FilterItem>
 			<FilterItem
@@ -37,19 +42,24 @@ export const FilterSidebar = ({
 			>
 				<PriceRangeFilter
 					data-testid={`${testId}-price-range-filter`}
+					mode={mode}
 				/>
 			</FilterItem>
 			<FilterItem
 				name="Sort By"
 				data-testid={`${testId}-sort-filter`}
 			>
-				<SortFilter data-testid={`${testId}-sort-filter`} />
+				<SortFilter
+					data-testid={`${testId}-sort-filter`}
+					mode={mode}
+				/>
 			</FilterItem>
 			<FilterItem name="Tags" data-testid={`${testId}-tag-filter`}>
 				<TagFilter
 					availableTags={popularTags}
 					maxHeight="200px"
 					data-testid={`${testId}-tag-filter`}
+					mode={mode}
 				/>
 			</FilterItem>
 		</ul>
