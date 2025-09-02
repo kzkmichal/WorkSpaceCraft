@@ -1,13 +1,8 @@
 "use client";
-import { useSearchParams } from "next/navigation";
-import { ProductsProps, SearchParamsKeys } from "./types";
-import { CategoryType } from "@/constant/categories";
-import { useSearchProductsQuery } from "@/graphql/generated/graphql";
+import { ProductsProps } from "./types";
+import { useFilterStore } from "@/stores";
 import { useProducts } from "@/hooks/useProducts";
-import {
-	Container,
-	FilterOptions,
-} from "@/components/common/molecules";
+import { Container } from "@/components/common/molecules";
 import {
 	ProductsSearch,
 	SearchEmpty,
@@ -18,32 +13,30 @@ import { FilterSidebar } from "./FilterSidebar";
 import { useEffect } from "react";
 import { ProductList } from "./ProductList";
 import { usePopularTags } from "@/hooks/tags/useTags";
+import { MobileFilterSheet } from "./MobileFilterSheet";
+import { useFilterStoreWithRouter } from "./FilterSidebar/hooks/useFilterStoreWithRouter";
 
 export const Products = ({
 	initialParams,
 	initialPopularTags,
 	"data-testid": testId = "products",
 }: ProductsProps) => {
-	const searchParams = useSearchParams();
+	const { urlFilters, clearAllFilters } = useFilterStoreWithRouter();
 
-	const searchQuery = searchParams.get(SearchParamsKeys.SEARCH) || "";
-	const tagSlugs =
-		searchParams.get(SearchParamsKeys.TAGS)?.split(",") || undefined;
-	const category = searchParams
-		.get(SearchParamsKeys.CATEGORY)
-		?.toUpperCase() as CategoryType | undefined;
-	const subcategory =
-		searchParams.get(SearchParamsKeys.SUBCATEGORY) || undefined;
-	const page = Number(searchParams.get(SearchParamsKeys.PAGE)) || 1;
-	const sortBy =
-		searchParams.get(SearchParamsKeys.SORT_BY) || undefined;
+	const searchQuery = urlFilters.search || "";
+	const tagSlugs = urlFilters.tags;
+	const category = urlFilters.category;
+	const subcategory = urlFilters.subcategory;
+	const page = urlFilters.page || 1;
+	const sortBy = urlFilters.sortBy;
 	const limit = 12;
-	const minPrice =
-		parseFloat(searchParams.get(SearchParamsKeys.MIN_PRICE) || "0") ||
-		undefined;
-	const maxPrice =
-		parseFloat(searchParams.get(SearchParamsKeys.MAX_PRICE) || "0") ||
-		undefined;
+	const minPrice = urlFilters.minPrice
+		? parseFloat(urlFilters.minPrice)
+		: undefined;
+	const maxPrice = urlFilters.maxPrice
+		? parseFloat(urlFilters.maxPrice)
+		: undefined;
+
 	const offset = (page - 1) * limit;
 
 	const {
@@ -78,49 +71,8 @@ export const Products = ({
 		subcategory ||
 		(tagSlugs && tagSlugs.length > 0);
 
-	const removeFilter = (filterType: string) => {
-		const params = new URLSearchParams(searchParams.toString());
-		params.delete(filterType);
-		if (filterType === "category") {
-			params.delete("subcategory");
-		}
-		window.history.replaceState(
-			{},
-			"",
-			`/products?${params.toString()}`,
-		);
-	};
-
-	const removeTagFilter = (tagToRemove: string) => {
-		const params = new URLSearchParams(searchParams.toString());
-		const currentTags = params.get("tags")?.split(",") || [];
-		const newTags = currentTags.filter((tag) => tag !== tagToRemove);
-
-		if (newTags.length > 0) {
-			params.set("tags", newTags.join(","));
-		} else {
-			params.delete("tags");
-		}
-
-		window.history.replaceState(
-			{},
-			"",
-			`/products?${params.toString()}`,
-		);
-	};
-
-	const clearAllFilters = () => {
-		window.history.replaceState({}, "", "/products");
-	};
-
 	const loadMoreProducts = () => {
-		const params = new URLSearchParams(searchParams.toString());
-		params.set("page", String(page + 1));
-		window.history.pushState(
-			{},
-			"",
-			`/products?${params.toString()}`,
-		);
+		useFilterStore.getState().updateFilterInstant("page", page + 1);
 	};
 
 	useEffect(() => {
@@ -136,52 +88,37 @@ export const Products = ({
 	return (
 		<Container
 			wrapperClassName="flex flex-col lg:flex-row gap-6"
-			as={"section"}
+			as="section"
 			paddingX="none"
 			paddingY="none"
+			data-testid={testId}
 		>
 			<div className="flex flex-col gap-3 rounded-lg border bg-white p-6">
-				<ProductsSearch
-					className="max-w-lg"
-					placeholder="Search products..."
-				/>
+				<div className="flex items-center justify-between gap-3">
+					<ProductsSearch
+						className="w-full"
+						placeholder="Search products..."
+						data-testid={`${testId}-search`}
+					/>
+					{finalPopularTags && (
+						<MobileFilterSheet
+							popularTags={finalPopularTags}
+							data-testid={`${testId}-mobile-filters`}
+							mode="staged"
+						/>
+					)}
+				</div>
 				{!loading && finalPopularTags && (
-					<aside className="w-64 flex-shrink-0">
-						<FilterSidebar popularTags={finalPopularTags} />
+					<aside className="hidden w-64 flex-shrink-0 lg:block">
+						<FilterSidebar
+							popularTags={finalPopularTags}
+							data-testid={`${testId}-desktop-sidebar`}
+							mode="instant"
+						/>
 					</aside>
 				)}
 			</div>
 			<div className="flex-1 rounded-lg border bg-white p-6">
-				{hasFilters && (
-					<div className="mb-6 flex flex-wrap gap-2">
-						{searchQuery && (
-							<FilterChip
-								label={`Search: "${searchQuery}"`}
-								onRemove={() => removeFilter("search")}
-							/>
-						)}
-						{category && (
-							<FilterChip
-								label={`Category: ${category}`}
-								onRemove={() => removeFilter("category")}
-							/>
-						)}
-						{subcategory && (
-							<FilterChip
-								label={`Subcategory: ${subcategory}`}
-								onRemove={() => removeFilter("subcategory")}
-							/>
-						)}
-						{tagSlugs &&
-							tagSlugs.map((tag) => (
-								<FilterChip
-									key={tag}
-									label={`Tag: ${tag}`}
-									onRemove={() => removeTagFilter(tag)}
-								/>
-							))}
-					</div>
-				)}
 				{!loading && (
 					<div className="mb-4 text-sm text-muted-foreground">
 						{hasResults ? (
@@ -252,38 +189,5 @@ export const Products = ({
 				)}
 			</div>
 		</Container>
-	);
-};
-
-const FilterChip = ({
-	label,
-	onRemove,
-}: {
-	label: string;
-	onRemove: () => void;
-}) => {
-	return (
-		<div className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm">
-			<span>{label}</span>
-			<button
-				onClick={onRemove}
-				className="ml-1 rounded-full p-0.5 hover:bg-primary/20"
-				aria-label={`Remove ${label} filter`}
-			>
-				<svg
-					className="h-3 w-3"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						strokeWidth={2}
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
-			</button>
-		</div>
 	);
 };

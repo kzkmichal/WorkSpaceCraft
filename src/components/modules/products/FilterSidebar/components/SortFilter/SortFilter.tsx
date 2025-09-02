@@ -1,9 +1,7 @@
 "use client";
 
 import { ProductSortOption } from "@/graphql/generated/graphql";
-import { SearchParamsKeys } from "@/components/modules/Products";
 import { SortFilterProps } from "./types";
-import { useFilterParams } from "../../hooks/useFilterParams";
 import { SORT_OPTIONS } from "./const";
 import {
 	Select,
@@ -13,11 +11,13 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/components/utils/helpers";
+import { useFilterMode } from "../../hooks/useFilterMode";
 
 export const SortFilter = ({
+	mode = "instant",
 	"data-testid": testId = "sort-filter",
 }: SortFilterProps) => {
-	const { filters, updateFilter } = useFilterParams();
+	const { filters, updateFilter } = useFilterMode(mode);
 
 	const currentSort = filters.sortBy as ProductSortOption | undefined;
 
@@ -27,10 +27,7 @@ export const SortFilter = ({
 
 	const handleSortChange = (value: string) => {
 		const sortOption = value as ProductSortOption;
-		updateFilter({
-			[SearchParamsKeys.SORT_BY]:
-				sortOption === "NEWEST" ? undefined : sortOption,
-		});
+		updateFilter("sortBy", sortOption);
 	};
 
 	return (

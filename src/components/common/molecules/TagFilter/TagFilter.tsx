@@ -1,17 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import {
-	useSearchParams,
-	useRouter,
-	usePathname,
-} from "next/navigation";
+import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { TagFilterProps } from "./types";
 import { TagBadge } from "@/components/common/atoms/TagBadge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/components/utils/helpers";
+import { useFilterStore } from "@/stores";
 
 export const TagFilter = ({
 	availableTags,
@@ -20,13 +16,26 @@ export const TagFilter = ({
 	"data-cc": dataCc,
 	id,
 	maxHeight = "200px",
+	mode = "instant",
 }: TagFilterProps) => {
-	const router = useRouter();
-	const pathname = usePathname();
-	const searchParams = useSearchParams();
+	const urlFilters = useFilterStore((state) => state.filters);
+	const stagedFilters = useFilterStore(
+		(state) => state.stagedFilters,
+	);
+	const updateFilterInstant = useFilterStore(
+		(state) => state.updateFilterInstant,
+	);
+	const updateFilterStaged = useFilterStore(
+		(state) => state.updateFilterStaged,
+	);
 
-	const selectedTagSlugs =
-		searchParams.get("tags")?.split(",").filter(Boolean) || [];
+	const filters = useMemo(() => {
+		return mode === "instant"
+			? urlFilters
+			: { ...urlFilters, ...stagedFilters };
+	}, [mode, urlFilters, stagedFilters]);
+
+	const selectedTagSlugs = filters.tags || [];
 
 	const [searchQuery, setSearchQuery] = useState("");
 
@@ -37,8 +46,6 @@ export const TagFilter = ({
 		: availableTags;
 
 	const toggleTag = (tagSlug: string) => {
-		const params = new URLSearchParams(searchParams.toString());
-
 		let newSelectedTags: string[];
 		if (selectedTagSlugs.includes(tagSlug)) {
 			newSelectedTags = selectedTagSlugs.filter(
@@ -48,23 +55,25 @@ export const TagFilter = ({
 			newSelectedTags = [...selectedTagSlugs, tagSlug];
 		}
 
-		if (newSelectedTags.length > 0) {
-			params.set("tags", newSelectedTags.join(","));
+		if (mode === "instant") {
+			updateFilterInstant(
+				"tags",
+				newSelectedTags.length > 0 ? newSelectedTags : undefined,
+			);
 		} else {
-			params.delete("tags");
+			updateFilterStaged(
+				"tags",
+				newSelectedTags.length > 0 ? newSelectedTags : undefined,
+			);
 		}
-
-		router.push(`${pathname}?${params.toString()}`, {
-			scroll: false,
-		});
 	};
 
 	const resetFilters = () => {
-		const params = new URLSearchParams(searchParams.toString());
-		params.delete("tags");
-		router.push(`${pathname}?${params.toString()}`, {
-			scroll: false,
-		});
+		if (mode === "instant") {
+			updateFilterInstant("tags", undefined);
+		} else {
+			updateFilterStaged("tags", undefined);
+		}
 	};
 
 	const inputCx =

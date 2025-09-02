@@ -1,3 +1,3 @@
-import { BaseProps } from "@/components/utils/types";
+import { BaseFilterProps } from "../shared/types";
 
-export type SubcategoryFilterProps = BaseProps & {};
+export type SubcategoryFilterProps = BaseFilterProps;
