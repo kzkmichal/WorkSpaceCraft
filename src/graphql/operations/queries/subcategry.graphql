@@ -1,5 +1,5 @@
-query Subcategories($categoryType: CategoryType!) {
-	subcategories(categoryType: $categoryType) {
+query Subcategories($categoryType: CategoryType, $limit: Int) {
+	subcategories(categoryType: $categoryType, limit: $limit) {
 		...SubcategoryFields
 	}
 }
