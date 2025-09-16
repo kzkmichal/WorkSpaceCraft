@@ -353,6 +353,7 @@ export type QuerySearchSuggestionsArgs = {
 
 export type QuerySubcategoriesArgs = {
   categoryType?: InputMaybe<CategoryType>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1049,7 +1050,8 @@ export type SearchProductsQueryVariables = Exact<{
 export type SearchProductsQuery = { searchProducts: Array<{ id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined }> };
 
 export type SubcategoriesQueryVariables = Exact<{
-  categoryType: CategoryType;
+  categoryType?: InputMaybe<CategoryType>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -2295,8 +2297,8 @@ export type SearchProductsLazyQueryHookResult = ReturnType<typeof useSearchProdu
 export type SearchProductsSuspenseQueryHookResult = ReturnType<typeof useSearchProductsSuspenseQuery>;
 export type SearchProductsQueryResult = Apollo.QueryResult<SearchProductsQuery, SearchProductsQueryVariables>;
 export const SubcategoriesDocument = gql`
-    query Subcategories($categoryType: CategoryType!) {
-  subcategories(categoryType: $categoryType) {
+    query Subcategories($categoryType: CategoryType, $limit: Int) {
+  subcategories(categoryType: $categoryType, limit: $limit) {
     ...SubcategoryFields
   }
 }
@@ -2315,10 +2317,11 @@ export const SubcategoriesDocument = gql`
  * const { data, loading, error } = useSubcategoriesQuery({
  *   variables: {
  *      categoryType: // value for 'categoryType'
+ *      limit: // value for 'limit'
  *   },
  * });
  */
-export function useSubcategoriesQuery(baseOptions: Apollo.QueryHookOptions<SubcategoriesQuery, SubcategoriesQueryVariables> & ({ variables: SubcategoriesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useSubcategoriesQuery(baseOptions?: Apollo.QueryHookOptions<SubcategoriesQuery, SubcategoriesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<SubcategoriesQuery, SubcategoriesQueryVariables>(SubcategoriesDocument, options);
       }

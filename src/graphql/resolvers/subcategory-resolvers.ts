@@ -16,46 +16,41 @@ type SubcategoryUpdateData = {
 
 export const resolvers: Resolvers = {
 	Query: {
-		subcategories: async (_, { categoryType }, { prisma }) => {
+		subcategories: async (_, { categoryType, limit }, { prisma }) => {
 			try {
+				if (
+					typeof categoryType === "string" &&
+					categoryType.includes(".well-known")
+				) {
+					return [];
+				}
+
 				const subcategories = await prisma.subcategory.findMany({
-					where: categoryType ? { categoryType } : undefined,
-					include: {
-						products: {
-							include: {
-								product: {
-									include: {
-										createdBy: true,
-										categories: true,
-										reviews: true,
-										images: true,
-									},
-								},
-							},
-						},
+					where: {
+						categoryType,
 					},
-					orderBy: {
-						name: "asc",
-					},
+					...(limit && { take: limit }),
 				});
 
-				return subcategories.map((subcategory) => ({
-					...formatSubcategory(subcategory),
-					products: subcategory.products.map((sp) => ({
-						...formatProduct(sp.product),
-						createdBy: formatUser(sp.product.createdBy),
-					})),
-				}));
+				return subcategories.map(formatSubcategory);
 			} catch (error) {
-				console.error("Failed to fetch subcategories:", error);
-				throw new GraphQLError("Failed to fetch subcategories", {
-					extensions: { code: "DATABASE_ERROR" },
-				});
+				console.error("Error fetching subcategories:", error);
+				throw new Error("Failed to fetch subcategories");
 			}
 		},
-
 		subcategory: async (_, { fullSlug }, { prisma }) => {
 			try {
+				if (
+					fullSlug.startsWith(".") ||
+					fullSlug.includes("well-known") ||
+					fullSlug.includes("favicon")
+				) {
+					console.log("Ignoring system path:", fullSlug);
+					throw new GraphQLError("Invalid subcategory path", {
+						extensions: { code: "BAD_USER_INPUT" },
+					});
+				}
+
 				const subcategory = await prisma.subcategory.findUnique({
 					where: { fullSlug },
 					include: {
