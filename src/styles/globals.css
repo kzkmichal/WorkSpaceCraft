@@ -196,3 +196,23 @@
 		text-wrap: balance;
 	}
 }
+
+.navigation-menu-viewport {
+	--radix-navigation-menu-viewport-height: auto;
+	max-height: 400px;
+}
+[data-radix-navigation-menu-trigger] {
+	/* Hover effects */
+	transition: all 0.2s ease-in-out;
+}
+
+[data-radix-navigation-menu-trigger]:hover {
+	background-color: rgba(0, 0, 0, 0.05);
+}
+[data-radix-navigation-menu-trigger][data-state="open"] {
+	background-color: rgba(0, 0, 0, 0.1);
+}
+[data-radix-navigation-menu-content] {
+	animation-duration: 200ms;
+	animation-timing-function: ease-out;
+}
