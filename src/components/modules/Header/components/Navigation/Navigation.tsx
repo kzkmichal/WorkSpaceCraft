@@ -82,11 +82,10 @@ export const Navigation = ({
 						className="hidden lg:flex"
 						delayDuration={0}
 						skipDelayDuration={0}
-						defaultValue="categories"
 					>
 						<NavigationMenuList>
 							{navigationCategories.length > 0 && (
-								<NavigationMenuItem value="categories">
+								<NavigationMenuItem>
 									<NavigationMenuTrigger
 										triggerMode="click"
 										className={`h-10 bg-transparent px-4 py-2 text-sm font-semibold transition-all duration-200 hover:bg-transparent focus:bg-transparent data-[active]:bg-transparent data-[state=open]:bg-transparent ${
