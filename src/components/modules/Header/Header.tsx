@@ -1,21 +1,23 @@
 import { Navigation } from "./components/Navigation";
 import { Container } from "@/components/common/molecules/Container";
 import { BaseProps } from "@/components/utils/types";
+import { getCategories } from "@/hooks/getCategories";
 
 export type HeaderProps = BaseProps;
 
-export const Header = ({
+export const Header = async ({
 	"data-testid": testId = "header",
 }: HeaderProps) => {
+	const categories = await getCategories();
 	return (
 		<Container
 			as="header"
 			data-testid={testId}
-			className="z-10 w-full bg-white shadow-md"
-			paddingY="sm"
-			size={"full"}
+			className="sticky top-0 z-50 w-full bg-background shadow-md"
+			paddingY="md"
+			size={"2xl"}
 		>
-			<Navigation />
+			<Navigation categories={categories} />
 		</Container>
 	);
 };

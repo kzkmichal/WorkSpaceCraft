@@ -1,328 +1,206 @@
 "use client";
-import { useEffect, useState } from "react";
-import {
-	Search,
-	ShoppingCart,
-	User,
-	Menu,
-	X,
-	UserCheck,
-} from "lucide-react";
-import Link from "next/link";
+
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Container } from "@/components/common/molecules";
-import { BaseProps } from "@/components/utils/types";
+import Link from "next/link";
+import {
+	NavigationMenu,
+	NavigationMenuContent,
+	NavigationMenuItem,
+	NavigationMenuLink,
+	NavigationMenuList,
+	NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 import { logout } from "@/app/actions/auth";
 import { GlobalSearch } from "@/components/modules/Search";
-
-export type NavigationProps = BaseProps;
-
-const categories = [
-	{
-		id: "home",
-		title: "Home",
-		subcategories: [
-			"Furniture",
-			"Health",
-			"Tech",
-			"Storage",
-			"Lighting",
-			"Decor",
-			"Ergonomics",
-			"Cables",
-			"Air Quality",
-			"Plants",
-		],
-	},
-	{
-		id: "office",
-		title: "Office",
-		subcategories: [
-			"Furniture",
-			"Collaboration",
-			"Tech",
-			"Meeting Rooms",
-			"Acoustics",
-			"Storage",
-			"Desks",
-			"Chairs",
-			"Lighting",
-		],
-	},
-	{
-		id: "remote",
-		title: "Remote",
-		subcategories: [
-			"Bags",
-			"Portable Tech",
-			"Accessories",
-			"Travel Gear",
-			"Mobile Workstation",
-			"Connectivity",
-			"Power",
-			"Security",
-		],
-	},
-];
-
-const SubcategoriesGrid = ({
-	subcategories,
-}: {
-	subcategories: string[];
-}) => {
-	const chunks = [];
-	for (let i = 0; i < subcategories.length; i += 5) {
-		chunks.push(subcategories.slice(i, i + 5));
-	}
-
-	return (
-		<div className="flex space-x-16">
-			{chunks.map((chunk, columnIndex) => (
-				<div key={columnIndex} className="flex flex-col space-y-3">
-					{chunk.map((subcategory) => (
-						<a
-							key={subcategory}
-							href={`/categories/${subcategory.toLowerCase()}`}
-							className="text-sm font-light text-gray-600 transition-colors hover:text-gray-900"
-						>
-							{subcategory}
-						</a>
-					))}
-					{[...Array<undefined>(5 - chunk.length)].map((_, index) => (
-						<div key={`empty-${index}`} className="h-[24px]" />
-					))}
-				</div>
-			))}
-		</div>
-	);
-};
+import { UserMenu } from "./UserMenu";
+import { MobileMenu } from "./MobileMenu";
+import { NavigationProps, NavigationCategory } from "./types";
+import {
+	getCategoryIcon,
+	CATEGORY_DESCRIPTIONS,
+} from "./categoryIcons";
 
 export const Navigation = ({
+	categories = [],
+	currentView,
 	"data-testid": testId = "navigation",
 }: NavigationProps) => {
-	const [isOpen, setIsOpen] = useState(false);
-	const [activeCategory, setActiveCategory] = useState<{
-		id: string;
-		subcategories: string[];
-	} | null>(null);
-	const [showCategories, setShowCategories] = useState(false);
-	const { data: session, status, update } = useSession();
+	const { data: session, status } = useSession();
 	const router = useRouter();
+	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const isLoading = status === "loading";
 
-	const [isLoggingOut, setIsLoggingOut] = useState(false);
+	const navigationCategories: NavigationCategory[] = categories.map(
+		(category) => ({
+			id: category.slug,
+			title: category.name,
+			description: CATEGORY_DESCRIPTIONS[category.type],
+			icon: getCategoryIcon(category.type),
+			categoryType: category.type,
+			link: `/${category.slug}`,
+			subcategories:
+				category.subcategories?.map((sub) => ({
+					id: sub?.id,
+					name: sub?.name,
+					slug: sub?.slug,
+					fullSlug: `/${sub?.fullSlug}`,
+				})) || [],
+		}),
+	);
 
-	const handleLogout = async () => {
-		setIsLoggingOut(true);
-		await logout();
-
-		await update();
-
-		router.refresh();
-		setIsLoggingOut(false);
+	const handleMobileMenuToggle = () => {
+		setIsMobileMenuOpen(!isMobileMenuOpen);
 	};
 
-	useEffect(() => {
-		if (!isLoggingOut && status === "unauthenticated") {
+	const handleLogout = async () => {
+		try {
+			await logout();
 			router.refresh();
+		} catch (error) {
+			console.error("Logout error:", error);
 		}
-	}, [status, isLoggingOut, router]);
+	};
 
 	return (
-		<Container
-			className="bg-white"
-			data-testid={testId}
-			paddingX="none"
-			paddingY={"none"}
-			as={"nav"}
-			size="2xl"
-		>
-			{/* Main Navigation */}
-			<div className="relative border-b border-gray-100">
-				<div className="">
-					<div className="flex h-20 items-center justify-between">
-						{/* Logo */}
-						<a
-							href="/"
-							className="text-2xl tracking-wide text-gray-900"
-						>
-							WorkSpaceCraft
-						</a>
-						<GlobalSearch />
-						{/* Desktop Navigation */}
-						<div className="hidden items-center space-x-8 md:flex">
-							<button
-								onMouseEnter={() => setShowCategories(true)}
-								className="text-sm font-light text-gray-600 hover:text-gray-900"
-							>
-								Categories
-							</button>
-							<a
-								href="/setups"
-								className="text-sm font-light text-gray-600 hover:text-gray-900"
-							>
-								Setups
-							</a>
-							<a
-								href="/community"
-								className="text-sm font-light text-gray-600 hover:text-gray-900"
-							>
-								Community
-							</a>
-							<a
-								href="/guides"
-								className="text-sm font-light text-gray-600 hover:text-gray-900"
-							>
-								Guides
-							</a>
-						</div>
-
-						{/* Icons */}
-						<div className="flex items-center space-x-6">
-							<button className="text-gray-600 hover:text-gray-900">
-								<Search className="h-5 w-5" />
-							</button>
-							{isLoading || isLoggingOut ? (
-								<span>Loading...</span>
-							) : session ? (
-								<>
-									<Link href="/profile">
-										<User className="h-5 w-5" />
-									</Link>
-									<button
-										onClick={handleLogout}
-										className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-									>
-										<UserCheck className="h-5 w-5" />
-									</button>
-								</>
-							) : (
-								<Link href="/auth/signin">
-									<User className="h-5 w-5" />
-								</Link>
-							)}
-							<button className="text-gray-600 hover:text-gray-900">
-								<ShoppingCart className="h-5 w-5" />
-							</button>
-
-							<button
-								className="block md:hidden"
-								onClick={() => setIsOpen(!isOpen)}
-							>
-								{isOpen ? (
-									<X className="h-6 w-6 text-gray-600" />
-								) : (
-									<Menu className="h-6 w-6 text-gray-600" />
-								)}
-							</button>
-						</div>
-					</div>
-				</div>
-
-				{/* Categories Dropdown */}
-				{showCategories && (
-					<div
-						className="absolute left-0 right-0 bg-white shadow-lg"
-						onMouseLeave={() => {
-							setShowCategories(false);
-							setActiveCategory(null);
-						}}
+		<>
+			<div
+				className="flex items-center justify-between"
+				data-testid={testId}
+			>
+				<div className="flex items-center gap-8">
+					<Link
+						href="/"
+						prefetch={true}
+						className="text-xl font-bold text-foreground transition-colors hover:text-muted-foreground"
 					>
-						<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-							<div className="flex space-x-16">
-								{/* Main Categories */}
-								<div className="flex w-48 flex-col space-y-6">
-									{categories.map((category) => (
-										<button
-											key={category.id}
-											onMouseEnter={() => setActiveCategory(category)}
-											className={`text-left transition-colors ${
-												activeCategory?.id === category.id
-													? "text-gray-900"
-													: "text-gray-600 hover:text-gray-900"
-											}`}
-										>
-											<span className="text-xl tracking-wide">
-												{category.title}
-											</span>
-										</button>
-									))}
-								</div>
-
-								{/* Subcategories */}
-								{activeCategory && (
-									<div className="py-2">
-										<SubcategoriesGrid
-											subcategories={activeCategory.subcategories}
-										/>
-									</div>
-								)}
-							</div>
-							<Link href="/categories">
-								<p className="block py-2 text-sm font-light text-gray-600">
-									All Categories
-								</p>
-							</Link>
-						</div>
-					</div>
-				)}
-			</div>
-
-			{/* Mobile Menu */}
-			{isOpen && (
-				<div className="border-b border-gray-200 bg-white md:hidden">
-					<div className="space-y-1 px-4 py-4">
-						{categories.map((category) => (
-							<div key={category.id} className="py-2">
-								<button
-									onClick={() =>
-										setActiveCategory(
-											activeCategory?.id === category.id
-												? null
-												: category,
-										)
-									}
-									className="text-lg text-gray-900"
-								>
-									{category.title}
-								</button>
-								{activeCategory?.id === category.id && (
-									<div className="mt-2 space-y-2 pl-4">
-										{category.subcategories.map((subcategory) => (
-											<a
-												key={subcategory}
-												href={`/categories/${category.id}/${subcategory.toLowerCase()}`}
-												className="block text-sm font-light text-gray-600 hover:text-gray-900"
-											>
-												{subcategory}
-											</a>
-										))}
-									</div>
-								)}
-							</div>
-						))}
-						<a
-							href="/setups"
-							className="block py-2 text-sm font-light text-gray-600"
-						>
-							Setups
-						</a>
-						<a
-							href="/community"
-							className="block py-2 text-sm font-light text-gray-600"
-						>
-							Community
-						</a>
-						<a
-							href="/guides"
-							className="block py-2 text-sm font-light text-gray-600"
-						>
-							Guides
-						</a>
+						WorkspaceCraft
+					</Link>
+					<NavigationMenu
+						className="hidden lg:flex"
+						delayDuration={0}
+						skipDelayDuration={0}
+						defaultValue="categories"
+					>
+						<NavigationMenuList>
+							{navigationCategories.length > 0 && (
+								<NavigationMenuItem value="categories">
+									<NavigationMenuTrigger
+										triggerMode="click"
+										className={`h-10 bg-transparent px-4 py-2 text-sm font-semibold transition-all duration-200 hover:bg-transparent focus:bg-transparent data-[active]:bg-transparent data-[state=open]:bg-transparent ${
+											currentView === "categories"
+												? "text-primary"
+												: "text-muted-foreground hover:text-primary focus:text-primary focus:outline-none"
+										}`}
+									>
+										Categories
+									</NavigationMenuTrigger>
+									<NavigationMenuContent>
+										<div className="fixed left-0 z-50 w-screen border-b bg-background p-6 shadow-lg">
+											<div className="mx-auto max-w-[96rem]">
+												<div className="grid grid-cols-3 gap-6">
+													{navigationCategories.map((category) => {
+														const IconComponent = category.icon;
+														return (
+															<div
+																key={category.id}
+																className="flex flex-col gap-2 rounded-lg border p-4 transition-colors hover:bg-muted/50"
+															>
+																<div className="space-y-2">
+																	<div className="flex items-center gap-2">
+																		<IconComponent className="h-5 w-5 text-primary" />
+																		<h3 className="text-lg font-semibold text-foreground">
+																			{category.title}
+																		</h3>
+																	</div>
+																	<p className="line-clamp-2 text-sm text-muted-foreground">
+																		{category.description}
+																	</p>
+																</div>
+																<div className="grid grid-cols-2 gap-2">
+																	{category.subcategories
+																		.slice(0, 6)
+																		.map((subcategory) => (
+																			<NavigationMenuLink
+																				key={subcategory.id}
+																				asChild
+																			>
+																				<Link
+																					href={subcategory.fullSlug}
+																					className="inline-flex items-center rounded-full bg-muted px-3 py-1.5 text-sm text-muted-foreground transition-all duration-200 hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+																				>
+																					{subcategory.name}
+																				</Link>
+																			</NavigationMenuLink>
+																		))}
+																</div>
+																<NavigationMenuLink asChild>
+																	<Link
+																		href={category.link}
+																		className="mt-auto inline-flex items-center text-sm font-medium text-primary transition-all duration-200 hover:text-primary/80 hover:underline focus:text-primary/80 focus:underline focus:outline-none"
+																	>
+																		View all →
+																	</Link>
+																</NavigationMenuLink>
+															</div>
+														);
+													})}
+												</div>
+											</div>
+										</div>
+									</NavigationMenuContent>
+								</NavigationMenuItem>
+							)}
+							<NavigationMenuItem>
+								<NavigationMenuLink asChild>
+									<Link
+										href="/products"
+										prefetch={true}
+										className={`inline-flex h-10 w-max items-center justify-center px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+											currentView === "products"
+												? "text-primary"
+												: "text-muted-foreground hover:text-primary focus:text-primary"
+										}`}
+									>
+										Products
+									</Link>
+								</NavigationMenuLink>
+							</NavigationMenuItem>
+						</NavigationMenuList>
+					</NavigationMenu>
+					<div className="hidden lg:block">
+						<GlobalSearch className="w-[25rem]" />
 					</div>
 				</div>
-			)}
-		</Container>
+				<div className="flex items-center gap-4">
+					<button
+						onClick={handleMobileMenuToggle}
+						className="rounded-lg p-2 transition-colors hover:bg-accent lg:hidden"
+					>
+						{isMobileMenuOpen ? (
+							<X className="h-5 w-5 text-muted-foreground" />
+						) : (
+							<Menu className="h-5 w-5 text-muted-foreground" />
+						)}
+					</button>
+					<div className="hidden lg:block">
+						<UserMenu
+							user={session?.user}
+							isLoading={isLoading}
+							onLogout={handleLogout}
+						/>
+					</div>
+				</div>
+			</div>
+			<MobileMenu
+				categories={navigationCategories}
+				isOpen={isMobileMenuOpen}
+				onClose={() => setIsMobileMenuOpen(false)}
+				user={session?.user}
+				onLogout={handleLogout}
+			/>
+		</>
 	);
 };
