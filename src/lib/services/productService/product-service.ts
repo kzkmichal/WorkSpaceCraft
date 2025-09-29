@@ -22,6 +22,63 @@ export class ProductService {
 		}
 	}
 
+	private getCompleteProductInclude() {
+		return {
+			createdBy: true,
+			categories: true,
+			images: true,
+			subcategories: {
+				include: {
+					subcategory: true,
+				},
+			},
+			tags: {
+				include: {
+					tag: true,
+				},
+			},
+			reviews: true,
+			dimensions: true,
+			technicalFeatures: true,
+			prosCons: true,
+			userExperience: true,
+		};
+	}
+
+	async getProduct(id: string) {
+		try {
+			const product = await this.prisma.product.findUnique({
+				where: { id },
+				include: this.getCompleteProductInclude(),
+			});
+
+			return product;
+		} catch (error) {
+			console.error(`Error fetching Product ${id}:`, error);
+			throw error;
+		}
+	}
+
+	async getUserProducts(userId: string) {
+		try {
+			const products = await this.prisma.product.findMany({
+				where: { userId },
+				include: this.getCompleteProductInclude(),
+				orderBy: {
+					createdAt: "desc",
+				},
+			});
+
+			return products;
+		} catch (error) {
+			console.error(
+				`Error fetching user products for ${userId}:`,
+				error,
+			);
+			throw error;
+		}
+	}
+
 	async getProducts(input: ProductsQueryInput) {
 		const {
 			categoryType,
@@ -71,21 +128,7 @@ export class ProductService {
 				take: limit,
 				skip: offset,
 				orderBy,
-				include: {
-					createdBy: true,
-					images: true,
-					categories: true,
-					subcategories: {
-						include: {
-							subcategory: true,
-						},
-					},
-					tags: {
-						include: {
-							tag: true,
-						},
-					},
-				},
+				include: this.getCompleteProductInclude(),
 			});
 
 			return products;

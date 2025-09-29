@@ -31,22 +31,32 @@ export async function createProduct(
 		description,
 		originalStoreLink,
 		price,
+		brand,
+		model,
+		dimensions,
+		technicalFeatures,
+		pros,
+		cons,
+		userExperience,
 	} = data;
 
 	try {
 		const finalTagIds = await processProductTags(tags || []);
 
 		const primaryImage = images.find((image) => image.isPrimary);
-
-		if (!primaryImage) {
+		if (!primaryImage && images.length > 0) {
 			images[0].isPrimary = true;
 		}
 
 		const product = await prisma.product.create({
 			data: {
-				title: title,
-				description: description,
-				price: price,
+				title,
+				description,
+				price,
+				originalStoreLink,
+				userId: session.user.id as string,
+				brand,
+				model: model || undefined,
 				images: {
 					create: images.map((image) => ({
 						url: image.url,
@@ -54,7 +64,6 @@ export async function createProduct(
 						isPrimary: image.isPrimary,
 					})),
 				},
-				originalStoreLink: originalStoreLink,
 				tags:
 					finalTagIds.length > 0
 						? {
@@ -63,7 +72,6 @@ export async function createProduct(
 								})),
 							}
 						: undefined,
-				userId: session.user.id as string,
 				categories: {
 					create: categoryTypes.map((categoryType) => ({
 						categoryType: categoryType as CategoryType,
@@ -77,6 +85,51 @@ export async function createProduct(
 								})),
 							}
 						: undefined,
+				dimensions:
+					dimensions && dimensions.length > 0
+						? {
+								create: dimensions.map((dim) => ({
+									name: dim.name,
+									value: dim.value,
+									unit: dim.unit || null,
+								})),
+							}
+						: undefined,
+				technicalFeatures:
+					technicalFeatures && technicalFeatures.length > 0
+						? {
+								create: technicalFeatures.map((feature) => ({
+									name: feature.name,
+									value: feature.value,
+								})),
+							}
+						: undefined,
+				prosCons:
+					[...(pros || []), ...(cons || [])].length > 0
+						? {
+								create: [
+									...(pros || []).map((pro) => ({
+										text: pro.text,
+										type: "PROS" as const,
+									})),
+									...(cons || []).map((con) => ({
+										text: con.text,
+										type: "CONS" as const,
+									})),
+								],
+							}
+						: undefined,
+				userExperience: userExperience
+					? {
+							create: {
+								setupDifficulty: userExperience.setupDifficulty,
+								assemblyRequired: userExperience.assemblyRequired,
+								toolsNeeded: userExperience.toolsNeeded || [],
+								compatibility: userExperience.compatibility || [],
+								userManualLink: userExperience.userManualLink || null,
+							},
+						}
+					: undefined,
 			},
 			include: {
 				tags: {
@@ -112,6 +165,10 @@ export async function updateProduct(
 ): Promise<ProductResult> {
 	const session = await auth();
 
+	if (!session) {
+		return { success: false, error: "You must be logged in" };
+	}
+
 	const {
 		tags,
 		images,
@@ -121,11 +178,14 @@ export async function updateProduct(
 		description,
 		originalStoreLink,
 		price,
+		brand,
+		model,
+		dimensions,
+		technicalFeatures,
+		pros,
+		cons,
+		userExperience,
 	} = data;
-
-	if (!session) {
-		return { success: false, error: "You must be logged in" };
-	}
 
 	try {
 		const existingProduct = await prisma.product.findUnique({
@@ -147,11 +207,11 @@ export async function updateProduct(
 		}
 
 		const primaryImage = images.find((image) => image.isPrimary);
-
-		if (!primaryImage) {
+		if (!primaryImage && images.length > 0) {
 			images[0].isPrimary = true;
 		}
-		const finalTags = await processProductTags(tags || []);
+
+		const finalTagIds = await processProductTags(tags || []);
 
 		const keepImageIds = images
 			.filter((img) => img.id)
@@ -201,19 +261,6 @@ export async function updateProduct(
 				});
 			}
 
-			await tx.productToTag.deleteMany({
-				where: { productId },
-			});
-
-			if (finalTags.length > 0) {
-				await tx.productToTag.createMany({
-					data: finalTags.map((tagId) => ({
-						productId,
-						tagId,
-					})),
-				});
-			}
-
 			await tx.productImage.createMany({
 				data: images
 					.filter((img) => !img.id)
@@ -225,13 +272,90 @@ export async function updateProduct(
 					})),
 			});
 
+			await tx.productToTag.deleteMany({
+				where: { productId },
+			});
+			if (finalTagIds.length > 0) {
+				await tx.productToTag.createMany({
+					data: finalTagIds.map((tagId) => ({
+						productId,
+						tagId,
+					})),
+				});
+			}
+
+			await tx.productDimension.deleteMany({
+				where: { productId },
+			});
+			if (dimensions && dimensions.length > 0) {
+				await tx.productDimension.createMany({
+					data: dimensions.map((dim) => ({
+						productId,
+						name: dim.name,
+						value: dim.value,
+						unit: dim.unit || null,
+					})),
+				});
+			}
+
+			await tx.productTechnicalFeature.deleteMany({
+				where: { productId },
+			});
+			if (technicalFeatures && technicalFeatures.length > 0) {
+				await tx.productTechnicalFeature.createMany({
+					data: technicalFeatures.map((feature) => ({
+						productId,
+						name: feature.name,
+						value: feature.value,
+					})),
+				});
+			}
+
+			await tx.productProCon.deleteMany({
+				where: { productId },
+			});
+			if ([...(pros || []), ...(cons || [])].length > 0) {
+				await tx.productProCon.createMany({
+					data: [
+						...(pros || []).map((pro) => ({
+							productId,
+							text: pro.text,
+							type: "PROS" as const,
+						})),
+						...(cons || []).map((con) => ({
+							productId,
+							text: con.text,
+							type: "CONS" as const,
+						})),
+					],
+				});
+			}
+
+			await tx.productUserExperience.deleteMany({
+				where: { productId },
+			});
+			if (userExperience) {
+				await tx.productUserExperience.create({
+					data: {
+						productId,
+						setupDifficulty: userExperience.setupDifficulty,
+						assemblyRequired: userExperience.assemblyRequired,
+						toolsNeeded: userExperience.toolsNeeded || [],
+						compatibility: userExperience.compatibility || [],
+						userManualLink: userExperience.userManualLink || null,
+					},
+				});
+			}
+
 			await tx.product.update({
 				where: { id: productId },
 				data: {
-					title: title,
-					description: description,
-					price: price,
-					originalStoreLink: originalStoreLink,
+					title,
+					description,
+					price,
+					originalStoreLink,
+					brand,
+					model: model || null,
 				},
 			});
 		});
@@ -307,7 +431,7 @@ export async function deleteProduct(
 export async function reportProduct(
 	productId: string,
 	reason: string,
-) {
+): Promise<ProductResult> {
 	const session = await auth();
 
 	if (!session) {
