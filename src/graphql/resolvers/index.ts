@@ -18,7 +18,6 @@ export const resolvers: Resolvers = {
 	Mutation: {
 		...AuthResolvers?.Mutation,
 		...CategoryResolvers?.Mutation,
-		...ProductResolvers?.Mutation,
 		...SubcategoryResolvers?.Mutation,
 		...Tag?.Mutation,
 	},

@@ -14,6 +14,34 @@ fragment ProductImage on ProductImage {
 	isPrimary
 }
 
+fragment ProductDimension on ProductDimension {
+	id
+	name
+	value
+	unit
+}
+
+fragment ProductTechnicalFeature on ProductTechnicalFeature {
+	id
+	name
+	value
+}
+
+fragment ProductProCon on ProductProCon {
+	id
+	text
+	type
+}
+
+fragment ProductUserExperience on ProductUserExperience {
+	id
+	setupDifficulty
+	assemblyRequired
+	toolsNeeded
+	compatibility
+	userManualLink
+}
+
 fragment ProductFields on Product {
 	id
 	title
@@ -40,5 +68,22 @@ fragment ProductFields on Product {
 	}
 	tags {
 		...TagFields
+	}
+	brand
+	model
+	dimensions {
+		...ProductDimension
+	}
+	technicalFeatures {
+		...ProductTechnicalFeature
+	}
+	pros {
+		...ProductProCon
+	}
+	cons {
+		...ProductProCon
+	}
+	userExperience {
+		...ProductUserExperience
 	}
 }

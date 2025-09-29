@@ -4,6 +4,8 @@ type Product {
 	description: String!
 	price: Float!
 	originalStoreLink: String!
+	brand: String
+	model: String
 	categories: [CategoryType!]!
 	subcategories: [Subcategory]
 	reviews: [Review]
@@ -15,6 +17,11 @@ type Product {
 	updatedAt: String!
 	images: [ProductImage]
 	tags: [Tag!]
+	dimensions: [ProductDimension!]
+	technicalFeatures: [ProductTechnicalFeature!]
+	pros: [ProductProCon!]
+	cons: [ProductProCon!]
+	userExperience: ProductUserExperience
 }
 
 type ProductImage {
@@ -37,4 +44,43 @@ enum ProductSortOption {
 type PriceRange {
 	min: Float
 	max: Float
+}
+
+type ProductDimension {
+	id: ID!
+	name: String!
+	value: String!
+	unit: String
+}
+
+type ProductTechnicalFeature {
+	id: ID!
+	name: String!
+	value: String!
+}
+
+type ProductProCon {
+	id: ID!
+	text: String!
+	type: ProConType!
+}
+
+enum ProConType {
+	PROS
+	CONS
+}
+
+type ProductUserExperience {
+	id: ID!
+	setupDifficulty: SetupDifficulty!
+	assemblyRequired: Boolean!
+	toolsNeeded: [String!]!
+	compatibility: [String!]!
+	userManualLink: String
+}
+
+enum SetupDifficulty {
+	EASY
+	MEDIUM
+	HARD
 }
