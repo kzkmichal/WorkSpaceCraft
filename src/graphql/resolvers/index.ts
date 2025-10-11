@@ -5,6 +5,7 @@ import { resolvers as ProductResolvers } from "./product-resolvers";
 import { resolvers as SearchResolvers } from "./search-resolvers";
 import { resolvers as SubcategoryResolvers } from "./subcategory-resolvers";
 import { resolvers as Tag } from "./tag-resolves";
+import { resolvers as SetupResolvers } from "./setup-resolvers";
 
 export const resolvers: Resolvers = {
 	Query: {
@@ -13,6 +14,7 @@ export const resolvers: Resolvers = {
 		...ProductResolvers?.Query,
 		...SearchResolvers?.Query,
 		...SubcategoryResolvers?.Query,
+		...SetupResolvers?.Query,
 		...Tag?.Query,
 	},
 	Mutation: {

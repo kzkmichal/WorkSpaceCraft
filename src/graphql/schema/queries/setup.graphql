@@ -1,0 +1,11 @@
+extend type Query {
+	userSetups(userId: String!): [Setup!]!
+	setupById(id: ID!): Setup
+	setupByCategory(category: SetupCategory!, userId: String): Setup
+	allSetups(
+		category: SetupCategory
+		status: SetupStatus
+		limit: Int
+		offset: Int
+	): [Setup!]!
+}

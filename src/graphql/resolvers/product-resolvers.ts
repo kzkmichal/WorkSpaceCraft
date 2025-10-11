@@ -54,7 +54,6 @@ async function getProducts(input: ProductsQueryInput) {
 
 		return products.map((product) => ({
 			...formatProduct(product),
-			createdBy: formatUser(product.createdBy),
 		}));
 	} catch (error) {
 		console.error("Failed to fetch products:", error);

@@ -1,6 +1,8 @@
 import {
 	Product,
 	Subcategory,
+	Setup,
+	SetupProduct,
 	User,
 	Tag,
 	ProductDimension,
@@ -13,6 +15,19 @@ import {
 	ProductToSubcategory,
 } from "@prisma/client";
 
+type CompleteSetupProduct = SetupProduct & {
+	product: CompleteProduct;
+};
+
+type CompleteSetup = Setup & {
+	user: User;
+	products: CompleteSetupProduct[];
+};
+
+type SetupType = Setup & {
+	user: User;
+};
+
 export const formatDates = <
 	T extends {
 		createdAt: Date;
@@ -24,6 +39,36 @@ export const formatDates = <
 	...obj,
 	createdAt: obj.createdAt.toISOString(),
 	updatedAt: obj.updatedAt.toISOString(),
+});
+
+export const formatUserSetups = (setups: SetupType[]) =>
+	setups.map((setup) => ({
+		...setup,
+		...formatDates(setup),
+		description: setup.description || undefined,
+		imageUrl: setup.imageUrl || undefined,
+		user: formatUser(setup.user),
+		products: [],
+	}));
+
+export const formatSetup = (setup: CompleteSetup) => ({
+	...setup,
+	...formatDates(setup),
+	description: setup.description || undefined,
+	imageUrl: setup.imageUrl || undefined,
+	user: formatUser(setup.user),
+	products: setup.products.map((sp) => ({
+		...formatSetupProduct(sp),
+		product: formatProduct(sp.product),
+	})),
+});
+
+export const formatSetupProduct = (setupProduct: SetupProduct) => ({
+	id: setupProduct.id,
+	setupId: setupProduct.setupId,
+	productId: setupProduct.productId,
+	order: setupProduct.order,
+	createdAt: setupProduct.createdAt.toISOString(),
 });
 
 type CompleteProduct = Product & {
@@ -81,6 +126,7 @@ export const formatProduct = (product: CompleteProduct) => ({
 	reportReason: product.reportReason ?? undefined,
 	moderatedBy: product.moderatedBy ?? undefined,
 	moderatedAt: product.moderatedAt?.toISOString() ?? undefined,
+	createdBy: formatUser(product.createdBy),
 });
 
 export const formatDimension = (dimension: ProductDimension) => ({

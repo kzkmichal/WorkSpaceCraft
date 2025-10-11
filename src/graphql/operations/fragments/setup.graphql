@@ -1,0 +1,32 @@
+fragment SetupFields on Setup {
+	id
+	userId
+	category
+	title
+	description
+	imageUrl
+	status
+	createdAt
+	updatedAt
+	user {
+		...User
+	}
+}
+
+fragment SetupProductItemFields on SetupProductItem {
+	id
+	setupId
+	productId
+	order
+	product {
+		...ProductFields
+	}
+	createdAt
+}
+
+fragment SetupWithProductsFields on Setup {
+	...SetupFields
+	products {
+		...SetupProductItemFields
+	}
+}
