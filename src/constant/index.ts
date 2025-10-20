@@ -1,11 +1,9 @@
-// src/constants/index.ts
-
 export const ROUTES = {
 	HOME: "/",
 	PRODUCTS: "/products",
 	PRODUCT: (id: string) => `/products/${id}`,
 	SETUPS: "/setups",
-	SETUP: (id: string) => `/setups/${id}`,
+	SETUP: (category: string, id: string) => `/setup/${category}/${id}`,
 	ARTICLES: "/articles",
 	ARTICLE: (id: string) => `/articles/${id}`,
 	AUTH: {

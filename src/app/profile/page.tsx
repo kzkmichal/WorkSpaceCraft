@@ -1,11 +1,19 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma/prisma";
+import { getUserSetups } from "@/hooks/setup";
 import { Profile } from "@/components/modules/Profile";
-import { UserProducts } from "@/components/modules/User/Components/UserProducts";
+import {
+	UserProducts,
+	UserSetups,
+} from "@/components/modules/User/index";
 import { UserFieldsFragment } from "@/graphql/generated/graphql";
 import { Container } from "@/components/common/molecules";
 import { Link } from "@/components/common/atoms";
+
+type PageProps = {
+	searchParams: Promise<{ tab?: string }>;
+};
 
 export async function generateMetadata() {
 	return {
@@ -18,16 +26,33 @@ export async function generateMetadata() {
 	};
 }
 
-export default async function ProfilePage() {
-	const session = await auth();
+const TabNavigation = ({ activeTab }: { activeTab: string }) => {
+	const tabs = [
+		{ id: "products", label: "Products" },
+		{ id: "setups", label: "Setups" },
+	];
 
-	if (!session) {
-		redirect("/auth/signin");
-	}
+	return (
+		<div className="mb-6 flex gap-2">
+			{tabs.map((tab) => (
+				<Link
+					key={tab.id}
+					href={`/profile?tab=${tab.id}`}
+					variant={activeTab === tab.id ? "primary" : "ghost"}
+					size="sm"
+					prefetch={true}
+				>
+					{tab.label}
+				</Link>
+			))}
+		</div>
+	);
+};
 
+const ProductsTabs = async ({ userId }: { userId: string }) => {
 	const userProducts = await prisma.product.findMany({
 		where: {
-			userId: session.user.id,
+			userId: userId,
 		},
 		orderBy: { createdAt: "desc" },
 		include: {
@@ -42,6 +67,7 @@ export default async function ProfilePage() {
 	});
 
 	const formattedProducts = userProducts.map((product) => ({
+		userId: product.userId,
 		id: product.id,
 		title: product.title,
 		price: product.price,
@@ -54,12 +80,43 @@ export default async function ProfilePage() {
 		),
 	}));
 
+	return <UserProducts products={formattedProducts} />;
+};
+
+const SetupsTabs = async ({ userId }: { userId: string }) => {
+	const setupsData = await getUserSetups(userId);
+
+	const formattedSetups = setupsData.map((setup) => ({
+		...setup,
+		productCount: 0,
+	}));
+
+	return <UserSetups setups={formattedSetups} />;
+};
+
+export default async function ProfilePage({
+	searchParams,
+}: PageProps) {
+	const session = await auth();
+	const { tab } = await searchParams;
+
+	if (!session || !session.user.id) {
+		redirect("/auth/signin");
+	}
+
+	const activeTab = tab || "products";
+
 	return (
 		<>
 			<Profile {...(session.user as UserFieldsFragment)} />
 			<Container>
-				<h2 className="mb-4 text-2xl font-bold">My Products</h2>
-				<UserProducts products={formattedProducts} />
+				<TabNavigation activeTab={activeTab} />
+				{activeTab === "products" && (
+					<ProductsTabs userId={session.user.id} />
+				)}
+				{activeTab === "setups" && (
+					<SetupsTabs userId={session.user.id} />
+				)}
 			</Container>
 			<Container as={"section"}>
 				<div className="rounded-lg border border-accent bg-card p-6 shadow-sm">

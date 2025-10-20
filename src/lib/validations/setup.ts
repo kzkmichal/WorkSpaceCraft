@@ -1,33 +1,38 @@
 import { z } from "zod";
 
-export const createSetupSchema = z.object({
+export const setupSchema = z.object({
 	category: z.enum(["HOME_OFFICE", "OFFICE", "REMOTE_WORK"]),
-	title: z
-		.string()
-		.min(5, { message: "Title is required" })
-		.max(100, {
-			message: "Title must be between 5 and 100 characters",
-		}),
-	description: z.string().min(50).max(1000).optional(),
-	imageUrl: z.string().url().optional(),
-});
-
-export const updateSetupSchema = z.object({
-	title: z.string().min(5).max(100).optional(),
-	description: z.string().min(50).max(1000).optional().nullable(),
-	imageUrl: z.string().url().optional().nullable(),
+	title: z.string().min(5).max(100),
+	description: z.string().max(1000).nullable().optional(),
+	imageUrl: z.string().url().nullable().optional(),
 	status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
 });
 
+export const createSetupSchema = setupSchema.pick({
+	category: true,
+	title: true,
+	description: true,
+	imageUrl: true,
+});
+
+export const updateSetupSchema = setupSchema
+	.pick({
+		title: true,
+		description: true,
+		imageUrl: true,
+		status: true,
+	})
+	.partial();
+
 export type CreateSetupInput = z.infer<typeof createSetupSchema>;
 export type UpdateSetupInput = z.infer<typeof updateSetupSchema>;
+export type SetupFormValues = z.infer<typeof setupSchema>;
 
 export const SETUP_LIMITS = {
 	MIN_PRODUCTS: 1,
 	MAX_PRODUCTS: 20,
 	MIN_TITLE_LENGTH: 5,
 	MAX_TITLE_LENGTH: 100,
-	MIN_DESCRIPTION: 50,
 	MAX_DESCRIPTION: 1000,
 } as const;
 
