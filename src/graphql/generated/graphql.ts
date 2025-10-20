@@ -289,6 +289,7 @@ export type ProductsQueryInput = {
 };
 
 export type Query = {
+  allSetups: Array<Setup>;
   allUsers: Array<User>;
   categories: Array<CategoryInfo>;
   categoriesWithStats: Array<CategoryWithStats>;
@@ -306,13 +307,24 @@ export type Query = {
   searchProducts: Array<Product>;
   searchSuggestions: Array<SearchSuggestion>;
   session?: Maybe<Session>;
+  setupByCategory?: Maybe<Setup>;
+  setupById?: Maybe<Setup>;
   subcategories: Array<Subcategory>;
   subcategoriesWithStats: Array<SubcategoryWithStats>;
   subcategory?: Maybe<Subcategory>;
   tag?: Maybe<Tag>;
   tags?: Maybe<Array<Tag>>;
   user?: Maybe<User>;
+  userSetups: Array<Setup>;
   users: Array<User>;
+};
+
+
+export type QueryAllSetupsArgs = {
+  category?: InputMaybe<SetupCategory>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<SetupStatus>;
 };
 
 
@@ -390,6 +402,17 @@ export type QuerySearchSuggestionsArgs = {
 };
 
 
+export type QuerySetupByCategoryArgs = {
+  category: SetupCategory;
+  userId?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QuerySetupByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type QuerySubcategoriesArgs = {
   categoryType?: InputMaybe<CategoryType>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -413,6 +436,11 @@ export type QueryTagArgs = {
 
 export type QueryUserArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryUserSetupsArgs = {
+  userId: Scalars['String']['input'];
 };
 
 export type Review = {
@@ -449,10 +477,42 @@ export type Session = {
   user?: Maybe<User>;
 };
 
+export type Setup = {
+  category: SetupCategory;
+  createdAt: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  imageUrl?: Maybe<Scalars['String']['output']>;
+  products: Array<SetupProductItem>;
+  status: SetupStatus;
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+  user: User;
+  userId: Scalars['String']['output'];
+};
+
+export type SetupCategory =
+  | 'HOME_OFFICE'
+  | 'OFFICE'
+  | 'REMOTE_WORK';
+
 export type SetupDifficulty =
   | 'EASY'
   | 'HARD'
   | 'MEDIUM';
+
+export type SetupProductItem = {
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  order: Scalars['Int']['output'];
+  product: Product;
+  productId: Scalars['String']['output'];
+  setupId: Scalars['String']['output'];
+};
+
+export type SetupStatus =
+  | 'DRAFT'
+  | 'PUBLISHED';
 
 export type Subcategory = {
   categoryType: CategoryType;
@@ -623,7 +683,11 @@ export type ResolversTypes = {
   SearchSuggestion: ResolverTypeWrapper<SearchSuggestion>;
   SearchSuggestionType: SearchSuggestionType;
   Session: ResolverTypeWrapper<Session>;
+  Setup: ResolverTypeWrapper<Setup>;
+  SetupCategory: SetupCategory;
   SetupDifficulty: SetupDifficulty;
+  SetupProductItem: ResolverTypeWrapper<SetupProductItem>;
+  SetupStatus: SetupStatus;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Subcategory: ResolverTypeWrapper<Subcategory>;
   SubcategoryWithStats: ResolverTypeWrapper<SubcategoryWithStats>;
@@ -662,6 +726,8 @@ export type ResolversParentTypes = {
   Review: Review;
   SearchSuggestion: SearchSuggestion;
   Session: Session;
+  Setup: Setup;
+  SetupProductItem: SetupProductItem;
   String: Scalars['String']['output'];
   Subcategory: Subcategory;
   SubcategoryWithStats: SubcategoryWithStats;
@@ -798,6 +864,7 @@ export type ProductUserExperienceResolvers<ContextType = ApolloContext, ParentTy
 };
 
 export type QueryResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  allSetups?: Resolver<Array<ResolversTypes['Setup']>, ParentType, ContextType, Partial<QueryAllSetupsArgs>>;
   allUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, Partial<QueryAllUsersArgs>>;
   categories?: Resolver<Array<ResolversTypes['CategoryInfo']>, ParentType, ContextType>;
   categoriesWithStats?: Resolver<Array<ResolversTypes['CategoryWithStats']>, ParentType, ContextType>;
@@ -815,12 +882,15 @@ export type QueryResolvers<ContextType = ApolloContext, ParentType extends Resol
   searchProducts?: Resolver<Array<ResolversTypes['Product']>, ParentType, ContextType, RequireFields<QuerySearchProductsArgs, 'query'>>;
   searchSuggestions?: Resolver<Array<ResolversTypes['SearchSuggestion']>, ParentType, ContextType, RequireFields<QuerySearchSuggestionsArgs, 'query'>>;
   session?: Resolver<Maybe<ResolversTypes['Session']>, ParentType, ContextType>;
+  setupByCategory?: Resolver<Maybe<ResolversTypes['Setup']>, ParentType, ContextType, RequireFields<QuerySetupByCategoryArgs, 'category'>>;
+  setupById?: Resolver<Maybe<ResolversTypes['Setup']>, ParentType, ContextType, RequireFields<QuerySetupByIdArgs, 'id'>>;
   subcategories?: Resolver<Array<ResolversTypes['Subcategory']>, ParentType, ContextType, Partial<QuerySubcategoriesArgs>>;
   subcategoriesWithStats?: Resolver<Array<ResolversTypes['SubcategoryWithStats']>, ParentType, ContextType, RequireFields<QuerySubcategoriesWithStatsArgs, 'categoryType'>>;
   subcategory?: Resolver<Maybe<ResolversTypes['Subcategory']>, ParentType, ContextType, RequireFields<QuerySubcategoryArgs, 'fullSlug'>>;
   tag?: Resolver<Maybe<ResolversTypes['Tag']>, ParentType, ContextType, RequireFields<QueryTagArgs, 'slug'>>;
   tags?: Resolver<Maybe<Array<ResolversTypes['Tag']>>, ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
+  userSetups?: Resolver<Array<ResolversTypes['Setup']>, ParentType, ContextType, RequireFields<QueryUserSetupsArgs, 'userId'>>;
   users?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
 };
 
@@ -848,6 +918,31 @@ export type SearchSuggestionResolvers<ContextType = ApolloContext, ParentType ex
 export type SessionResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['Session'] = ResolversParentTypes['Session']> = {
   expires?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SetupResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['Setup'] = ResolversParentTypes['Setup']> = {
+  category?: Resolver<ResolversTypes['SetupCategory'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  imageUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  products?: Resolver<Array<ResolversTypes['SetupProductItem']>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['SetupStatus'], ParentType, ContextType>;
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  userId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SetupProductItemResolvers<ContextType = ApolloContext, ParentType extends ResolversParentTypes['SetupProductItem'] = ResolversParentTypes['SetupProductItem']> = {
+  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  order?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  product?: Resolver<ResolversTypes['Product'], ParentType, ContextType>;
+  productId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  setupId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -915,6 +1010,8 @@ export type Resolvers<ContextType = ApolloContext> = {
   Review?: ReviewResolvers<ContextType>;
   SearchSuggestion?: SearchSuggestionResolvers<ContextType>;
   Session?: SessionResolvers<ContextType>;
+  Setup?: SetupResolvers<ContextType>;
+  SetupProductItem?: SetupProductItemResolvers<ContextType>;
   Subcategory?: SubcategoryResolvers<ContextType>;
   SubcategoryWithStats?: SubcategoryWithStatsResolvers<ContextType>;
   Tag?: TagResolvers<ContextType>;
@@ -945,6 +1042,12 @@ export type ProductUserExperienceFragment = { id: string, setupDifficulty: Setup
 export type ProductFieldsFragment = { id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, brand?: string | undefined, model?: string | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined, dimensions?: Array<{ id: string, name: string, value: string, unit?: string | undefined }> | undefined, technicalFeatures?: Array<{ id: string, name: string, value: string }> | undefined, pros?: Array<{ id: string, text: string, type: ProConType }> | undefined, cons?: Array<{ id: string, text: string, type: ProConType }> | undefined, userExperience?: { id: string, setupDifficulty: SetupDifficulty, assemblyRequired: boolean, toolsNeeded: Array<string>, compatibility: Array<string>, userManualLink?: string | undefined } | undefined };
 
 export type SearchSuggestionFieldsFragment = { type: SearchSuggestionType, title: string, subtitle?: string | undefined, url: string, imageUrl?: string | undefined, badge?: string | undefined };
+
+export type SetupFieldsFragment = { id: string, userId: string, category: SetupCategory, title: string, description?: string | undefined, imageUrl?: string | undefined, status: SetupStatus, createdAt: string, updatedAt: string, user: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role } };
+
+export type SetupProductItemFieldsFragment = { id: string, setupId: string, productId: string, order: number, createdAt: string, product: { id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, brand?: string | undefined, model?: string | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined, dimensions?: Array<{ id: string, name: string, value: string, unit?: string | undefined }> | undefined, technicalFeatures?: Array<{ id: string, name: string, value: string }> | undefined, pros?: Array<{ id: string, text: string, type: ProConType }> | undefined, cons?: Array<{ id: string, text: string, type: ProConType }> | undefined, userExperience?: { id: string, setupDifficulty: SetupDifficulty, assemblyRequired: boolean, toolsNeeded: Array<string>, compatibility: Array<string>, userManualLink?: string | undefined } | undefined } };
+
+export type SetupWithProductsFieldsFragment = { id: string, userId: string, category: SetupCategory, title: string, description?: string | undefined, imageUrl?: string | undefined, status: SetupStatus, createdAt: string, updatedAt: string, products: Array<{ id: string, setupId: string, productId: string, order: number, createdAt: string, product: { id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, brand?: string | undefined, model?: string | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined, dimensions?: Array<{ id: string, name: string, value: string, unit?: string | undefined }> | undefined, technicalFeatures?: Array<{ id: string, name: string, value: string }> | undefined, pros?: Array<{ id: string, text: string, type: ProConType }> | undefined, cons?: Array<{ id: string, text: string, type: ProConType }> | undefined, userExperience?: { id: string, setupDifficulty: SetupDifficulty, assemblyRequired: boolean, toolsNeeded: Array<string>, compatibility: Array<string>, userManualLink?: string | undefined } | undefined } }>, user: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role } };
 
 export type SubcategoryFieldsFragment = { id: string, name: string, slug: string, fullSlug: string, description?: string | undefined, categoryType: CategoryType, createdAt: string, updatedAt: string, products?: Array<{ id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, brand?: string | undefined, model?: string | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined, dimensions?: Array<{ id: string, name: string, value: string, unit?: string | undefined }> | undefined, technicalFeatures?: Array<{ id: string, name: string, value: string }> | undefined, pros?: Array<{ id: string, text: string, type: ProConType }> | undefined, cons?: Array<{ id: string, text: string, type: ProConType }> | undefined, userExperience?: { id: string, setupDifficulty: SetupDifficulty, assemblyRequired: boolean, toolsNeeded: Array<string>, compatibility: Array<string>, userManualLink?: string | undefined } | undefined } | undefined> | undefined };
 
@@ -1153,6 +1256,38 @@ export type SearchProductsQueryVariables = Exact<{
 
 
 export type SearchProductsQuery = { searchProducts: Array<{ id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, brand?: string | undefined, model?: string | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined, dimensions?: Array<{ id: string, name: string, value: string, unit?: string | undefined }> | undefined, technicalFeatures?: Array<{ id: string, name: string, value: string }> | undefined, pros?: Array<{ id: string, text: string, type: ProConType }> | undefined, cons?: Array<{ id: string, text: string, type: ProConType }> | undefined, userExperience?: { id: string, setupDifficulty: SetupDifficulty, assemblyRequired: boolean, toolsNeeded: Array<string>, compatibility: Array<string>, userManualLink?: string | undefined } | undefined }> };
+
+export type UserSetupsQueryVariables = Exact<{
+  userId: Scalars['String']['input'];
+}>;
+
+
+export type UserSetupsQuery = { userSetups: Array<{ id: string, userId: string, category: SetupCategory, title: string, description?: string | undefined, imageUrl?: string | undefined, status: SetupStatus, createdAt: string, updatedAt: string, user: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role } }> };
+
+export type SetupByIdQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type SetupByIdQuery = { setupById?: { id: string, userId: string, category: SetupCategory, title: string, description?: string | undefined, imageUrl?: string | undefined, status: SetupStatus, createdAt: string, updatedAt: string, products: Array<{ id: string, setupId: string, productId: string, order: number, createdAt: string, product: { id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, brand?: string | undefined, model?: string | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined, dimensions?: Array<{ id: string, name: string, value: string, unit?: string | undefined }> | undefined, technicalFeatures?: Array<{ id: string, name: string, value: string }> | undefined, pros?: Array<{ id: string, text: string, type: ProConType }> | undefined, cons?: Array<{ id: string, text: string, type: ProConType }> | undefined, userExperience?: { id: string, setupDifficulty: SetupDifficulty, assemblyRequired: boolean, toolsNeeded: Array<string>, compatibility: Array<string>, userManualLink?: string | undefined } | undefined } }>, user: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role } } | undefined };
+
+export type SetupByCategoryQueryVariables = Exact<{
+  category: SetupCategory;
+  userId?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type SetupByCategoryQuery = { setupByCategory?: { id: string, userId: string, category: SetupCategory, title: string, description?: string | undefined, imageUrl?: string | undefined, status: SetupStatus, createdAt: string, updatedAt: string, products: Array<{ id: string, setupId: string, productId: string, order: number, createdAt: string, product: { id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, brand?: string | undefined, model?: string | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined, dimensions?: Array<{ id: string, name: string, value: string, unit?: string | undefined }> | undefined, technicalFeatures?: Array<{ id: string, name: string, value: string }> | undefined, pros?: Array<{ id: string, text: string, type: ProConType }> | undefined, cons?: Array<{ id: string, text: string, type: ProConType }> | undefined, userExperience?: { id: string, setupDifficulty: SetupDifficulty, assemblyRequired: boolean, toolsNeeded: Array<string>, compatibility: Array<string>, userManualLink?: string | undefined } | undefined } }>, user: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role } } | undefined };
+
+export type AllSetupsQueryVariables = Exact<{
+  category: SetupCategory;
+  status?: InputMaybe<SetupStatus>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type AllSetupsQuery = { allSetups: Array<{ id: string, userId: string, category: SetupCategory, title: string, description?: string | undefined, imageUrl?: string | undefined, status: SetupStatus, createdAt: string, updatedAt: string, user: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role } }> };
 
 export type SubcategoriesQueryVariables = Exact<{
   categoryType?: InputMaybe<CategoryType>;
@@ -1386,6 +1521,43 @@ export const SearchSuggestionFieldsFragmentDoc = gql`
   badge
 }
     `;
+export const SetupFieldsFragmentDoc = gql`
+    fragment SetupFields on Setup {
+  id
+  userId
+  category
+  title
+  description
+  imageUrl
+  status
+  createdAt
+  updatedAt
+  user {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+export const SetupProductItemFieldsFragmentDoc = gql`
+    fragment SetupProductItemFields on SetupProductItem {
+  id
+  setupId
+  productId
+  order
+  product {
+    ...ProductFields
+  }
+  createdAt
+}
+    ${ProductFieldsFragmentDoc}`;
+export const SetupWithProductsFieldsFragmentDoc = gql`
+    fragment SetupWithProductsFields on Setup {
+  ...SetupFields
+  products {
+    ...SetupProductItemFields
+  }
+}
+    ${SetupFieldsFragmentDoc}
+${SetupProductItemFieldsFragmentDoc}`;
 export const UpdateUserProfileDocument = gql`
     mutation UpdateUserProfile($input: UpdateUserProfileInput!) {
   updateUserProfile(input: $input) {
@@ -2454,6 +2626,170 @@ export type SearchProductsQueryHookResult = ReturnType<typeof useSearchProductsQ
 export type SearchProductsLazyQueryHookResult = ReturnType<typeof useSearchProductsLazyQuery>;
 export type SearchProductsSuspenseQueryHookResult = ReturnType<typeof useSearchProductsSuspenseQuery>;
 export type SearchProductsQueryResult = Apollo.QueryResult<SearchProductsQuery, SearchProductsQueryVariables>;
+export const UserSetupsDocument = gql`
+    query UserSetups($userId: String!) {
+  userSetups(userId: $userId) {
+    ...SetupFields
+  }
+}
+    ${SetupFieldsFragmentDoc}`;
+
+/**
+ * __useUserSetupsQuery__
+ *
+ * To run a query within a React component, call `useUserSetupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserSetupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserSetupsQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useUserSetupsQuery(baseOptions: Apollo.QueryHookOptions<UserSetupsQuery, UserSetupsQueryVariables> & ({ variables: UserSetupsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UserSetupsQuery, UserSetupsQueryVariables>(UserSetupsDocument, options);
+      }
+export function useUserSetupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UserSetupsQuery, UserSetupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UserSetupsQuery, UserSetupsQueryVariables>(UserSetupsDocument, options);
+        }
+export function useUserSetupsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<UserSetupsQuery, UserSetupsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<UserSetupsQuery, UserSetupsQueryVariables>(UserSetupsDocument, options);
+        }
+export type UserSetupsQueryHookResult = ReturnType<typeof useUserSetupsQuery>;
+export type UserSetupsLazyQueryHookResult = ReturnType<typeof useUserSetupsLazyQuery>;
+export type UserSetupsSuspenseQueryHookResult = ReturnType<typeof useUserSetupsSuspenseQuery>;
+export type UserSetupsQueryResult = Apollo.QueryResult<UserSetupsQuery, UserSetupsQueryVariables>;
+export const SetupByIdDocument = gql`
+    query SetupById($id: ID!) {
+  setupById(id: $id) {
+    ...SetupWithProductsFields
+  }
+}
+    ${SetupWithProductsFieldsFragmentDoc}`;
+
+/**
+ * __useSetupByIdQuery__
+ *
+ * To run a query within a React component, call `useSetupByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSetupByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSetupByIdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useSetupByIdQuery(baseOptions: Apollo.QueryHookOptions<SetupByIdQuery, SetupByIdQueryVariables> & ({ variables: SetupByIdQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SetupByIdQuery, SetupByIdQueryVariables>(SetupByIdDocument, options);
+      }
+export function useSetupByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SetupByIdQuery, SetupByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SetupByIdQuery, SetupByIdQueryVariables>(SetupByIdDocument, options);
+        }
+export function useSetupByIdSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SetupByIdQuery, SetupByIdQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SetupByIdQuery, SetupByIdQueryVariables>(SetupByIdDocument, options);
+        }
+export type SetupByIdQueryHookResult = ReturnType<typeof useSetupByIdQuery>;
+export type SetupByIdLazyQueryHookResult = ReturnType<typeof useSetupByIdLazyQuery>;
+export type SetupByIdSuspenseQueryHookResult = ReturnType<typeof useSetupByIdSuspenseQuery>;
+export type SetupByIdQueryResult = Apollo.QueryResult<SetupByIdQuery, SetupByIdQueryVariables>;
+export const SetupByCategoryDocument = gql`
+    query SetupByCategory($category: SetupCategory!, $userId: String) {
+  setupByCategory(category: $category, userId: $userId) {
+    ...SetupWithProductsFields
+  }
+}
+    ${SetupWithProductsFieldsFragmentDoc}`;
+
+/**
+ * __useSetupByCategoryQuery__
+ *
+ * To run a query within a React component, call `useSetupByCategoryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSetupByCategoryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSetupByCategoryQuery({
+ *   variables: {
+ *      category: // value for 'category'
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useSetupByCategoryQuery(baseOptions: Apollo.QueryHookOptions<SetupByCategoryQuery, SetupByCategoryQueryVariables> & ({ variables: SetupByCategoryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SetupByCategoryQuery, SetupByCategoryQueryVariables>(SetupByCategoryDocument, options);
+      }
+export function useSetupByCategoryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SetupByCategoryQuery, SetupByCategoryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SetupByCategoryQuery, SetupByCategoryQueryVariables>(SetupByCategoryDocument, options);
+        }
+export function useSetupByCategorySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<SetupByCategoryQuery, SetupByCategoryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SetupByCategoryQuery, SetupByCategoryQueryVariables>(SetupByCategoryDocument, options);
+        }
+export type SetupByCategoryQueryHookResult = ReturnType<typeof useSetupByCategoryQuery>;
+export type SetupByCategoryLazyQueryHookResult = ReturnType<typeof useSetupByCategoryLazyQuery>;
+export type SetupByCategorySuspenseQueryHookResult = ReturnType<typeof useSetupByCategorySuspenseQuery>;
+export type SetupByCategoryQueryResult = Apollo.QueryResult<SetupByCategoryQuery, SetupByCategoryQueryVariables>;
+export const AllSetupsDocument = gql`
+    query AllSetups($category: SetupCategory!, $status: SetupStatus, $limit: Int, $offset: Int) {
+  allSetups(category: $category, status: $status, limit: $limit, offset: $offset) {
+    ...SetupFields
+  }
+}
+    ${SetupFieldsFragmentDoc}`;
+
+/**
+ * __useAllSetupsQuery__
+ *
+ * To run a query within a React component, call `useAllSetupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllSetupsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllSetupsQuery({
+ *   variables: {
+ *      category: // value for 'category'
+ *      status: // value for 'status'
+ *      limit: // value for 'limit'
+ *      offset: // value for 'offset'
+ *   },
+ * });
+ */
+export function useAllSetupsQuery(baseOptions: Apollo.QueryHookOptions<AllSetupsQuery, AllSetupsQueryVariables> & ({ variables: AllSetupsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AllSetupsQuery, AllSetupsQueryVariables>(AllSetupsDocument, options);
+      }
+export function useAllSetupsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AllSetupsQuery, AllSetupsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AllSetupsQuery, AllSetupsQueryVariables>(AllSetupsDocument, options);
+        }
+export function useAllSetupsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AllSetupsQuery, AllSetupsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AllSetupsQuery, AllSetupsQueryVariables>(AllSetupsDocument, options);
+        }
+export type AllSetupsQueryHookResult = ReturnType<typeof useAllSetupsQuery>;
+export type AllSetupsLazyQueryHookResult = ReturnType<typeof useAllSetupsLazyQuery>;
+export type AllSetupsSuspenseQueryHookResult = ReturnType<typeof useAllSetupsSuspenseQuery>;
+export type AllSetupsQueryResult = Apollo.QueryResult<AllSetupsQuery, AllSetupsQueryVariables>;
 export const SubcategoriesDocument = gql`
     query Subcategories($categoryType: CategoryType, $limit: Int) {
   subcategories(categoryType: $categoryType, limit: $limit) {

@@ -1,0 +1,33 @@
+query UserSetups($userId: String!) {
+	userSetups(userId: $userId) {
+		...SetupFields
+	}
+}
+
+query SetupById($id: ID!) {
+	setupById(id: $id) {
+		...SetupWithProductsFields
+	}
+}
+
+query SetupByCategory($category: SetupCategory!, $userId: String) {
+	setupByCategory(category: $category, userId: $userId) {
+		...SetupWithProductsFields
+	}
+}
+
+query AllSetups(
+	$category: SetupCategory!
+	$status: SetupStatus
+	$limit: Int
+	$offset: Int
+) {
+	allSetups(
+		category: $category
+		status: $status
+		limit: $limit
+		offset: $offset
+	) {
+		...SetupFields
+	}
+}

@@ -1,0 +1,32 @@
+type Setup {
+	id: ID!
+	userId: String!
+	category: SetupCategory!
+	title: String!
+	description: String
+	imageUrl: String
+	status: SetupStatus!
+	createdAt: String!
+	updatedAt: String!
+	user: User!
+	products: [SetupProductItem!]!
+}
+
+type SetupProductItem {
+	id: ID!
+	setupId: String!
+	productId: String!
+	order: Int!
+	product: Product!
+	createdAt: String!
+}
+enum SetupCategory {
+	HOME_OFFICE
+	OFFICE
+	REMOTE_WORK
+}
+
+enum SetupStatus {
+	DRAFT
+	PUBLISHED
+}
