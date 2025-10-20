@@ -24,16 +24,16 @@ export async function createSetup(
 		return { success: false, error: SETUP_ERRORS.UNAUTHORIZED };
 	}
 
-	const validated = createSetupSchema.parse(data);
-
 	try {
+		const validated = createSetupSchema.parse(data);
 		const setupService = getSetupService();
+
 		const result = await setupService.createSetup(
 			session.user.id as string,
 			validated.category,
 			validated.title,
-			validated.description,
-			validated.imageUrl,
+			validated.description ?? undefined,
+			validated.imageUrl ?? undefined,
 		);
 
 		revalidatePath(`/setups`);
@@ -62,10 +62,10 @@ export async function updateSetup(
 		return { success: false, error: SETUP_ERRORS.UNAUTHORIZED };
 	}
 
-	const validated = updateSetupSchema.parse(data);
-
 	try {
+		const validated = updateSetupSchema.parse(data);
 		const setupService = getSetupService();
+
 		await setupService.updateSetup(
 			setupId,
 			session.user.id as string,
@@ -75,7 +75,7 @@ export async function updateSetup(
 			validated.status,
 		);
 
-		revalidatePath(`/setup/${setupId}`);
+		revalidatePath("/setup", "layout");
 		revalidatePath("/profile");
 
 		return { success: true, setupId };
@@ -138,8 +138,7 @@ export async function addProductToSetup(
 			session.user.id as string,
 		);
 
-		revalidatePath(`/setup/${setupId}/edit`);
-
+		revalidatePath("/setup", "layout");
 		return { success: true };
 	} catch (error) {
 		return {
@@ -168,7 +167,7 @@ export async function removeProductFromSetup(
 			session.user.id as string,
 		);
 
-		revalidatePath(`/setup/${setupId}/edit`);
+		revalidatePath("/setup", "layout");
 
 		return { success: true };
 	} catch (error) {
@@ -198,7 +197,7 @@ export async function reorderSetupProducts(
 			session.user.id as string,
 		);
 
-		revalidatePath(`/setup/${setupId}/edit`);
+		revalidatePath("/setup", "layout");
 
 		return { success: true };
 	} catch (error) {
@@ -226,7 +225,7 @@ export async function publishSetup(
 			session.user.id as string,
 		);
 
-		revalidatePath(`/setup/${setupId}`);
+		revalidatePath("/setup", "layout");
 		revalidatePath("/setups");
 		revalidatePath("/profile");
 
@@ -271,7 +270,7 @@ export async function toggleProductInSetup(
 			);
 		}
 
-		revalidatePath(`/setup/${setupId}/edit`);
+		revalidatePath("/setup", "layout");
 
 		return { success: true };
 	} catch (error) {

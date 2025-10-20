@@ -4,7 +4,6 @@ import type {
 	SetupCategory,
 	SetupStatus,
 } from "../generated/graphql";
-import { formatSetup, formatUserSetups } from "./utils";
 import { getSetupService } from "@/lib/services/setupService/setup-service-factory";
 
 async function getUserSetups(id: string) {
@@ -17,7 +16,7 @@ async function getUserSetups(id: string) {
 			return [];
 		}
 
-		return formatUserSetups(setups);
+		return setups;
 	} catch (error) {
 		if (error instanceof GraphQLError) throw error;
 		console.error("Failed to fetch setups:", error);
@@ -39,9 +38,7 @@ async function getSetup(id: string) {
 			});
 		}
 
-		return {
-			...formatSetup(setup),
-		};
+		return setup;
 	} catch (error) {
 		if (error instanceof GraphQLError) throw error;
 		console.error("Failed to fetch setup:", error);
@@ -73,9 +70,7 @@ async function getAllSetups(
 			});
 		}
 
-		return {
-			...formatUserSetups(setups),
-		};
+		return setups;
 	} catch (error) {
 		if (error instanceof GraphQLError) throw error;
 		console.error("Failed to fetch setups:", error);
@@ -103,7 +98,7 @@ async function getSetupByCategory(
 			});
 		}
 
-		return { ...formatSetup(setup) };
+		return setup;
 	} catch (error) {
 		console.error("Failed to fetch setups by category:", error);
 		throw new GraphQLError("Failed to fetch setups by category", {

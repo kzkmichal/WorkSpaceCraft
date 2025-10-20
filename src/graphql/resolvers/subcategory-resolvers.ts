@@ -1,11 +1,8 @@
 import { GraphQLError } from "graphql";
 import type { Resolvers } from "../generated/graphql";
-import {
-	formatProduct,
-	formatSubcategory,
-	formatUser,
-} from "./utils";
+import { formatProduct, formatUser } from "./utils";
 import { getProductService } from "@/lib/services/productService/product-service-factory";
+import { formatSubcategory } from "@/lib/services/productService/product-formatter";
 
 type SubcategoryUpdateData = {
 	name?: string;

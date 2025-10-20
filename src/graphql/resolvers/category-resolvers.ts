@@ -1,12 +1,9 @@
 import { GraphQLError } from "graphql";
 import type { Resolvers } from "../generated/graphql";
-import {
-	formatUser,
-	formatProduct,
-	formatSubcategory,
-} from "./utils";
+import { formatUser, formatProduct } from "./utils";
 import { categories, getCategoryByType } from "@/constant/categories";
 import { getProductService } from "@/lib/services/productService/product-service-factory";
+import { formatSubcategory } from "@/lib/services/productService/product-formatter";
 
 export const resolvers: Resolvers = {
 	Query: {

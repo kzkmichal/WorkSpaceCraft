@@ -14,7 +14,7 @@ export type UserSetupsProps = BaseProps & {
 export type SetupCardProps = BaseProps &
 	Omit<SetupFieldsFragment, "user" | "createdAt" | "updatedAt"> & {
 		isOwner?: boolean;
-		productCount: number;
+		productCount?: number;
 	};
 export type SetupCardActionButtonsProps = BaseProps & {
 	id: string;

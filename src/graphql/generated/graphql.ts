@@ -1280,7 +1280,7 @@ export type SetupByCategoryQueryVariables = Exact<{
 export type SetupByCategoryQuery = { setupByCategory?: { id: string, userId: string, category: SetupCategory, title: string, description?: string | undefined, imageUrl?: string | undefined, status: SetupStatus, createdAt: string, updatedAt: string, products: Array<{ id: string, setupId: string, productId: string, order: number, createdAt: string, product: { id: string, title: string, description: string, price: number, originalStoreLink: string, createdAt: string, updatedAt: string, categories: Array<CategoryType>, isReported?: boolean | undefined, reportCount?: number | undefined, brand?: string | undefined, model?: string | undefined, createdBy: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role }, subcategories?: Array<{ id: string, name: string, slug: string, fullSlug: string, categoryType: CategoryType } | undefined> | undefined, images?: Array<{ id: string, url?: string | undefined, fileName?: string | undefined, isPrimary?: boolean | undefined } | undefined> | undefined, tags?: Array<{ id: string, name: string, slug: string, createdAt: string, updatedAt: string }> | undefined, dimensions?: Array<{ id: string, name: string, value: string, unit?: string | undefined }> | undefined, technicalFeatures?: Array<{ id: string, name: string, value: string }> | undefined, pros?: Array<{ id: string, text: string, type: ProConType }> | undefined, cons?: Array<{ id: string, text: string, type: ProConType }> | undefined, userExperience?: { id: string, setupDifficulty: SetupDifficulty, assemblyRequired: boolean, toolsNeeded: Array<string>, compatibility: Array<string>, userManualLink?: string | undefined } | undefined } }>, user: { id: string, name?: string | undefined, email: string, createdAt: string, updatedAt: string, role: Role } } | undefined };
 
 export type AllSetupsQueryVariables = Exact<{
-  category: SetupCategory;
+  category?: InputMaybe<SetupCategory>;
   status?: InputMaybe<SetupStatus>;
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
@@ -2748,7 +2748,7 @@ export type SetupByCategoryLazyQueryHookResult = ReturnType<typeof useSetupByCat
 export type SetupByCategorySuspenseQueryHookResult = ReturnType<typeof useSetupByCategorySuspenseQuery>;
 export type SetupByCategoryQueryResult = Apollo.QueryResult<SetupByCategoryQuery, SetupByCategoryQueryVariables>;
 export const AllSetupsDocument = gql`
-    query AllSetups($category: SetupCategory!, $status: SetupStatus, $limit: Int, $offset: Int) {
+    query AllSetups($category: SetupCategory, $status: SetupStatus, $limit: Int, $offset: Int) {
   allSetups(category: $category, status: $status, limit: $limit, offset: $offset) {
     ...SetupFields
   }
@@ -2774,7 +2774,7 @@ export const AllSetupsDocument = gql`
  *   },
  * });
  */
-export function useAllSetupsQuery(baseOptions: Apollo.QueryHookOptions<AllSetupsQuery, AllSetupsQueryVariables> & ({ variables: AllSetupsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useAllSetupsQuery(baseOptions?: Apollo.QueryHookOptions<AllSetupsQuery, AllSetupsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<AllSetupsQuery, AllSetupsQueryVariables>(AllSetupsDocument, options);
       }

@@ -4,6 +4,7 @@ import {
 	SetupStatus,
 } from "@prisma/client";
 import { Mutations } from "./mutations";
+import { SetupFormatter } from "./setup-formatter";
 
 export class SetupService {
 	constructor(
@@ -13,17 +14,15 @@ export class SetupService {
 
 	async getUserSetups(userId: string) {
 		try {
-			const userSetup = await this.prisma.setup.findMany({
+			const userSetups = await this.prisma.setup.findMany({
 				where: { userId },
 				include: {
 					user: true,
-					// category: true,
-					// status: true,
 				},
 				orderBy: { createdAt: "desc" },
 			});
 
-			return userSetup;
+			return SetupFormatter.formatUserSetups(userSetups);
 		} catch (error) {
 			console.error(
 				`Error fetching setups for user ${userId}:`,
@@ -61,7 +60,7 @@ export class SetupService {
 				},
 			});
 
-			return setup;
+			return setup ? SetupFormatter.formatSetup(setup) : null;
 		} catch (error) {
 			console.error(`Error fetching Setup ${id}:`, error);
 			throw new Error("Failed to fetch setup");
@@ -101,7 +100,7 @@ export class SetupService {
 				},
 			});
 
-			return setup;
+			return setup ? SetupFormatter.formatSetup(setup) : null;
 		} catch (error) {
 			console.error(
 				`Error fetching setups for category ${category}:`,
@@ -132,7 +131,7 @@ export class SetupService {
 				orderBy: { createdAt: "desc" },
 			});
 
-			return setups;
+			return SetupFormatter.formatUserSetups(setups);
 		} catch (error) {
 			console.error("Error fetching all setups:", error);
 			throw new Error("Failed to fetch setups");

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma/prisma";
+import { getUserSetups } from "@/hooks/setup";
 import { Profile } from "@/components/modules/Profile";
 import {
 	UserProducts,
@@ -9,6 +10,10 @@ import {
 import { UserFieldsFragment } from "@/graphql/generated/graphql";
 import { Container } from "@/components/common/molecules";
 import { Link } from "@/components/common/atoms";
+
+type PageProps = {
+	searchParams: Promise<{ tab?: string }>;
+};
 
 export async function generateMetadata() {
 	return {
@@ -62,6 +67,7 @@ const ProductsTabs = async ({ userId }: { userId: string }) => {
 	});
 
 	const formattedProducts = userProducts.map((product) => ({
+		userId: product.userId,
 		id: product.id,
 		title: product.title,
 		price: product.price,
@@ -78,33 +84,11 @@ const ProductsTabs = async ({ userId }: { userId: string }) => {
 };
 
 const SetupsTabs = async ({ userId }: { userId: string }) => {
-	const userSetups = await prisma.setup.findMany({
-		where: {
-			userId: userId,
-		},
-		orderBy: { createdAt: "desc" },
-		include: {
-			user: true,
-			_count: { select: { products: true } },
-		},
-	});
+	const setupsData = await getUserSetups(userId);
 
-	const formattedSetups = userSetups.map((setup) => ({
-		id: setup.id,
-		status: setup.status,
-		category: setup.category,
-		userId: setup.userId,
-		title: setup.title,
-		description: setup.description || undefined,
-		imageUrl: setup.imageUrl || undefined,
-		productCount: setup._count.products,
-		user: {
-			name: setup.user.name,
-			email: setup.user.email,
-			image: setup.user.image || undefined,
-			id: setup.user.id,
-			createdAt: setup.user.createdAt,
-		},
+	const formattedSetups = setupsData.map((setup) => ({
+		...setup,
+		productCount: 0,
 	}));
 
 	return <UserSetups setups={formattedSetups} />;
@@ -112,16 +96,15 @@ const SetupsTabs = async ({ userId }: { userId: string }) => {
 
 export default async function ProfilePage({
 	searchParams,
-}: {
-	searchParams: { tab?: string };
-}) {
+}: PageProps) {
 	const session = await auth();
+	const { tab } = await searchParams;
 
 	if (!session || !session.user.id) {
 		redirect("/auth/signin");
 	}
 
-	const activeTab = searchParams.tab || "products";
+	const activeTab = tab || "products";
 
 	return (
 		<>

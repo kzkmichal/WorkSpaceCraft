@@ -17,7 +17,7 @@ query SetupByCategory($category: SetupCategory!, $userId: String) {
 }
 
 query AllSetups(
-	$category: SetupCategory!
+	$category: SetupCategory
 	$status: SetupStatus
 	$limit: Int
 	$offset: Int

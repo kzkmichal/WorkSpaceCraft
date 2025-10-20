@@ -5,6 +5,7 @@ import {
 } from "@/graphql/generated/graphql";
 import { SearchQueryBuilder } from "@/lib/search-helpers";
 import { PrismaClient } from "@prisma/client";
+import { ProductFormatter } from "./product-formatter";
 
 export class ProductService {
 	constructor(private prisma: PrismaClient) {}
@@ -52,7 +53,7 @@ export class ProductService {
 				include: this.getCompleteProductInclude(),
 			});
 
-			return product;
+			return product ? ProductFormatter.formatProduct(product) : null;
 		} catch (error) {
 			console.error(`Error fetching Product ${id}:`, error);
 			throw error;
@@ -69,7 +70,9 @@ export class ProductService {
 				},
 			});
 
-			return products;
+			return products.map((product) =>
+				ProductFormatter.formatProduct(product),
+			);
 		} catch (error) {
 			console.error(
 				`Error fetching user products for ${userId}:`,
@@ -131,7 +134,9 @@ export class ProductService {
 				include: this.getCompleteProductInclude(),
 			});
 
-			return products;
+			return products.map((product) =>
+				ProductFormatter.formatProduct(product),
+			);
 		} catch (error) {
 			console.error("Error getting products:", error);
 			throw new Error("Getting products failed");

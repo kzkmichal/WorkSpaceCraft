@@ -1,4 +1,4 @@
-import { SetupCategory } from "@prisma/client";
+import { SetupCategory } from "@/graphql/generated/graphql";
 
 export const getCategoryIcon = (category: SetupCategory): string => {
 	const icons: Record<SetupCategory, string> = {
@@ -25,4 +25,8 @@ export const getCategoryColor = (category: SetupCategory): string => {
 		REMOTE_WORK: "green",
 	};
 	return colors[category];
+};
+
+export const getCategoryUrl = (category: SetupCategory): string => {
+	return category.toLowerCase().replace(/_/g, "-");
 };

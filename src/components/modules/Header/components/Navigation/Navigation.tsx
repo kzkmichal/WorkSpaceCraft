@@ -167,6 +167,21 @@ export const Navigation = ({
 									</Link>
 								</NavigationMenuLink>
 							</NavigationMenuItem>
+							<NavigationMenuItem>
+								<NavigationMenuLink asChild>
+									<Link
+										href="/setups"
+										prefetch={true}
+										className={`inline-flex h-10 w-max items-center justify-center px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+											currentView === "setups"
+												? "text-primary"
+												: "text-muted-foreground hover:text-primary focus:text-primary"
+										}`}
+									>
+										Setups
+									</Link>
+								</NavigationMenuLink>
+							</NavigationMenuItem>
 						</NavigationMenuList>
 					</NavigationMenu>
 					<div className="hidden lg:block">

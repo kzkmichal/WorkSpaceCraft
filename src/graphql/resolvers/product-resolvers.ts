@@ -5,7 +5,6 @@ import type {
 	Resolvers,
 	ProductsQueryInput,
 } from "../generated/graphql";
-import { formatProduct, formatUser } from "./utils";
 import { prisma } from "@/lib/prisma/prisma";
 import { generateSlug, normalizeTagName } from "@/utils/tag-utils";
 import { getProductService } from "@/lib/services/productService/product-service-factory";
@@ -52,9 +51,7 @@ async function getProducts(input: ProductsQueryInput) {
 			...input,
 		});
 
-		return products.map((product) => ({
-			...formatProduct(product),
-		}));
+		return products;
 	} catch (error) {
 		console.error("Failed to fetch products:", error);
 		if (error instanceof GraphQLError) throw error;
@@ -76,10 +73,7 @@ async function getProduct(id: string) {
 			});
 		}
 
-		return {
-			...formatProduct(product),
-			createdBy: formatUser(product.createdBy),
-		};
+		return product;
 	} catch (error) {
 		if (error instanceof GraphQLError) throw error;
 		console.error("Failed to fetch product:", error);
@@ -101,10 +95,7 @@ async function getMyProducts(user?: { id: string }) {
 
 		const products = await productsService.getUserProducts(user.id);
 
-		return products.map((product) => ({
-			...formatProduct(product),
-			createdBy: formatUser(product.createdBy),
-		}));
+		return products;
 	} catch (error) {
 		console.error("Failed to fetch user products:", error);
 		throw new GraphQLError("Failed to fetch user products", {
