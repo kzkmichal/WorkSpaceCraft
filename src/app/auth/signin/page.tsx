@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { SignInForm } from "@/components/modules/auth/SignInForm";
-import { auth } from "@/lib/auth";
+import { getOptionalAuth } from "@/lib/session-helpers";
 
 export async function generateMetadata() {
 	return {
@@ -14,7 +14,7 @@ export async function generateMetadata() {
 }
 
 export default async function SignInPage() {
-	const session = await auth();
+	const session = await getOptionalAuth();
 
 	if (session) {
 		redirect("/");

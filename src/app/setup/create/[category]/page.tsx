@@ -1,8 +1,7 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 import { SetupForm } from "@/components/modules/Setups/SetupForm/SetupFrom";
 import { parseCategoryFromUrl } from "@/utils/setup-utils";
+import { requireAuth } from "@/lib/session-helpers";
 
 type SetupProps = {
 	params: Promise<{
@@ -40,7 +39,7 @@ export async function generateMetadata({ params }: SetupProps) {
 }
 
 export default async function CreateSetupPage(props: SetupProps) {
-	const session = await auth();
+	await requireAuth();
 
 	const { category } = await props.params;
 
@@ -48,10 +47,6 @@ export default async function CreateSetupPage(props: SetupProps) {
 
 	if (!category || !parsedCategory) {
 		notFound();
-	}
-
-	if (!session?.user || !session.user.id) {
-		redirect("/auth/signin?callbackUrl=/setups/create");
 	}
 
 	return (

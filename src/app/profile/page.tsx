@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { requireAuth } from "@/lib/session-helpers";
 import { prisma } from "@/lib/prisma/prisma";
 import { getUserSetups } from "@/hooks/setup";
 import { Profile } from "@/components/modules/Profile";
@@ -97,12 +96,8 @@ const SetupsTabs = async ({ userId }: { userId: string }) => {
 export default async function ProfilePage({
 	searchParams,
 }: PageProps) {
-	const session = await auth();
+	const session = await requireAuth();
 	const { tab } = await searchParams;
-
-	if (!session || !session.user.id) {
-		redirect("/auth/signin");
-	}
 
 	const activeTab = tab || "products";
 
@@ -112,10 +107,10 @@ export default async function ProfilePage({
 			<Container>
 				<TabNavigation activeTab={activeTab} />
 				{activeTab === "products" && (
-					<ProductsTabs userId={session.user.id} />
+					<ProductsTabs userId={session.user.id!} />
 				)}
 				{activeTab === "setups" && (
-					<SetupsTabs userId={session.user.id} />
+					<SetupsTabs userId={session.user.id!} />
 				)}
 			</Container>
 			<Container as={"section"}>

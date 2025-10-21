@@ -1,8 +1,8 @@
 import { notFound, redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { ProductForm } from "@/components/modules/Products/ProductForm";
 import { getProductForEdit } from "@/hooks/products/getProductForEdit";
 import { getCategories } from "@/hooks/getCategories";
+import { checkResourceOwnership } from "@/lib/session-helpers";
 
 type EditProductPageProps = {
 	params: Promise<{ id: string }>;
@@ -17,13 +17,16 @@ export default async function EditProductPage(
 	props: EditProductPageProps,
 ) {
 	const params = await props.params;
-	const session = await auth();
-
-	if (!session) {
-		redirect(`/auth/signin?callbackUrl=/products/edit/${params.id}`);
-	}
-
 	const product = await getProductForEdit(params.id);
+
+	if (!product) {
+		notFound();
+	}
+	const { canEdit } = await checkResourceOwnership(product.userId);
+
+	if (!canEdit) {
+		redirect("/products");
+	}
 
 	const categories = await getCategories();
 
@@ -40,17 +43,6 @@ export default async function EditProductPage(
 				categoryType: sub.categoryType,
 			})),
 	}));
-
-	if (!product) {
-		notFound();
-	}
-
-	if (
-		product.userId !== session.user.id &&
-		session.user.role !== "ADMIN"
-	) {
-		redirect("/products");
-	}
 
 	return (
 		<ProductForm

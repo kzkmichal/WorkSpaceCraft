@@ -1,7 +1,6 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { ProductForm } from "@/components/modules/Products/ProductForm";
 import { getCategories } from "@/hooks/getCategories";
+import { requireAuth } from "@/lib/session-helpers";
 
 export const metadata = {
 	title: "Add Product - WorkSpaceCraft",
@@ -9,11 +8,7 @@ export const metadata = {
 };
 
 export default async function AddProductPage() {
-	const session = await auth();
-
-	if (!session) {
-		redirect("/auth/signin?callbackUrl=/products/add");
-	}
+	await requireAuth();
 
 	const categories = await getCategories();
 

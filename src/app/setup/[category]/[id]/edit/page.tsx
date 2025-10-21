@@ -1,7 +1,7 @@
 import { SetupForm } from "@/components/modules/Setups/SetupForm/SetupFrom";
 import { SetupProductsSection } from "@/components/modules/Setups/SetupProductSection/SetupProductsSection";
 import { getSetup } from "@/hooks/setup";
-import { auth } from "@/lib/auth";
+import { checkResourceOwnership } from "@/lib/session-helpers";
 import { parseCategoryFromUrl } from "@/utils/setup-utils";
 import { notFound, redirect } from "next/navigation";
 
@@ -15,27 +15,17 @@ type SetupProps = {
 export default async function SetupCreatePage({
 	params,
 }: SetupProps) {
-	const session = await auth();
-
-	if (!session?.user || !session.user.id) {
-		redirect(
-			`/auth/signin?callbackUrl=/setup/${(await params).category}/${(await params).id}/edit`,
-		);
-	}
 	const { id, category } = await params;
-
 	const parsedCategory = parseCategoryFromUrl(category);
-
 	const setup = await getSetup(id);
 
 	if (!category || !parsedCategory || !setup) {
 		notFound();
 	}
 
-	if (
-		setup.userId !== session.user.id &&
-		session.user.role !== "ADMIN"
-	) {
+	const { canEdit } = await checkResourceOwnership(setup.userId);
+
+	if (!canEdit) {
 		redirect("/setups");
 	}
 

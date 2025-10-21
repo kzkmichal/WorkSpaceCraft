@@ -34,19 +34,24 @@ export async function middleware(request: NextRequest) {
 		return NextResponse.next();
 	}
 
-	if (path.startsWith("/admin")) {
-		const session = await auth();
+	const session = await auth();
 
+	if (path.startsWith("/admin")) {
 		if (!session || session.user.role !== "ADMIN") {
 			return NextResponse.redirect(
 				new URL("/?access=denied", request.url),
 			);
 		}
 
-		return NextResponse.next();
+		const response = NextResponse.next();
+		if (session.user.id) {
+			response.headers.set("x-user-id", session.user.id);
+		}
+		if (session.user.role) {
+			response.headers.set("x-user-role", session.user.role);
+		}
+		return response;
 	}
-
-	const session = await auth();
 
 	if (!session) {
 		const signInUrl = new URL("/auth/signin", request.url);
@@ -54,7 +59,18 @@ export async function middleware(request: NextRequest) {
 		return NextResponse.redirect(signInUrl);
 	}
 
-	return NextResponse.next();
+	const response = NextResponse.next();
+	if (session.user.id) {
+		response.headers.set("x-user-id", session.user.id);
+	}
+	if (session.user.role) {
+		response.headers.set("x-user-role", session.user.role);
+	}
+	if (session.user.email) {
+		response.headers.set("x-user-email", session.user.email);
+	}
+
+	return response;
 }
 
 export const config = {

@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { AdminSidebar } from "@/components/modules/AdminDashboard/Components/AdminSidebar";
+import { requireAdmin } from "@/lib/session-helpers";
 
 export async function generateMetadata() {
 	return {
@@ -14,11 +13,7 @@ export default async function AdminLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	const session = await auth();
-
-	if (!session || session.user.role !== "ADMIN") {
-		redirect("/");
-	}
+	await requireAdmin();
 
 	return (
 		<div className="flex min-h-screen">

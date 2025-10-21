@@ -2,7 +2,7 @@ import { SetupView } from "@/components/modules/Setups/SetupView";
 import { getSetup } from "@/hooks/setup";
 import { parseCategoryFromUrl } from "@/utils/setup-utils";
 import { notFound } from "next/dist/client/components/navigation";
-import { auth } from "@/lib/auth";
+import { getOptionalAuth } from "@/lib/session-helpers";
 
 type PageProps = {
 	params: Promise<{
@@ -41,7 +41,7 @@ export default async function SetupDetailPage(props: PageProps) {
 
 	if (!setup) notFound();
 
-	const session = await auth();
+	const session = await getOptionalAuth();
 	const isOwner = session?.user?.id === setup.userId;
 
 	return <SetupView {...setup} isOwner={isOwner} />;
