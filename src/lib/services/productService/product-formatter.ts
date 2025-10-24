@@ -7,7 +7,7 @@ import {
 	ProductUserExperience,
 } from "@prisma/client";
 import { formatDates, formatUser } from "../common/formatter-utils";
-import { CompleteProduct } from "../common/types";
+import { CompleteProduct, SearchProduct } from "../common/types";
 
 export const formatSubcategory = (subcategory: Subcategory) => ({
 	...subcategory,
@@ -89,6 +89,35 @@ export class ProductFormatter {
 			userExperience: product.userExperience
 				? formatUserExperience(product.userExperience)
 				: undefined,
+			reportReason: product.reportReason ?? undefined,
+			moderatedBy: product.moderatedBy ?? undefined,
+			moderatedAt: product.moderatedAt?.toISOString() ?? undefined,
+			createdBy: formatUser(product.createdBy),
+		};
+	}
+
+	static formatSearchProduct(product: SearchProduct) {
+		return {
+			...product,
+			...formatDates(product),
+			brand: product.brand || undefined,
+			model: product.model || undefined,
+			categories:
+				product.categories?.map((pc) => pc.categoryType) || [],
+			subcategories:
+				product.subcategories?.map((ps) =>
+					formatSubcategory(ps.subcategory),
+				) || [],
+			images:
+				product.images?.map((image) => ({
+					...image,
+					...formatDates(image),
+					fileName: image.fileName || undefined,
+				})) || [],
+			tags:
+				product.tags?.map((pt) => ({
+					...formatTag(pt.tag),
+				})) || [],
 			reportReason: product.reportReason ?? undefined,
 			moderatedBy: product.moderatedBy ?? undefined,
 			moderatedAt: product.moderatedAt?.toISOString() ?? undefined,

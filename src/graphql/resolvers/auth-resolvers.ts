@@ -1,7 +1,7 @@
 import { GraphQLError } from "graphql";
 // import { UserRole } from "@prisma/client";
 import type { Resolvers } from "../generated/graphql";
-import { formatUser } from "./utils";
+import { formatUser } from "@/lib/services/common/formatter-utils";
 import { comparePasswords, hashPassword } from "@/lib/password";
 
 export const resolvers: Resolvers = {
