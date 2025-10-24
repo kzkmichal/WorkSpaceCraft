@@ -7,7 +7,7 @@ import { Url } from "url";
 import Link from "next/link";
 
 const badgeVariants = cva(
-	"inline-flex items-center justify-center rounded border px-1 py-[2px] text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 w-fit",
+	"inline-flex items-center justify-center rounded border px-1 py-[2px] text-xs font-primary font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 w-fit",
 	{
 		variants: {
 			variant: {

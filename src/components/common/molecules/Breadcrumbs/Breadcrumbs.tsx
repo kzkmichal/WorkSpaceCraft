@@ -17,6 +17,7 @@ import Link from "next/link";
 import { Home } from "lucide-react";
 import { breadcrumbsRoutes, hiddenPaths, routeLabels } from "./const";
 import { Container } from "../Container";
+import { cn } from "@/components/utils/helpers";
 
 export const AppBreadcrumbs = ({
 	className,
@@ -117,11 +118,10 @@ export const AppBreadcrumbs = ({
 								<BreadcrumbLink asChild>
 									<Link
 										href={item.href}
-										className={`max-w-[200px] truncate ${
-											item.isActive
-												? "font-medium text-foreground"
-												: ""
-										}`}
+										className={cn(
+											`max-w-[200px] truncate font-primary`,
+											item.isActive && "font-medium text-foreground",
+										)}
 									>
 										{index === 0 ? (
 											<div className="flex items-center gap-1.5">
