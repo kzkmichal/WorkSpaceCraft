@@ -3,7 +3,9 @@ import { Inter } from "next/font/google";
 import Providers from "./providers";
 import { Footer } from "@/components/modules/Footer";
 import { Header } from "@/components/modules/Header";
+import { AppBreadcrumbs } from "@/components/common/molecules";
 import "../styles/globals.css";
+import { hiddenPaths } from "@/components/common/molecules/Breadcrumbs";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -81,6 +83,13 @@ export default function RootLayout({
 				<Providers>
 					<div className="flex min-h-screen flex-col">
 						<Header />
+						<AppBreadcrumbs
+							hideOnPaths={[
+								hiddenPaths.ROOT,
+								hiddenPaths.AUTH_SIGNIN,
+								hiddenPaths.AUTH_SIGNUP,
+							]}
+						/>
 						<main className="h-full w-full flex-grow bg-background">
 							{children}
 						</main>
