@@ -1,13 +1,11 @@
 import React from "react";
-import { Inter } from "next/font/google";
 import Providers from "./providers";
 import { Footer } from "@/components/modules/Footer";
 import { Header } from "@/components/modules/Header";
 import { AppBreadcrumbs } from "@/components/common/molecules";
 import "../styles/globals.css";
 import { hiddenPaths } from "@/components/common/molecules/Breadcrumbs";
-
-const inter = Inter({ subsets: ["latin"] });
+import { dmSans, jakartaSans } from "./fonts";
 
 export const metadata = {
 	title: {
@@ -79,7 +77,7 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body className={inter.className}>
+			<body className={`${jakartaSans.variable} ${dmSans.variable}`}>
 				<Providers>
 					<div className="flex min-h-screen flex-col">
 						<Header />

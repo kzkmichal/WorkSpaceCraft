@@ -1,3 +1,4 @@
+import { jakartaSans, dmSans } from "./src/app/fonts";
 /** @type {import('tailwindcss').Config} */
 import tailwindcssAnimate from "tailwindcss-animate";
 
@@ -71,9 +72,9 @@ module.exports = {
 				},
 			},
 			fontFamily: {
-				serif: ["DM Serif Text", "serif"],
-				sans: ["Inter", "sans-serif"],
-				primary: ["Archivo", "sans-serif"],
+				primary: ["var(--font-jakarta-sans)", "sans-serif"],
+				secondary: ["var(--font-dm-sans)", "sans-serif"],
+				sans: ["var(--font-dm-sans)", "sans-serif"],
 			},
 			fontSize: {
 				"2xs": [
