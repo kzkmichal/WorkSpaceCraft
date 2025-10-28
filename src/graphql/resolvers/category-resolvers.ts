@@ -1,81 +1,14 @@
 import { GraphQLError } from "graphql";
 import type { Resolvers } from "../generated/graphql";
-import { formatUser, formatProduct } from "./utils";
-import { categories, getCategoryByType } from "@/constant/categories";
+import { getCategoryService } from "@/lib/services/categoryService/category-service-factory";
 import { getProductService } from "@/lib/services/productService/product-service-factory";
-import { formatSubcategory } from "@/lib/services/productService/product-formatter";
 
 export const resolvers: Resolvers = {
 	Query: {
-		categories: async (_, __, { prisma }) => {
+		categories: async () => {
 			try {
-				const categoriesWithData = await Promise.all(
-					categories.map(async (category) => {
-						const [subcategories, products] = await Promise.all([
-							prisma.subcategory.findMany({
-								where: { categoryType: category.type },
-								include: {
-									products: {
-										include: {
-											product: {
-												include: {
-													createdBy: true,
-													reviews: true,
-													categories: true,
-												},
-											},
-										},
-									},
-								},
-							}),
-							prisma.product.findMany({
-								where: {
-									categories: {
-										some: {
-											categoryType: category.type,
-										},
-									},
-								},
-								include: {
-									createdBy: true,
-									reviews: true,
-									categories: true,
-									subcategories: {
-										include: {
-											subcategory: true,
-										},
-									},
-								},
-							}),
-						]);
-
-						return {
-							...category,
-							subcategories: subcategories.map((subcategory) => ({
-								...formatSubcategory(subcategory),
-								products: subcategory.products.map((sp) => ({
-									...formatProduct(sp.product),
-									createdBy: formatUser(sp.product.createdBy),
-									categories: sp.product.categories.map(
-										(pc) => pc.categoryType,
-									),
-								})),
-							})),
-							products: products.map((product) => ({
-								...formatProduct(product),
-								createdBy: formatUser(product.createdBy),
-								categories: product.categories.map(
-									(pc) => pc.categoryType,
-								),
-								subcategories: product.subcategories.map((ps) =>
-									formatSubcategory(ps.subcategory),
-								),
-							})),
-						};
-					}),
-				);
-
-				return categoriesWithData;
+				const categoryService = getCategoryService();
+				return await categoryService.getCategories();
 			} catch (error) {
 				console.error("Failed to fetch categories data:", error);
 				throw new GraphQLError("Failed to fetch categories data", {
@@ -84,9 +17,11 @@ export const resolvers: Resolvers = {
 			}
 		},
 
-		categoryByType: async (_, { type }, { prisma }) => {
+		categoryByType: async (_, { type }) => {
 			try {
-				const category = getCategoryByType(type);
+				const categoryService = getCategoryService();
+				const category =
+					await categoryService.getCategoryByType(type);
 
 				if (!category) {
 					throw new GraphQLError("Category not found", {
@@ -94,117 +29,28 @@ export const resolvers: Resolvers = {
 					});
 				}
 
-				const [subcategories, products] = await Promise.all([
-					prisma.subcategory.findMany({
-						where: { categoryType: type },
-						include: {
-							products: {
-								include: {
-									product: {
-										include: {
-											createdBy: true,
-											reviews: true,
-											categories: true,
-										},
-									},
-								},
-							},
-						},
-					}),
-					prisma.product.findMany({
-						where: {
-							categories: {
-								some: {
-									categoryType: type,
-								},
-							},
-						},
-						include: {
-							createdBy: true,
-							reviews: true,
-							categories: true,
-							subcategories: {
-								include: {
-									subcategory: true,
-								},
-							},
-						},
-					}),
-				]);
-
-				return {
-					...category,
-					subcategories: subcategories.map((subcategory) => ({
-						...formatSubcategory(subcategory),
-						products: subcategory.products.map((sp) => ({
-							...formatProduct(sp.product),
-							createdBy: formatUser(sp.product.createdBy),
-							categories: sp.product.categories.map(
-								(pc) => pc.categoryType,
-							),
-						})),
-					})),
-					products: products.map((product) => ({
-						...formatProduct(product),
-						createdBy: formatUser(product.createdBy),
-						categories: product.categories.map(
-							(pc) => pc.categoryType,
-						),
-						subcategories: product.subcategories.map((ps) =>
-							formatSubcategory(ps.subcategory),
-						),
-					})),
-				};
+				return category;
 			} catch (error) {
+				if (error instanceof GraphQLError) throw error;
 				console.error("Failed to fetch category data:", error);
 				throw new GraphQLError("Failed to fetch category data", {
 					extensions: { code: "DATABASE_ERROR" },
 				});
 			}
 		},
+
 		categoryProducts: async (
 			_,
 			{ type, limit = 10, offset = 0, subcategoryId },
-			{ prisma },
 		) => {
 			try {
-				const products = await prisma.product.findMany({
-					where: {
-						categories: {
-							some: {
-								categoryType: type,
-							},
-						},
-						...(subcategoryId && {
-							subcategories: {
-								some: {
-									subcategoryId,
-								},
-							},
-						}),
-					},
-					take: limit,
-					skip: offset,
-					include: {
-						subcategories: {
-							include: {
-								subcategory: true,
-							},
-						},
-						categories: true,
-						createdBy: true,
-						reviews: true,
-					},
-				});
-
-				return products.map((product) => ({
-					...formatProduct(product),
-					createdBy: formatUser(product.createdBy),
-					subcategories: product.subcategories.map((ps) =>
-						formatSubcategory(ps.subcategory),
-					),
-					categories: product.categories.map((pc) => pc.categoryType),
-				}));
+				const categoryService = getCategoryService();
+				return await categoryService.getCategoryProducts(
+					type,
+					limit,
+					offset,
+					subcategoryId,
+				);
 			} catch (error) {
 				console.error("Failed to fetch category products:", error);
 				throw new GraphQLError("Failed to fetch category products", {
@@ -213,33 +59,10 @@ export const resolvers: Resolvers = {
 			}
 		},
 
-		categorySubcategories: async (_, { type }, { prisma }) => {
+		categorySubcategories: async (_, { type }) => {
 			try {
-				const subcategories = await prisma.subcategory.findMany({
-					where: {
-						categoryType: type,
-					},
-					include: {
-						products: {
-							include: {
-								product: {
-									include: {
-										createdBy: true,
-										reviews: true,
-									},
-								},
-							},
-						},
-					},
-				});
-
-				return subcategories.map((subcategory) => ({
-					...formatSubcategory(subcategory),
-					products: subcategory.products.map((sp) => ({
-						...formatProduct(sp.product),
-						createdBy: formatUser(sp.product.createdBy),
-					})),
-				}));
+				const categoryService = getCategoryService();
+				return await categoryService.getCategorySubcategories(type);
 			} catch (error) {
 				console.error(
 					"Failed to fetch category subcategories:",
@@ -254,44 +77,34 @@ export const resolvers: Resolvers = {
 			}
 		},
 
-		categoriesWithStats: async (_) => {
-			const productService = getProductService();
-			const categoriesWithStats =
-				await productService.getCategoriesWithStats();
-			return categoriesWithStats;
+		categoriesWithStats: async () => {
+			try {
+				const categoryService = getCategoryService();
+				return await categoryService.getCategoriesWithStats();
+			} catch (error) {
+				console.error(
+					"Failed to fetch categories with stats:",
+					error,
+				);
+				throw new GraphQLError(
+					"Failed to fetch categories with stats",
+					{
+						extensions: { code: "DATABASE_ERROR" },
+					},
+				);
+			}
 		},
 	},
 
 	CategoryInfo: {
-		products: async (parent, _, { prisma }) => {
+		products: async (parent) => {
 			try {
-				const products = await prisma.product.findMany({
-					where: {
-						categories: {
-							some: {
-								categoryType: parent.type,
-							},
-						},
-					},
-					include: {
-						subcategories: {
-							include: {
-								subcategory: true,
-							},
-						},
-						categories: true,
-						createdBy: true,
-						reviews: true,
-					},
-				});
-
-				return products.map((product) => ({
-					...formatProduct(product),
-					createdBy: formatUser(product.createdBy),
-					subcategories: product.subcategories.map((ps) =>
-						formatSubcategory(ps.subcategory),
-					),
-				}));
+				const categoryService = getCategoryService();
+				return await categoryService.getCategoryProducts(
+					parent.type,
+					undefined,
+					0,
+				);
 			} catch (error) {
 				console.error("Failed to fetch category products:", error);
 				throw new GraphQLError("Failed to fetch category products", {
@@ -300,15 +113,12 @@ export const resolvers: Resolvers = {
 			}
 		},
 
-		subcategories: async (parent, _, { prisma }) => {
+		subcategories: async (parent) => {
 			try {
-				const subcategories = await prisma.subcategory.findMany({
-					where: {
-						categoryType: parent.type,
-					},
-				});
-
-				return subcategories.map(formatSubcategory);
+				const categoryService = getCategoryService();
+				return await categoryService.getCategorySubcategories(
+					parent.type,
+				);
 			} catch (error) {
 				console.error(
 					"Failed to fetch category subcategories:",

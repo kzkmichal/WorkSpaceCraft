@@ -64,3 +64,15 @@ export type SearchProduct = Product & {
 	})[];
 	reviews?: any[];
 };
+
+export type CompleteSubcategory = Subcategory & {
+	products: (ProductToSubcategory & {
+		product: CompleteProduct;
+	})[];
+};
+
+export type CompleteTag = Tag & {
+	products: (ProductToTag & {
+		product: CompleteProduct;
+	})[];
+};

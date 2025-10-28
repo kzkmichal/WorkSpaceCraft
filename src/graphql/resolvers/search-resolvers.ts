@@ -1,7 +1,7 @@
 import { getSearchService } from "@/lib/search-service-factory";
 import { Resolvers } from "../generated/graphql";
 import { GraphQLError } from "graphql";
-import { formatProduct, formatUser } from "./utils";
+import { ProductFormatter } from "@/lib/services/productService/product-formatter";
 
 export const resolvers: Resolvers = {
 	Query: {
@@ -47,28 +47,9 @@ export const resolvers: Resolvers = {
 					tags,
 				});
 
-				return products.map((product) => ({
-					...formatProduct(product),
-					createdBy: formatUser(product.createdBy),
-					categories: product.categories.map((pc) => pc.categoryType),
-					subcategories: product.subcategories.map((ps) => ({
-						...ps.subcategory,
-						description: ps.subcategory.description || undefined,
-						createdAt: ps.subcategory.createdAt.toISOString(),
-						updatedAt: ps.subcategory.updatedAt.toISOString(),
-					})),
-					images: product.images.map((image) => ({
-						...image,
-						fileName: image.fileName || undefined,
-						createdAt: image.createdAt.toISOString(),
-						updatedAt: image.updatedAt.toISOString(),
-					})),
-					tags: product.tags.map((pt) => ({
-						...pt.tag,
-						createdAt: pt.tag.createdAt.toISOString(),
-						updatedAt: pt.tag.updatedAt.toISOString(),
-					})),
-				}));
+				return products.map((product) =>
+					ProductFormatter.formatSearchProduct(product),
+				);
 			} catch (error) {
 				console.error("Error in searchProducts resolver:", error);
 				throw new GraphQLError("Failed to search products", {

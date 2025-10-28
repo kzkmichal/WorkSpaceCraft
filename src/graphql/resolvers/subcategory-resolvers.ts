@@ -1,70 +1,29 @@
 import { GraphQLError } from "graphql";
 import type { Resolvers } from "../generated/graphql";
-import { formatProduct, formatUser } from "./utils";
-import { getProductService } from "@/lib/services/productService/product-service-factory";
-import { formatSubcategory } from "@/lib/services/productService/product-formatter";
-
-type SubcategoryUpdateData = {
-	name?: string;
-	description?: string | null;
-	slug?: string;
-	fullSlug?: string;
-};
+import { getSubcategoryService } from "@/lib/services/subcategoryService/subcategory-service-factory";
 
 export const resolvers: Resolvers = {
 	Query: {
-		subcategories: async (_, { categoryType, limit }, { prisma }) => {
+		subcategories: async (_, { categoryType, limit }) => {
 			try {
-				if (
-					typeof categoryType === "string" &&
-					categoryType.includes(".well-known")
-				) {
-					return [];
-				}
-
-				const subcategories = await prisma.subcategory.findMany({
-					where: {
-						categoryType,
-					},
-					...(limit && { take: limit }),
-				});
-
-				return subcategories.map(formatSubcategory);
+				const subcategoryService = getSubcategoryService();
+				return (await subcategoryService.getSubcategories(
+					categoryType,
+					limit,
+				)) as any;
 			} catch (error) {
 				console.error("Error fetching subcategories:", error);
-				throw new Error("Failed to fetch subcategories");
+				throw new GraphQLError("Failed to fetch subcategories", {
+					extensions: { code: "DATABASE_ERROR" },
+				});
 			}
 		},
-		subcategory: async (_, { fullSlug }, { prisma }) => {
-			try {
-				if (
-					fullSlug.startsWith(".") ||
-					fullSlug.includes("well-known") ||
-					fullSlug.includes("favicon")
-				) {
-					console.log("Ignoring system path:", fullSlug);
-					throw new GraphQLError("Invalid subcategory path", {
-						extensions: { code: "BAD_USER_INPUT" },
-					});
-				}
 
-				const subcategory = await prisma.subcategory.findUnique({
-					where: { fullSlug },
-					include: {
-						products: {
-							include: {
-								product: {
-									include: {
-										createdBy: true,
-										categories: true,
-										reviews: true,
-										images: true,
-									},
-								},
-							},
-						},
-					},
-				});
+		subcategory: async (_, { fullSlug }) => {
+			try {
+				const subcategoryService = getSubcategoryService();
+				const subcategory =
+					await subcategoryService.getSubcategoryByFullSlug(fullSlug);
 
 				if (!subcategory) {
 					throw new GraphQLError("Subcategory not found", {
@@ -72,15 +31,17 @@ export const resolvers: Resolvers = {
 					});
 				}
 
-				return {
-					...formatSubcategory(subcategory),
-					products: subcategory.products.map((sp) => ({
-						...formatProduct(sp.product),
-						createdBy: formatUser(sp.product.createdBy),
-					})),
-				};
+				return subcategory as any;
 			} catch (error) {
 				if (error instanceof GraphQLError) throw error;
+				if (
+					error instanceof Error &&
+					error.message === "Invalid subcategory path"
+				) {
+					throw new GraphQLError("Invalid subcategory path", {
+						extensions: { code: "BAD_USER_INPUT" },
+					});
+				}
 				console.error("Failed to fetch subcategory:", error);
 				throw new GraphQLError("Failed to fetch subcategory", {
 					extensions: { code: "DATABASE_ERROR" },
@@ -89,63 +50,43 @@ export const resolvers: Resolvers = {
 		},
 
 		subcategoriesWithStats: async (_, { categoryType }) => {
-			const productService = getProductService();
-			const subcategoriesWithStats =
-				await productService.getSubcategoriesWithStats(categoryType);
-
-			return subcategoriesWithStats;
+			try {
+				const subcategoryService = getSubcategoryService();
+				return (await subcategoryService.getSubcategoriesWithStats(
+					categoryType,
+				)) as any;
+			} catch (error) {
+				console.error(
+					"Failed to fetch subcategories with stats:",
+					error,
+				);
+				throw new GraphQLError(
+					"Failed to fetch subcategories with stats",
+					{
+						extensions: { code: "DATABASE_ERROR" },
+					},
+				);
+			}
 		},
 	},
 
 	Mutation: {
-		createSubcategory: async (_, { input }, { prisma }) => {
+		createSubcategory: async (_, { input }) => {
 			try {
-				const { name, slug, description, categoryType } = input;
-				const fullSlug = `${categoryType.toLowerCase()}/${slug}`;
-
-				const existing = await prisma.subcategory.findFirst({
-					where: {
-						OR: [
-							{ fullSlug },
-							{
-								AND: [{ categoryType }, { slug }],
-							},
-						],
-					},
-				});
-
-				if (existing) {
+				const subcategoryService = getSubcategoryService();
+				return (await subcategoryService.createSubcategory(
+					input,
+				)) as any;
+			} catch (error) {
+				if (
+					error instanceof Error &&
+					error.message.includes("already exists")
+				) {
 					throw new GraphQLError(
 						"Subcategory with this slug already exists in this category",
 						{ extensions: { code: "BAD_USER_INPUT" } },
 					);
 				}
-
-				const subcategory = await prisma.subcategory.create({
-					data: {
-						name,
-						slug,
-						fullSlug,
-						description,
-						categoryType,
-					},
-					include: {
-						products: {
-							include: {
-								product: {
-									include: {
-										createdBy: true,
-										categories: true,
-									},
-								},
-							},
-						},
-					},
-				});
-
-				return formatSubcategory(subcategory);
-			} catch (error) {
-				if (error instanceof GraphQLError) throw error;
 				console.error("Failed to create subcategory:", error);
 				throw new GraphQLError("Failed to create subcategory", {
 					extensions: { code: "DATABASE_ERROR" },
@@ -153,73 +94,26 @@ export const resolvers: Resolvers = {
 			}
 		},
 
-		updateSubcategory: async (_, { input }, { prisma }) => {
+		updateSubcategory: async (_, { input }) => {
 			try {
-				const { id, name, slug, description } = input;
-
-				const existingSubcategory =
-					await prisma.subcategory.findUnique({
-						where: { id },
-					});
-
-				if (!existingSubcategory) {
-					throw new GraphQLError("Subcategory not found", {
-						extensions: { code: "NOT_FOUND" },
-					});
-				}
-
-				let updateData: SubcategoryUpdateData = {
-					...(name && { name }),
-					...(description && { description }),
-				};
-
-				if (slug) {
-					const fullSlug = `${existingSubcategory.categoryType.toLowerCase()}/${slug}`;
-
-					const slugExists = await prisma.subcategory.findFirst({
-						where: {
-							AND: [
-								{ categoryType: existingSubcategory.categoryType },
-								{ slug },
-								{ id: { not: id } },
-							],
-						},
-					});
-
-					if (slugExists) {
+				const subcategoryService = getSubcategoryService();
+				return (await subcategoryService.updateSubcategory(
+					input,
+				)) as any;
+			} catch (error) {
+				if (error instanceof Error) {
+					if (error.message === "Subcategory not found") {
+						throw new GraphQLError("Subcategory not found", {
+							extensions: { code: "NOT_FOUND" },
+						});
+					}
+					if (error.message.includes("already exists")) {
 						throw new GraphQLError(
 							"Subcategory with this slug already exists in this category",
 							{ extensions: { code: "BAD_USER_INPUT" } },
 						);
 					}
-
-					updateData = {
-						...updateData,
-						slug,
-						fullSlug,
-					};
 				}
-
-				const updatedSubcategory = await prisma.subcategory.update({
-					where: { id },
-					data: updateData,
-					include: {
-						products: {
-							include: {
-								product: {
-									include: {
-										createdBy: true,
-										categories: true,
-									},
-								},
-							},
-						},
-					},
-				});
-
-				return formatSubcategory(updatedSubcategory);
-			} catch (error) {
-				if (error instanceof GraphQLError) throw error;
 				console.error("Failed to update subcategory:", error);
 				throw new GraphQLError("Failed to update subcategory", {
 					extensions: { code: "DATABASE_ERROR" },
@@ -227,12 +121,10 @@ export const resolvers: Resolvers = {
 			}
 		},
 
-		deleteSubcategory: async (_, { id }, { prisma }) => {
+		deleteSubcategory: async (_, { id }) => {
 			try {
-				await prisma.subcategory.delete({
-					where: { id },
-				});
-				return true;
+				const subcategoryService = getSubcategoryService();
+				return await subcategoryService.deleteSubcategory(id);
 			} catch (error) {
 				console.error("Failed to delete subcategory:", error);
 				throw new GraphQLError("Failed to delete subcategory", {
